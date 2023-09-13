@@ -47,7 +47,7 @@ void GameApp::Initialize(UINT Width, UINT Height)
 
     //생성
     m_hWnd = CreateWindowW(m_szWindowClass, m_szTitle, WS_OVERLAPPEDWINDOW,
-        100, 100,	// 시작 위치
+        CW_USEDEFAULT, 0,
         rcClient.right - rcClient.left, rcClient.bottom - rcClient.top,
         nullptr, nullptr, m_hInstance, nullptr);
 
@@ -87,54 +87,6 @@ void GameApp::Update()
 }
 
 void GameApp::Render()
-{
-}
-
-void GameApp::init3D()
-{
-    createDeviceAndSwapChain();
-}
-
-void GameApp::createDeviceAndSwapChain()
-{
-    HRESULT hr;
-    DXGI_SWAP_CHAIN_DESC swapdesc;
-    ZeroMemory(&swapdesc, sizeof(swapdesc));        // swapdesc 에 있는 내용을 0으로 초기화
-    {
-        swapdesc.BufferDesc.Width = GWinSizeX;
-        swapdesc.BufferDesc.Height = GWinSizeY;
-        swapdesc.BufferDesc.RefreshRate.Numerator = 60;         // 화면 주사율에 관련된 부분
-        swapdesc.BufferDesc.RefreshRate.Denominator = 1;
-        swapdesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        swapdesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-        swapdesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-        swapdesc.SampleDesc.Count = 1;
-        swapdesc.SampleDesc.Quality = 0;
-        swapdesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapdesc.OutputWindow = m_hWnd;
-        swapdesc.Windowed = true;
-        swapdesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    }
-
-    hr = D3D11CreateDeviceAndSwapChain(
-        nullptr,
-        D3D_DRIVER_TYPE_HARDWARE,
-        nullptr,
-        0,
-        nullptr,
-        0,
-        D3D11_SDK_VERSION,
-        &swapdesc,
-        m_SwapChain.GetAddressOf(),
-        m_device.GetAddressOf(),
-        nullptr,
-        m_deivceContext.GetAddressOf()
-    );
-    assert(SUCCEEDED(hr));
-
-}
-
-void GameApp::createRenderTargetView()
 {
 }
 

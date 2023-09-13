@@ -34,20 +34,24 @@ void DemoApp::Render()
 		uint32 offset = 0;
 
 		// IA
-		m_pDeviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-		m_pDeviceContext->IASetInputLayout(m_inputLayout.Get());
-		m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_DeviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+		m_DeviceContext->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+		m_DeviceContext->IASetInputLayout(m_inputLayout.Get());
+		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// VS
-		m_pDeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+		m_DeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 
 		// RS
 
 		// PS
-		m_pDeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+		m_DeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+		m_DeviceContext->PSSetShaderResources(0, 1, m_shaderResoureceView.GetAddressOf());
 
 		// OM
-		m_pDeviceContext->Draw(m_vertices.size(), 0);
+		m_DeviceContext->Draw(m_vertices.size(), 0);
+
+		m_DeviceContext->DrawIndexed(m_indices.size(), 0, 0);
 	}
 
 	renderEnd();
@@ -55,16 +59,16 @@ void DemoApp::Render()
 
 void DemoApp::renderBegin()
 {
-	float clearColor[4] = { 1.0f, 1.0f, 1.0f, 1.f };
+	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.f };
 
-	m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, nullptr);
-	m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, clearColor);
-	m_pDeviceContext->RSSetViewports(1, &m_Viewport);
+	m_DeviceContext->OMSetRenderTargets(1, m_RenderTargetView.GetAddressOf(), nullptr);
+	m_DeviceContext->ClearRenderTargetView(m_RenderTargetView.Get(), clearColor);
+	m_DeviceContext->RSSetViewports(1, &m_Viewport);
 }
 
 void DemoApp::renderEnd()
 {
-	HRESULT hr = m_pSwapChain->Present(1, 0);
+	HRESULT hr = m_SwapChain->Present(1, 0);
 	assert(SUCCEEDED(hr));
 }
 
@@ -78,6 +82,8 @@ void DemoApp::InitD3D()
 	createVS();
 	createInputLayout();
 	createPS();
+
+	createSRV();
 }
 
 void DemoApp::createDeviceAndSwapChain()
@@ -101,7 +107,7 @@ void DemoApp::createDeviceAndSwapChain()
 	swapDesc.OutputWindow = m_hWnd;
 	swapDesc.Windowed = true;
 	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	
+
 
 	// 1. 디바이스 생성. 2. 스왑체인 생성. 3. 디바이스 컨텍스트 생성.
 	hr = D3D11CreateDeviceAndSwapChain(
@@ -113,10 +119,10 @@ void DemoApp::createDeviceAndSwapChain()
 		0,
 		D3D11_SDK_VERSION,
 		&swapDesc,
-		&m_pSwapChain,
-		&m_pDevice,
+		m_SwapChain.GetAddressOf(),
+		m_Device.GetAddressOf(),
 		nullptr,
-		&m_pDeviceContext);
+		m_DeviceContext.GetAddressOf());
 
 	assert(SUCCEEDED(hr));
 }
@@ -127,10 +133,10 @@ void DemoApp::createRenderTargetView()
 
 	// 4. 렌더타겟뷰 생성 (백버퍼를 이용하는 렌더타겟뷰)
 	ID3D11Texture2D* pBackBufferTexture = nullptr;
-	hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBufferTexture);
+	hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBufferTexture);
 	assert(SUCCEEDED(hr));
 
-	hr = m_pDevice->CreateRenderTargetView(pBackBufferTexture, NULL, &m_pRenderTargetView); // 백 버퍼 텍스처를 렌더 타겟 뷰로 생성합니다.
+	hr = m_Device->CreateRenderTargetView(pBackBufferTexture, NULL, m_RenderTargetView.GetAddressOf()); // 백 버퍼 텍스처를 렌더 타겟 뷰로 생성합니다.
 	assert(SUCCEEDED(hr));
 }
 
@@ -146,15 +152,23 @@ void DemoApp::setViewport()
 
 void DemoApp::createGeometry()
 {
-	{
-		m_vertices.resize(3);
+	HRESULT hr;
 
+	{
+		m_vertices.resize(4);
+		
 		m_vertices[0].position = Vec3(-0.5f, -0.5f, 0.f);
+		m_vertices[0].uv = Vec2(0.f, 1.f);
 		m_vertices[0].color = Color(1.f, 0.f, 0.f, 1.f);
-		m_vertices[1].position = Vec3(0.0f, 0.5f, 0.f);
+		m_vertices[1].position = Vec3(-0.5f,  0.5f, 0.f);
+		m_vertices[1].uv = Vec2(0.f, 0.f);
 		m_vertices[1].color = Color(0.f, 1.f, 0.f, 1.f);
 		m_vertices[2].position = Vec3(0.5f, -0.5f, 0.f);
+		m_vertices[2].uv = Vec2(1.f, 1.f);
 		m_vertices[2].color = Color(0.f, 0.f, 1.f, 1.f);
+		m_vertices[3].position = Vec3(0.5f,  0.5f, 0.f);
+		m_vertices[3].uv = Vec2(1.f, 0.f);
+		m_vertices[3].color = Color(0.f, 0.f, 1.f, 0.f);
 	}
 
 	// VertexBuffer
@@ -169,7 +183,29 @@ void DemoApp::createGeometry()
 		ZeroMemory(&data, sizeof(data));
 		data.pSysMem = m_vertices.data();
 
-		m_pDevice->CreateBuffer(&desc, &data, m_vertexBuffer.GetAddressOf());
+		hr = m_Device->CreateBuffer(&desc, &data, m_vertexBuffer.GetAddressOf());
+		assert(SUCCEEDED(hr));
+	}
+
+	// index
+	{
+		m_indices = { 0, 1, 2, 2, 1, 3 };
+	}
+
+	// indexBuffer
+	{
+		D3D11_BUFFER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		desc.ByteWidth = (unsigned int)(sizeof(uint32) * m_indices.size());
+
+		D3D11_SUBRESOURCE_DATA data;
+		ZeroMemory(&data, sizeof(data));
+		data.pSysMem = m_indices.data();
+
+		hr = m_Device->CreateBuffer(&desc, &data, m_indexBuffer.GetAddressOf());
+		assert(SUCCEEDED(hr));
 	}
 }
 
@@ -178,26 +214,37 @@ void DemoApp::createInputLayout()
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	const int count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
-	m_pDevice->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
+	m_Device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
 }
 
 void DemoApp::createVS()
 {
 	LoadShaderFromFile(L"Defalut.hlsl", "VS", "vs_5_0", m_vsBlob);
-	HRESULT hr = m_pDevice->CreateVertexShader(m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), nullptr, m_vertexShader.GetAddressOf());
+	HRESULT hr = m_Device->CreateVertexShader(m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), nullptr, m_vertexShader.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 
 void DemoApp::createPS()
 {
 	LoadShaderFromFile(L"Defalut.hlsl", "PS", "ps_5_0", m_psBlob);
-	HRESULT hr = m_pDevice->CreatePixelShader(m_psBlob->GetBufferPointer(), m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
+	HRESULT hr = m_Device->CreatePixelShader(m_psBlob->GetBufferPointer(), m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
+	assert(SUCCEEDED(hr));
+}
+
+void DemoApp::createSRV()
+{
+	DirectX::TexMetadata md;
+	DirectX::ScratchImage img;
+	HRESULT hr = ::LoadFromWICFile(L"./Monster.png", WIC_FLAGS_NONE, &md, img);
 	assert(SUCCEEDED(hr));
 
+	hr = ::CreateShaderResourceView(m_Device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResoureceView.GetAddressOf());
+	assert(SUCCEEDED(hr));
 }
 
 void DemoApp::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)

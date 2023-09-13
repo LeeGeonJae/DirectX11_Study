@@ -18,11 +18,6 @@ protected:
 	virtual void Update();
 	virtual void Render();
 
-private:
-	void init3D();
-	void createDeviceAndSwapChain();
-	void createRenderTargetView();
-
 protected:
 	HINSTANCE m_hInstance;
 	WNDCLASSEXW m_wcex;
