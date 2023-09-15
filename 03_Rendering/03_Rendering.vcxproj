@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{847c8c90-1dc5-4a70-a25d-596cd14484b1}</ProjectGuid>
-    <RootNamespace>My02Texture</RootNamespace>
+    <ProjectGuid>{379e9e59-8a67-4fc2-b501-9425d80346ab}</ProjectGuid>
+    <RootNamespace>My03Rendering</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

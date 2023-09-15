@@ -1,13 +1,18 @@
 #include "pch.h"
 
-#include "GameApp.h"
 #include <cassert>
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+#include <imgui_impl_dx11.h>
+
+#include "GameApp.h"
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 GameApp* GameApp::m_pInstance = nullptr;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
 
 LRESULT CALLBACK DefaultWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -57,6 +62,7 @@ void GameApp::Initialize(UINT Width, UINT Height)
     ShowWindow(m_hWnd, SW_SHOW);
     UpdateWindow(m_hWnd);
 
+    m_currentTime = m_previousTime = (float)GetTickCount64() / 1000.0f;
 }
 
 bool GameApp::Run()
@@ -84,14 +90,20 @@ bool GameApp::Run()
 
 void GameApp::Update()
 {
+    m_Timer.Tick();
 }
 
 void GameApp::Render()
 {
 }
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        return true;
+
     switch (message)
     {
     case WM_DESTROY:

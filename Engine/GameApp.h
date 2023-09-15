@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TimeManager.h"
+
 #include <wrl.h>
 
 #define MAX_LOADSTRING 100
@@ -27,6 +29,10 @@ protected:
 	WCHAR m_szWindowClass[MAX_LOADSTRING];
 	UINT m_ClientWidth;
 	UINT m_ClientHeight;
+
+	float m_previousTime;
+	float m_currentTime;
+	GameTimer m_Timer;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
