@@ -79,7 +79,7 @@ void DemoApp::Render()
 
 		// OM
 		m_DeviceContext->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
-		
+
 		m_DeviceContext->DrawIndexed(m_indices.size(), 0, 0);
 	}
 
@@ -194,16 +194,16 @@ void DemoApp::createGeometry()
 		m_vertices.resize(4);
 
 		m_vertices[0].position = Vec3(-0.5f, -0.5f, 0.f);
-		m_vertices[0].uv = Vec2(0.f, 1.f);
+		m_vertices[0].uv = Vec2(0.f, 5.f);
 		m_vertices[0].color = Color(1.f, 0.f, 0.f, 1.f);
 		m_vertices[1].position = Vec3(-0.5f, 0.5f, 0.f);
 		m_vertices[1].uv = Vec2(0.f, 0.f);
 		m_vertices[1].color = Color(0.f, 1.f, 0.f, 1.f);
 		m_vertices[2].position = Vec3(0.5f, -0.5f, 0.f);
-		m_vertices[2].uv = Vec2(1.f, 1.f);
+		m_vertices[2].uv = Vec2(5.f, 5.f);
 		m_vertices[2].color = Color(0.f, 0.f, 1.f, 1.f);
 		m_vertices[3].position = Vec3(0.5f, 0.5f, 0.f);
-		m_vertices[3].uv = Vec2(1.f, 0.f);
+		m_vertices[3].uv = Vec2(5.f, 0.f);
 		m_vertices[3].color = Color(0.f, 0.f, 1.f, 0.f);
 	}
 
@@ -280,7 +280,7 @@ void DemoApp::createConstantBuffer()
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	desc.ByteWidth = sizeof(TransformData);
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	 
+
 	HRESULT hr = m_Device->CreateBuffer(&desc, nullptr, m_constantBuffer.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
@@ -292,7 +292,7 @@ void DemoApp::createRasterizerState()
 	desc.FillMode = D3D11_FILL_SOLID;
 	desc.CullMode = D3D11_CULL_BACK;
 	desc.FrontCounterClockwise = false;		// 정점이 시계방향으로 돌면서 삼각형을 그리면 정면이 앞부분으로 간다. true면 정면이 반대방향을 향한다.
-	
+
 	HRESULT hr = m_Device->CreateRasterizerState(&desc, m_rasterizerState.GetAddressOf());
 }
 
