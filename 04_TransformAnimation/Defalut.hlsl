@@ -15,7 +15,6 @@ struct VS_OUTPUT
 
 cbuffer TransfromData : register(b0)
 {
-	float4 offset;
 	matrix World;
 	matrix View;
 	matrix Projection;

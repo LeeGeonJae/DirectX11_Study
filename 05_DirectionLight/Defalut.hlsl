@@ -2,17 +2,17 @@
 struct VS_INPUT
 {
 	float4 position : POSITION;
+	float2 uv : TEXCOORD;
 	float4 color : COLOR;
 	float3 normal : NORMAL;
-	float2 uv : TEXCOORD;
 };
 
 struct VS_OUTPUT
 {
-	float4 position : POSITION;
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
 	float4 color : COLOR;
 	float3 normal : NORMAL;
-	float2 uv : TEXCOORD;
 };
 
 cbuffer TransfromData : register(b0)
@@ -30,6 +30,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.position = mul(output.position, View);
 	output.position = mul(output.position, Projection);
 	output.uv = input.uv;
+	output.normal = input.normal;
 	output.color = input.color;
 
 	return output;

@@ -268,35 +268,35 @@ void DemoApp::createGeometry()
 	{
 		m_vertices.resize(24);
 
-		m_vertices[0].position = Vec3(-1.0f, 1.0f, -1.0f); m_vertices[0].normal = Vec3(0.0f, 1.0f, 0.0f);  m_vertices[0].uv = Vec2(0.f, 0.f);
-		m_vertices[1].position = Vec3(1.0f, 1.0f, -1.0f); m_vertices[1].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[1].uv = Vec2(1.f, 0.f);
-		m_vertices[2].position = Vec3(1.0f, 1.0f, 1.0f); m_vertices[2].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[2].uv = Vec2(1.f, 0.f);
-		m_vertices[3].position = Vec3(-1.0f, 1.0f, 1.0f); m_vertices[3].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[3].uv = Vec2(0.f, 0.f);
+		m_vertices[0].position = Vec3(-1.0f, 1.0f, -1.0f);	m_vertices[0].normal = Vec3(0.0f, 1.0f, 0.0f);  m_vertices[0].uv = Vec2(1.0f, 0.0f);
+		m_vertices[1].position = Vec3(1.0f, 1.0f, -1.0f);	m_vertices[1].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[1].uv = Vec2(0.0f, 0.0f);
+		m_vertices[2].position = Vec3(1.0f, 1.0f, 1.0f);	m_vertices[2].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[2].uv = Vec2(0.0f, 1.0f);
+		m_vertices[3].position = Vec3(-1.0f, 1.0f, 1.0f);	m_vertices[3].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[3].uv = Vec2(1.0f, 1.0f);
+		
+		m_vertices[4].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[4].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[4].uv = Vec2(0.0f, 0.0f);
+		m_vertices[5].position = Vec3(1.0f, -1.0f, -1.0f);	m_vertices[5].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[5].uv = Vec2(1.0f, 0.0f);
+		m_vertices[6].position = Vec3(1.0f, -1.0f, 1.0f);	m_vertices[6].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[6].uv = Vec2(1.0f, 1.0f);
+		m_vertices[7].position = Vec3(-1.0f, -1.0f, 1.0f);	m_vertices[7].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[7].uv = Vec2(0.0f, 1.0f);
+		
+		m_vertices[8].position = Vec3(-1.0f, -1.0f, 1.0f);	m_vertices[8].normal = Vec3(-1.0f, 0.0f, 0.0f);	m_vertices[8].uv = Vec2(0.0f, 1.0f);
+		m_vertices[9].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[9].normal = Vec3(-1.0f, 0.0f, 0.0f);	m_vertices[9].uv = Vec2(1.0f, 1.0f);
+		m_vertices[10].position = Vec3(-1.0f, 1.0f, -1.0f); m_vertices[10].normal = Vec3(-1.0f, 0.0f, 0.0f); m_vertices[10].uv = Vec2(1.0f, 0.0f);
+		m_vertices[11].position = Vec3(-1.0f, 1.0f, 1.0f);	m_vertices[11].normal = Vec3(-1.0f, 0.0f, 0.0f); m_vertices[11].uv = Vec2(0.0f, 0.0f);
+		
+		m_vertices[12].position = Vec3(1.0f, -1.0f, 1.0f);	m_vertices[12].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[12].uv = Vec2(1.0f, 1.0f);
+		m_vertices[13].position = Vec3(1.0f, -1.0f, -1.0f); m_vertices[13].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[13].uv = Vec2(0.0f, 1.0f);
+		m_vertices[14].position = Vec3(1.0f, 1.0f, -1.0f);	m_vertices[14].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[14].uv = Vec2(0.0f, 0.0f);
+		m_vertices[15].position = Vec3(1.0f, 1.0f, 1.0f);	m_vertices[15].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[15].uv = Vec2(1.0f, 0.0f);
+		
+		m_vertices[16].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[16].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[16].uv = Vec2(0.0f, 1.0f);
+		m_vertices[17].position = Vec3(1.0f, -1.0f, -1.0f);	m_vertices[17].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[17].uv = Vec2(1.0f, 1.0f);
+		m_vertices[18].position = Vec3(1.0f, 1.0f, -1.0f);	m_vertices[18].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[18].uv = Vec2(1.0f, 0.0f);
+		m_vertices[19].position = Vec3(-1.0f, 1.0f, -1.0f);	m_vertices[19].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[19].uv = Vec2(0.0f, 0.0f);
 
-		m_vertices[4].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[4].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[4].uv = Vec2(0.f, 1.f);
-		m_vertices[5].position = Vec3(1.0f, -1.0f, -1.0f); m_vertices[5].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[5].uv = Vec2(1.f, 1.f);
-		m_vertices[6].position = Vec3(1.0f, -1.0f, 1.0f); m_vertices[6].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[6].uv = Vec2(1.f, 1.f);
-		m_vertices[7].position = Vec3(-1.0f, -1.0f, 1.0f); m_vertices[7].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[7].uv = Vec2(0.f, 1.f);
-
-		m_vertices[8].position = Vec3(-1.0f, -1.0f, 1.0f); m_vertices[8].normal = Vec3(-1.0f, 0.0f, 0.0f);	m_vertices[8].uv = Vec2(0.f, 1.f);
-		m_vertices[9].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[9].normal = Vec3(-1.0f, 0.0f, 0.0f);	m_vertices[9].uv = Vec2(0.f, 1.f);
-		m_vertices[10].position = Vec3(-1.0f, 1.0f, -1.0f); m_vertices[10].normal = Vec3(-1.0f, 0.0f, 0.0f); m_vertices[10].uv = Vec2(0.f, 0.f);
-		m_vertices[11].position = Vec3(-1.0f, 1.0f, 1.0f); m_vertices[11].normal = Vec3(-1.0f, 0.0f, 0.0f); m_vertices[11].uv = Vec2(0.f, 0.f);
-
-		m_vertices[12].position = Vec3(1.0f, -1.0f, 1.0f); m_vertices[12].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[12].uv = Vec2(1.f, 1.f);
-		m_vertices[13].position = Vec3(1.0f, -1.0f, -1.0f); m_vertices[13].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[13].uv = Vec2(1.f, 1.f);
-		m_vertices[14].position = Vec3(1.0f, 1.0f, -1.0f); m_vertices[14].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[14].uv = Vec2(1.f, 0.f);
-		m_vertices[15].position = Vec3(1.0f, 1.0f, 1.0f); m_vertices[15].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[15].uv = Vec2(1.f, 0.f);
-
-		m_vertices[16].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[16].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[16].uv = Vec2(0.f, 1.f);
-		m_vertices[17].position = Vec3(1.0f, -1.0f, -1.0f); m_vertices[17].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[17].uv = Vec2(1.f, 1.f);
-		m_vertices[18].position = Vec3(1.0f, 1.0f, -1.0f); m_vertices[18].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[18].uv = Vec2(1.f, 0.f);
-		m_vertices[19].position = Vec3(-1.0f, 1.0f, -1.0f); m_vertices[19].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[19].uv = Vec2(0.f, 0.f);
-
-		m_vertices[20].position = Vec3(-1.0f, -1.0f, 1.0f); m_vertices[20].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[20].uv = Vec2(0.f, 1.f);
-		m_vertices[21].position = Vec3(1.0f, -1.0f, 1.0f); m_vertices[21].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[21].uv = Vec2(1.f, 1.f);
-		m_vertices[22].position = Vec3(1.0f, 1.0f, 1.0f); m_vertices[22].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[22].uv = Vec2(1.f, 0.f);
-		m_vertices[23].position = Vec3(-1.0f, 1.0f, 1.0f); m_vertices[23].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[23].uv = Vec2(0.f, 0.f);
+		m_vertices[20].position = Vec3(-1.0f, -1.0f, 1.0f); m_vertices[20].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[20].uv = Vec2(1.0f, 1.0f);
+		m_vertices[21].position = Vec3(1.0f, -1.0f, 1.0f);	m_vertices[21].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[21].uv = Vec2(0.0f, 1.0f);
+		m_vertices[22].position = Vec3(1.0f, 1.0f, 1.0f);	m_vertices[22].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[22].uv = Vec2(0.0f, 0.0f);
+		m_vertices[23].position = Vec3(-1.0f, 1.0f, 1.0f);	m_vertices[23].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[23].uv = Vec2(1.0f, 0.0f);
 	}
 
 	// VertexBuffer
@@ -352,10 +352,10 @@ void DemoApp::createInputLayout()
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	}; 
 
 	const int count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
 	m_Device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
@@ -404,9 +404,9 @@ void DemoApp::createSamplerState()
 {
 	D3D11_SAMPLER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 	desc.BorderColor[0] = 1;
 	desc.BorderColor[1] = 0;
 	desc.BorderColor[2] = 0;
@@ -446,7 +446,7 @@ void DemoApp::createSRV()
 {
 	DirectX::TexMetadata md;
 	DirectX::ScratchImage img;
-	HRESULT hr = ::LoadFromWICFile(L"Monster.png", WIC_FLAGS_NONE, &md, img);
+	HRESULT hr = ::LoadFromWICFile(L"ground.jpg", WIC_FLAGS_NONE, &md, img);
 	assert(SUCCEEDED(hr));
 
 	hr = ::CreateShaderResourceView(m_Device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView.GetAddressOf());

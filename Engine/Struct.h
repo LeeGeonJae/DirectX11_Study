@@ -6,9 +6,9 @@
 struct Vertex
 {
 	Vec3 position;
+	Vec2 uv;
 	Color color;
 	Vec3 normal;
-	Vec2 uv;
 };
 
 struct TransformData

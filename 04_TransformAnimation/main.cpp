@@ -8,7 +8,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     DemoApp Game(hInstance);
 
-    Game.Initialize(1920, 1080);
+    Game.Initialize(GWinSizeX, GWinSizeY);
     Game.Run();
 
     return 0;

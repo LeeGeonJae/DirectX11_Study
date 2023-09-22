@@ -15,14 +15,16 @@ struct VS_OUTPUT
 
 cbuffer TransfromData : register(b0)
 {
-	float4 offset;
+	Matrix World;
+	Matrix View;
+	Matrix Projection;
 }
 
 // IA - VS - RS - PS - OM
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	output.position = input.position + offset;
+	output.position = input.position;
 	output.uv = input.uv;
 	output.color = input.color;
 
