@@ -35,6 +35,9 @@
     <ClInclude Include="ImGuiMenu.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderStruct.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Defalut.hlsl">

@@ -33,7 +33,6 @@ void ImGuiMenu::Init(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* devic
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(device, devicecontext);
 
-
 	m_CameraPos[0] = 0.0f;
 	m_CameraPos[1] = 1.0f;
 	m_CameraPos[2] = -15.0f;

@@ -3,6 +3,7 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 #include "ImGuiMenu.h"
+#include "ShaderStruct.h"
 
 #include <imgui.h>
 
@@ -69,7 +70,7 @@ private:
 
 private:
 	// Geometry
-	vector<Vertex> m_vertices;
+	vector<ShaderVertex> m_vertices;
 	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
 	vector<uint32> m_indices;
 	ComPtr<ID3D11Buffer> m_indexBuffer = nullptr;
@@ -99,9 +100,9 @@ private:
 private:
 	ImGuiMenu* m_imgui;
 
-	TransformData m_transformData1;
-	TransformData m_transformData2;
-	TransformData m_transformData3;
+	ConstantData m_transformData1;
+	ConstantData m_transformData2;
+	ConstantData m_transformData3;
 	ComPtr<ID3D11Buffer> m_constantBuffer;
 
 	DirectX::SimpleMath::Matrix m_World1;
@@ -109,4 +110,7 @@ private:
 	DirectX::SimpleMath::Matrix m_World3;
 	DirectX::SimpleMath::Matrix m_View;
 	DirectX::SimpleMath::Matrix m_Projection;
+
+	Vector4 m_DirectionLight;
+	Vector4 m_LightColor;
 };

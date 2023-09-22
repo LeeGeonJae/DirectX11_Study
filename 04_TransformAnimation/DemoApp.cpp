@@ -260,14 +260,14 @@ void DemoApp::createGeometry()
 	{
 		m_vertices.resize(8);
 
-		m_vertices[0].position = Vec3(-1.0f, 1.0f, -1.0f);
-		m_vertices[1].position = Vec3(1.0f, 1.0f, -1.0f);
-		m_vertices[2].position = Vec3(1.0f, 1.0f, 1.0f);
-		m_vertices[3].position = Vec3(-1.0f, 1.0f, 1.0f);
-		m_vertices[4].position = Vec3(-1.0f, -1.0f, -1.0f);
-		m_vertices[5].position = Vec3(1.0f, -1.0f, -1.0f);
-		m_vertices[6].position = Vec3(1.0f, -1.0f, 1.0f);
-		m_vertices[7].position = Vec3(-1.0f, -1.0f, 1.0f);
+		m_vertices[0].position = Vector3(-1.0f, 1.0f, -1.0f);
+		m_vertices[1].position = Vector3(1.0f, 1.0f, -1.0f);
+		m_vertices[2].position = Vector3(1.0f, 1.0f, 1.0f);
+		m_vertices[3].position = Vector3(-1.0f, 1.0f, 1.0f);
+		m_vertices[4].position = Vector3(-1.0f, -1.0f, -1.0f);
+		m_vertices[5].position = Vector3(1.0f, -1.0f, -1.0f);
+		m_vertices[6].position = Vector3(1.0f, -1.0f, 1.0f);
+		m_vertices[7].position = Vector3(-1.0f, -1.0f, 1.0f);
 		m_vertices[0].color = Color(0.0f, 0.0f, 1.0f, 1.0f);
 		m_vertices[1].color = Color(0.0f, 1.0f, 0.0f, 1.0f);
 		m_vertices[2].color = Color(0.0f, 1.0f, 1.0f, 1.0f);

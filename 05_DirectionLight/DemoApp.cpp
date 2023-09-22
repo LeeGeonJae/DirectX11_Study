@@ -1,5 +1,6 @@
 #include "../Engine/pch.h"
 #include "../Engine/TimeManager.h"
+#include "../Engine/Helper.h"
 
 #include "DemoApp.h"
 #include <DirectXMath.h>
@@ -59,42 +60,59 @@ void DemoApp::Update()
 
 	float t = GameTimer::m_Instance->TotalTime();
 
-	// 1st Cube: Rotate around the origin
-	XMMATRIX mSpin1 = XMMatrixRotationY(-t);
-	XMMATRIX mTranslate1 = XMMatrixTranslation(m_imgui->GetFirstCubePosition().x, m_imgui->GetFirstCubePosition().y, m_imgui->GetFirstCubePosition().z);
-	m_World1 = mSpin1 * mTranslate1;
+	// Cube
+	{
+		// 1st Cube: Rotate around the origin
+		XMMATRIX mSpin1 = XMMatrixRotationY(-t);
+		XMMATRIX mTranslate1 = XMMatrixTranslation(m_imgui->GetFirstCubePosition().x, m_imgui->GetFirstCubePosition().y, m_imgui->GetFirstCubePosition().z);
+		m_World1 = mSpin1 * mTranslate1;
 
+		// 2nd Cube:  Rotate around origin
+		XMMATRIX mSpin2 = XMMatrixRotationY(t * 5.0f);
+		XMMATRIX mTranslate2 = XMMatrixTranslation(m_imgui->GetSecondCubePosition().x, m_imgui->GetSecondCubePosition().y, m_imgui->GetSecondCubePosition().z);
+		XMMATRIX mScale2 = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	// 2nd Cube:  Rotate around origin
-	XMMATRIX mSpin2 = XMMatrixRotationY(t * 5.0f);
-	XMMATRIX mTranslate2 = XMMatrixTranslation(m_imgui->GetSecondCubePosition().x, m_imgui->GetSecondCubePosition().y, m_imgui->GetSecondCubePosition().z);
-	XMMATRIX mScale2 = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+		XMMATRIX mSpin3 = XMMatrixRotationY(-t * 4.0f);
+		XMMATRIX mScale3 = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+		XMMATRIX mTranslate3 = XMMatrixTranslation(m_imgui->GetThirdCubePosition().x, m_imgui->GetThirdCubePosition().y, m_imgui->GetThirdCubePosition().z);
 
-	XMMATRIX mSpin3 = XMMatrixRotationY(-t * 4.0f);
-	XMMATRIX mScale3 = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-	XMMATRIX mTranslate3 = XMMatrixTranslation(m_imgui->GetThirdCubePosition().x, m_imgui->GetThirdCubePosition().y, m_imgui->GetThirdCubePosition().z);
+		m_World2 = mScale2 * mSpin2 * mTranslate2 * static_cast<XMMATRIX>(m_World1);
+		m_World3 = mScale3 * mSpin3 * mTranslate3 * static_cast<XMMATRIX>(m_World2);
 
-	m_World2 = mScale2 * mSpin2 * mTranslate2 * static_cast<XMMATRIX>(m_World1);
-	m_World3 = mScale3 * mSpin3 * mTranslate3 * static_cast<XMMATRIX>(m_World2);
+		m_transformData1.World = XMMatrixTranspose(m_World1);
+		m_transformData1.View = XMMatrixTranspose(m_View);
+		m_transformData1.Projection = XMMatrixTranspose(m_Projection);
 
-	m_transformData1.World = XMMatrixTranspose(m_World1);
-	m_transformData1.View = XMMatrixTranspose(m_View);
-	m_transformData1.Projection = XMMatrixTranspose(m_Projection);
+		m_transformData2.World = XMMatrixTranspose(m_World2);
+		m_transformData2.View = XMMatrixTranspose(m_View);
+		m_transformData2.Projection = XMMatrixTranspose(m_Projection);
 
-	m_transformData2.World = XMMatrixTranspose(m_World2);
-	m_transformData2.View = XMMatrixTranspose(m_View);
-	m_transformData2.Projection = XMMatrixTranspose(m_Projection);
+		m_transformData3.World = XMMatrixTranspose(m_World3);
+		m_transformData3.View = XMMatrixTranspose(m_View);
+		m_transformData3.Projection = XMMatrixTranspose(m_Projection);
 
-	m_transformData3.World = XMMatrixTranspose(m_World3);
-	m_transformData3.View = XMMatrixTranspose(m_View);
-	m_transformData3.Projection = XMMatrixTranspose(m_Projection);
+		XMVECTOR Eye = XMVectorSet(m_imgui->GetCameraPos()[0], m_imgui->GetCameraPos()[1], m_imgui->GetCameraPos()[2], m_imgui->GetCameraPos()[3]);
+		XMVECTOR At = XMVectorSet(m_imgui->GetCameraPos()[0], m_imgui->GetCameraPos()[1] + 1.f, 100.f, 0.0f);
+		XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		m_View = XMMatrixLookAtLH(Eye, At, Up);
+		m_Projection = XMMatrixPerspectiveFovLH(m_imgui->GetCameraFov(), m_ClientWidth / (FLOAT)m_ClientHeight, m_imgui->GetCameraNear(), m_imgui->GetCameraFar());
+	}
 
+	// Lighting
+	{
+		//XMMATRIX mSpin1 = XMMatrixRotationX(-t);
+		//XMMATRIX mSpin2 = XMMatrixRotationY(-t);
+		//XMMATRIX mSpin3 = XMMatrixRotationZ(-t);
+		//m_DirectionLight = mSpin1 * mSpin2 * mSpin3;
 
-	XMVECTOR Eye = XMVectorSet(m_imgui->GetCameraPos()[0], m_imgui->GetCameraPos()[1], m_imgui->GetCameraPos()[2], m_imgui->GetCameraPos()[3]);
-	XMVECTOR At = XMVectorSet(m_imgui->GetCameraPos()[0], m_imgui->GetCameraPos()[1] + 1.f, 100.f, 0.0f);
-	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	m_View = XMMatrixLookAtLH(Eye, At, Up);
-	m_Projection = XMMatrixPerspectiveFovLH(m_imgui->GetCameraFov(), m_ClientWidth / (FLOAT)m_ClientHeight, m_imgui->GetCameraNear(), m_imgui->GetCameraFar());
+		Vector3 lightnormal = { 1.f, 1.f, 0.f };
+		m_transformData1.LightDir = lightnormal;
+		m_transformData2.LightDir = lightnormal;
+		m_transformData3.LightDir = lightnormal;
+		m_transformData1.LightColor = Color{ 1.f, 1.f, 1.f, 1.f };
+		m_transformData2.LightColor = Color{ 1.f, 1.f, 1.f, 1.f };
+		m_transformData3.LightColor = Color{ 1.f, 1.f, 1.f, 1.f };
+	}
 }
 
 void DemoApp::Render()
@@ -268,35 +286,35 @@ void DemoApp::createGeometry()
 	{
 		m_vertices.resize(24);
 
-		m_vertices[0].position = Vec3(-1.0f, 1.0f, -1.0f);	m_vertices[0].normal = Vec3(0.0f, 1.0f, 0.0f);  m_vertices[0].uv = Vec2(1.0f, 0.0f);
-		m_vertices[1].position = Vec3(1.0f, 1.0f, -1.0f);	m_vertices[1].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[1].uv = Vec2(0.0f, 0.0f);
-		m_vertices[2].position = Vec3(1.0f, 1.0f, 1.0f);	m_vertices[2].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[2].uv = Vec2(0.0f, 1.0f);
-		m_vertices[3].position = Vec3(-1.0f, 1.0f, 1.0f);	m_vertices[3].normal = Vec3(0.0f, 1.0f, 0.0f);	m_vertices[3].uv = Vec2(1.0f, 1.0f);
+		m_vertices[0].position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[0].normal = Vector3(0.0f, 1.0f, 0.0f);  m_vertices[0].uv = Vector2(1.0f, 0.0f);
+		m_vertices[1].position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[1].normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[1].uv = Vector2(0.0f, 0.0f);
+		m_vertices[2].position = Vector3(1.0f, 1.0f, 1.0f);		m_vertices[2].normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[2].uv = Vector2(0.0f, 1.0f);
+		m_vertices[3].position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[3].normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[3].uv = Vector2(1.0f, 1.0f);
 		
-		m_vertices[4].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[4].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[4].uv = Vec2(0.0f, 0.0f);
-		m_vertices[5].position = Vec3(1.0f, -1.0f, -1.0f);	m_vertices[5].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[5].uv = Vec2(1.0f, 0.0f);
-		m_vertices[6].position = Vec3(1.0f, -1.0f, 1.0f);	m_vertices[6].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[6].uv = Vec2(1.0f, 1.0f);
-		m_vertices[7].position = Vec3(-1.0f, -1.0f, 1.0f);	m_vertices[7].normal = Vec3(0.0f, -1.0f, 0.0f);	m_vertices[7].uv = Vec2(0.0f, 1.0f);
+		m_vertices[4].position = Vector3(-1.0f, -1.0f, -1.0f);	m_vertices[4].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[4].uv = Vector2(0.0f, 0.0f);
+		m_vertices[5].position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[5].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[5].uv = Vector2(1.0f, 0.0f);
+		m_vertices[6].position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[6].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[6].uv = Vector2(1.0f, 1.0f);
+		m_vertices[7].position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[7].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[7].uv = Vector2(0.0f, 1.0f);
 		
-		m_vertices[8].position = Vec3(-1.0f, -1.0f, 1.0f);	m_vertices[8].normal = Vec3(-1.0f, 0.0f, 0.0f);	m_vertices[8].uv = Vec2(0.0f, 1.0f);
-		m_vertices[9].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[9].normal = Vec3(-1.0f, 0.0f, 0.0f);	m_vertices[9].uv = Vec2(1.0f, 1.0f);
-		m_vertices[10].position = Vec3(-1.0f, 1.0f, -1.0f); m_vertices[10].normal = Vec3(-1.0f, 0.0f, 0.0f); m_vertices[10].uv = Vec2(1.0f, 0.0f);
-		m_vertices[11].position = Vec3(-1.0f, 1.0f, 1.0f);	m_vertices[11].normal = Vec3(-1.0f, 0.0f, 0.0f); m_vertices[11].uv = Vec2(0.0f, 0.0f);
+		m_vertices[8].position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[8].normal = Vector3(-1.0f, 0.0f, 0.0f);	m_vertices[8].uv = Vector2(0.0f, 1.0f);
+		m_vertices[9].position = Vector3(-1.0f, -1.0f, -1.0f);	m_vertices[9].normal = Vector3(-1.0f, 0.0f, 0.0f);	m_vertices[9].uv = Vector2(1.0f, 1.0f);
+		m_vertices[10].position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[10].normal = Vector3(-1.0f, 0.0f, 0.0f); m_vertices[10].uv = Vector2(1.0f, 0.0f);
+		m_vertices[11].position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[11].normal = Vector3(-1.0f, 0.0f, 0.0f); m_vertices[11].uv = Vector2(0.0f, 0.0f);
 		
-		m_vertices[12].position = Vec3(1.0f, -1.0f, 1.0f);	m_vertices[12].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[12].uv = Vec2(1.0f, 1.0f);
-		m_vertices[13].position = Vec3(1.0f, -1.0f, -1.0f); m_vertices[13].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[13].uv = Vec2(0.0f, 1.0f);
-		m_vertices[14].position = Vec3(1.0f, 1.0f, -1.0f);	m_vertices[14].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[14].uv = Vec2(0.0f, 0.0f);
-		m_vertices[15].position = Vec3(1.0f, 1.0f, 1.0f);	m_vertices[15].normal = Vec3(1.0f, 0.0f, 0.0f);	m_vertices[15].uv = Vec2(1.0f, 0.0f);
+		m_vertices[12].position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[12].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[12].uv = Vector2(1.0f, 1.0f);
+		m_vertices[13].position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[13].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[13].uv = Vector2(0.0f, 1.0f);
+		m_vertices[14].position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[14].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[14].uv = Vector2(0.0f, 0.0f);
+		m_vertices[15].position = Vector3(1.0f, 1.0f, 1.0f);	m_vertices[15].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[15].uv = Vector2(1.0f, 0.0f);
 		
-		m_vertices[16].position = Vec3(-1.0f, -1.0f, -1.0f); m_vertices[16].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[16].uv = Vec2(0.0f, 1.0f);
-		m_vertices[17].position = Vec3(1.0f, -1.0f, -1.0f);	m_vertices[17].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[17].uv = Vec2(1.0f, 1.0f);
-		m_vertices[18].position = Vec3(1.0f, 1.0f, -1.0f);	m_vertices[18].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[18].uv = Vec2(1.0f, 0.0f);
-		m_vertices[19].position = Vec3(-1.0f, 1.0f, -1.0f);	m_vertices[19].normal = Vec3(0.0f, 0.0f, -1.0f); m_vertices[19].uv = Vec2(0.0f, 0.0f);
+		m_vertices[16].position = Vector3(-1.0f, -1.0f, -1.0f); m_vertices[16].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[16].uv = Vector2(0.0f, 1.0f);
+		m_vertices[17].position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[17].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[17].uv = Vector2(1.0f, 1.0f);
+		m_vertices[18].position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[18].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[18].uv = Vector2(1.0f, 0.0f);
+		m_vertices[19].position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[19].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[19].uv = Vector2(0.0f, 0.0f);
 
-		m_vertices[20].position = Vec3(-1.0f, -1.0f, 1.0f); m_vertices[20].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[20].uv = Vec2(1.0f, 1.0f);
-		m_vertices[21].position = Vec3(1.0f, -1.0f, 1.0f);	m_vertices[21].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[21].uv = Vec2(0.0f, 1.0f);
-		m_vertices[22].position = Vec3(1.0f, 1.0f, 1.0f);	m_vertices[22].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[22].uv = Vec2(0.0f, 0.0f);
-		m_vertices[23].position = Vec3(-1.0f, 1.0f, 1.0f);	m_vertices[23].normal = Vec3(0.0f, 0.0f, 1.0f);	m_vertices[23].uv = Vec2(1.0f, 0.0f);
+		m_vertices[20].position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[20].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[20].uv = Vector2(1.0f, 1.0f);
+		m_vertices[21].position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[21].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[21].uv = Vector2(0.0f, 1.0f);
+		m_vertices[22].position = Vector3(1.0f, 1.0f, 1.0f);	m_vertices[22].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[22].uv = Vector2(0.0f, 0.0f);
+		m_vertices[23].position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[23].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[23].uv = Vector2(1.0f, 0.0f);
 	}
 
 	// VertexBuffer
@@ -476,6 +494,7 @@ void DemoApp::setTransform()
 {
 	m_World1 = XMMatrixIdentity();
 	m_World2 = XMMatrixIdentity();
+	m_DirectionLight = Vector4{1.f, 0.f, 0.f, 0.f};
 }
 
 void DemoApp::Release()

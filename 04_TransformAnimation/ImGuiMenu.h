@@ -22,18 +22,18 @@ public:
 	inline float GetCameraFov();
 	inline float GetCameraNear();
 	inline float GetCameraFar();
-	inline Vec3 GetFirstCubePosition();
-	inline Vec3 GetSecondCubePosition();
-	inline Vec3 GetThirdCubePosition();
+	inline Vector3 GetFirstCubePosition();
+	inline Vector3 GetSecondCubePosition();
+	inline Vector3 GetThirdCubePosition();
 
 private:
 	float m_CameraPos[4];
 	float m_CameraFov;
 	float m_CameraNearFar[2];
 
-	Vec3 m_FirstCubePosition;
-	Vec3 m_SecondCubePosition;
-	Vec3 m_ThirdCubePosition;
+	Vector3 m_FirstCubePosition;
+	Vector3 m_SecondCubePosition;
+	Vector3 m_ThirdCubePosition;
 
 private:
 	DemoApp* m_Owner;
@@ -55,15 +55,15 @@ float ImGuiMenu::GetCameraFar()
 {
 	return m_CameraNearFar[1];
 }
-Vec3 ImGuiMenu::GetFirstCubePosition()
+Vector3 ImGuiMenu::GetFirstCubePosition()
 {
 	return m_FirstCubePosition;
 }
-Vec3 ImGuiMenu::GetSecondCubePosition()
+Vector3 ImGuiMenu::GetSecondCubePosition()
 {
 	return m_SecondCubePosition;
 }
-Vec3 ImGuiMenu::GetThirdCubePosition()
+Vector3 ImGuiMenu::GetThirdCubePosition()
 {
 	return m_ThirdCubePosition;
 }
