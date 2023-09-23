@@ -4,6 +4,19 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
+Vector4 ImGuiMenu::CameraPos = { 0.f, 1.f, -15.f, 0.f};
+float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
+float ImGuiMenu::CameraNearFar[2] = { 0.01f , 100.0f };
+
+Vector3 ImGuiMenu::FirstCubePosition = {  };
+Vector3 ImGuiMenu::SecondCubePosition = { -4.0f, 0.0f, 0.0f };
+Vector3 ImGuiMenu::ThirdCubePosition = { 5.0f, 0.0f, 0.0f };
+
+Vector4 ImGuiMenu::DirectionLightDir1 =		{ -0.577f, 0.577f, -0.577f, 1.0f };
+Vector4 ImGuiMenu::DirectionLightColor1 =	{ 0.5f, 0.5f, 0.5f, 1.f };
+Vector4 ImGuiMenu::DirectionLightDir2 =		{ 0.0f, 0.f, 0.f, 1.0f };
+Vector4 ImGuiMenu::DirectionLightColor2 =	{ 1.f, 0.f, 0.f, 1.f };
+
 ImGuiMenu::ImGuiMenu(DemoApp* owner)
 	:m_Owner(owner)
 {
@@ -27,31 +40,12 @@ void ImGuiMenu::Init(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* devic
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(device, devicecontext);
 
-
-	m_CameraPos[0] = 0.0f;
-	m_CameraPos[1] = 1.0f;
-	m_CameraPos[2] = -15.0f;
-	m_CameraPos[3] = 0.0f;
-	m_CameraFov = 50;
-	m_CameraNearFar[0] = 0.01f;
-	m_CameraNearFar[1] = 100.0f;
-
-	m_FirstCubePosition = {};
-	m_SecondCubePosition = { -4.0f, 0.0f, 0.0f };
-	m_ThirdCubePosition = { 5.0f, 0.0f, 0.0f };
-
 	ImGui::SetNextWindowSize({ 500.f, 500.f });
-}
-
-void ImGuiMenu::Update()
-{
-
 }
 
 void ImGuiMenu::Render()
@@ -61,34 +55,47 @@ void ImGuiMenu::Render()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	// Camera & Cube
 	{
-		ImGui::Begin("Menu");
+		ImGui::Begin("Camera & Cube Menu");
 
+		// Camera
 		if (ImGui::CollapsingHeader("Camera Setting"))
 		{
-			ImGui::SliderFloat4("Camera Position", m_CameraPos, -50.f, 50.f);
-			ImGui::SliderFloat("Camera Fov", &m_CameraFov, 0.01f, 180.f);
-			ImGui::SliderFloat2("Camera Near&Far", m_CameraNearFar, 0.1f, 100.f);
+			static float camerafov = 50.f;
+
+			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -50.f, 50.f);
+			ImGui::SliderFloat("Camera Fov", &camerafov, 0.01f, 180.f);
+			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 100.f);
+
+			CameraFov = camerafov * 3.14f / 180.f;
 		}
 
+		// Cube
 		if (ImGui::CollapsingHeader("Cube Position Setting"))
 		{
-			static float firstcube[3] = {};
-			static float secondcube[3] = { -4.0f, 0.0f, 0.0f };
-			static float thirdcube[3] = { 5.0f, 0.0f, 0.0f };
-			ImGui::SliderFloat3("First Cube Position", firstcube, -20.f, 20.f);
-			ImGui::SliderFloat3("Second Cube Position", secondcube, -20.f, 20.f);
-			ImGui::SliderFloat3("Third Cube Position", thirdcube, -20.f, 20.f);
+			ImGui::SliderFloat3("First Cube Position", (float*)&FirstCubePosition, -20.f, 20.f);
+			ImGui::SliderFloat3("Second Cube Position", (float*)&SecondCubePosition, -20.f, 20.f);
+			ImGui::SliderFloat3("Third Cube Position", (float*)&ThirdCubePosition, -20.f, 20.f);
+		}
 
-			m_FirstCubePosition.x = firstcube[0];
-			m_FirstCubePosition.y = firstcube[1];
-			m_FirstCubePosition.z = firstcube[2];
-			m_SecondCubePosition.x = secondcube[0];
-			m_SecondCubePosition.y = secondcube[1];
-			m_SecondCubePosition.z = secondcube[2];
-			m_ThirdCubePosition.x = thirdcube[0];
-			m_ThirdCubePosition.y = thirdcube[1];
-			m_ThirdCubePosition.z = thirdcube[2];
+		ImGui::End();
+	}
+
+	// Light
+	{
+		ImGui::Begin("Direction Light Menu");
+
+		if (ImGui::CollapsingHeader("Direction Light 1"))
+		{
+			ImGui::SliderFloat4("Light1 Position", (float*)&DirectionLightDir1, -1.f, 1.f);
+			ImGui::ColorEdit4("Light1 Color", (float*)&DirectionLightColor1);
+		}
+
+		if (ImGui::CollapsingHeader("Direction Light 2"))
+		{
+			ImGui::SliderFloat4("Light2 Position", (float*)&DirectionLightDir2, -1.f, 1.f);
+			ImGui::ColorEdit4("Light2 Color", (float*)&DirectionLightColor2);
 		}
 
 		ImGui::End();

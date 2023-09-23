@@ -111,6 +111,8 @@ private:
 	DirectX::SimpleMath::Matrix m_View;
 	DirectX::SimpleMath::Matrix m_Projection;
 
-	Vector4 m_DirectionLight;
-	Vector4 m_LightColor;
+
+private:
+	XMFLOAT4 m_DirectionLight;
+	XMFLOAT4 m_LightColor;
 };

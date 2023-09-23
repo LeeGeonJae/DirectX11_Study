@@ -62,20 +62,22 @@ void DemoApp::Update()
 
 	// Cube
 	{
-		// 1st Cube: Rotate around the origin
+		// 1st Cube
 		XMMATRIX mSpin1 = XMMatrixRotationY(-t);
-		XMMATRIX mTranslate1 = XMMatrixTranslation(m_imgui->GetFirstCubePosition().x, m_imgui->GetFirstCubePosition().y, m_imgui->GetFirstCubePosition().z);
-		m_World1 = mSpin1 * mTranslate1;
+		XMMATRIX mTranslate1 = XMMatrixTranslation(ImGuiMenu::FirstCubePosition.x, ImGuiMenu::FirstCubePosition.y, ImGuiMenu::FirstCubePosition.z);
 
-		// 2nd Cube:  Rotate around origin
+		// 2nd Cube
 		XMMATRIX mSpin2 = XMMatrixRotationY(t * 5.0f);
-		XMMATRIX mTranslate2 = XMMatrixTranslation(m_imgui->GetSecondCubePosition().x, m_imgui->GetSecondCubePosition().y, m_imgui->GetSecondCubePosition().z);
+		XMMATRIX mTranslate2 = XMMatrixTranslation(ImGuiMenu::SecondCubePosition.x, ImGuiMenu::SecondCubePosition.y, ImGuiMenu::SecondCubePosition.z);
 		XMMATRIX mScale2 = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-		XMMATRIX mSpin3 = XMMatrixRotationY(-t * 4.0f);
+		// 3rd Cube
+		XMMATRIX mSpin3 = XMMatrixRotationY(-t * 2.0f);
 		XMMATRIX mScale3 = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-		XMMATRIX mTranslate3 = XMMatrixTranslation(m_imgui->GetThirdCubePosition().x, m_imgui->GetThirdCubePosition().y, m_imgui->GetThirdCubePosition().z);
+		XMMATRIX mTranslate3 = XMMatrixTranslation(ImGuiMenu::ThirdCubePosition.x, ImGuiMenu::ThirdCubePosition.y, ImGuiMenu::ThirdCubePosition.z);
 
+		// Cube World Setting
+		m_World1 = mSpin1 * mTranslate1;
 		m_World2 = mScale2 * mSpin2 * mTranslate2 * static_cast<XMMATRIX>(m_World1);
 		m_World3 = mScale3 * mSpin3 * mTranslate3 * static_cast<XMMATRIX>(m_World2);
 
@@ -90,28 +92,36 @@ void DemoApp::Update()
 		m_transformData3.World = XMMatrixTranspose(m_World3);
 		m_transformData3.View = XMMatrixTranspose(m_View);
 		m_transformData3.Projection = XMMatrixTranspose(m_Projection);
+	}
 
-		XMVECTOR Eye = XMVectorSet(m_imgui->GetCameraPos()[0], m_imgui->GetCameraPos()[1], m_imgui->GetCameraPos()[2], m_imgui->GetCameraPos()[3]);
-		XMVECTOR At = XMVectorSet(m_imgui->GetCameraPos()[0], m_imgui->GetCameraPos()[1] + 1.f, 100.f, 0.0f);
+	// Camera
+	{
+		XMVECTOR Eye = XMVectorSet(ImGuiMenu::CameraPos.x, ImGuiMenu::CameraPos.y, ImGuiMenu::CameraPos.z, ImGuiMenu::CameraPos.w);
+		XMVECTOR At = XMVectorSet(ImGuiMenu::CameraPos.x, ImGuiMenu::CameraPos.y + 1.f, 100.f, 0.0f);
 		XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		m_View = XMMatrixLookAtLH(Eye, At, Up);
-		m_Projection = XMMatrixPerspectiveFovLH(m_imgui->GetCameraFov(), m_ClientWidth / (FLOAT)m_ClientHeight, m_imgui->GetCameraNear(), m_imgui->GetCameraFar());
+		m_Projection = XMMatrixPerspectiveFovLH(ImGuiMenu::CameraFov, m_ClientWidth / (FLOAT)m_ClientHeight, ImGuiMenu::CameraNearFar[0], ImGuiMenu::CameraNearFar[1]);
 	}
 
 	// Lighting
 	{
-		//XMMATRIX mSpin1 = XMMatrixRotationX(-t);
-		//XMMATRIX mSpin2 = XMMatrixRotationY(-t);
-		//XMMATRIX mSpin3 = XMMatrixRotationZ(-t);
-		//m_DirectionLight = mSpin1 * mSpin2 * mSpin3;
+		XMFLOAT4 LightNormal1 = ImGuiMenu::DirectionLightDir1;
+		Color LightColor1 = ImGuiMenu::DirectionLightColor1;
+		XMFLOAT4 LightNormal2 = ImGuiMenu::DirectionLightDir2;
+		Color LightColor2 = ImGuiMenu::DirectionLightColor2;
 
-		Vector3 lightnormal = { 1.f, 1.f, 0.f };
-		m_transformData1.LightDir = lightnormal;
-		m_transformData2.LightDir = lightnormal;
-		m_transformData3.LightDir = lightnormal;
-		m_transformData1.LightColor = Color{ 1.f, 1.f, 1.f, 1.f };
-		m_transformData2.LightColor = Color{ 1.f, 1.f, 1.f, 1.f };
-		m_transformData3.LightColor = Color{ 1.f, 1.f, 1.f, 1.f };
+		m_transformData1.LightDir[0] = LightNormal1;
+		m_transformData2.LightDir[0] = LightNormal1;
+		m_transformData3.LightDir[0] = LightNormal1;
+		m_transformData1.LightColor[0] = LightColor1;
+		m_transformData2.LightColor[0] = LightColor1;
+		m_transformData3.LightColor[0] = LightColor1;
+		m_transformData1.LightDir[1] = LightNormal2;
+		m_transformData2.LightDir[1] = LightNormal2;
+		m_transformData3.LightDir[1] = LightNormal2;
+		m_transformData1.LightColor[1] = LightColor2;
+		m_transformData2.LightColor[1] = LightColor2;
+		m_transformData3.LightColor[1] = LightColor2;
 	}
 }
 
@@ -142,8 +152,11 @@ void DemoApp::Render()
 		m_DeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 		m_DeviceContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
 		m_DeviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+		m_DeviceContext->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
 
 		// OM
+
+		//
 		m_DeviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &m_transformData1, 0, 0);
 		m_DeviceContext->DrawIndexed(m_indices.size(), 0, 0);
 
@@ -385,7 +398,7 @@ void DemoApp::createConstantBuffer()
 	ZeroMemory(&desc, sizeof(desc));
 	desc.Usage = D3D11_USAGE_DEFAULT; // CPU_Write + GPU_Read
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.ByteWidth = sizeof(TransformData);
+	desc.ByteWidth = sizeof(ConstantData);
 	desc.CPUAccessFlags = 0;
 
 	HRESULT hr = m_Device->CreateBuffer(&desc, nullptr, m_constantBuffer.GetAddressOf());
