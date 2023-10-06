@@ -21,8 +21,8 @@ cbuffer ConstantData : register(b0)
 	matrix World;
 	matrix View;
 	matrix Projection;
-	float4 LightDir[2];
-	float4 LightColor[2];
+	float4 LightDir;
+	float4 LightColor;
 }
 
 // IA - VS - RS - PS - OM
@@ -34,8 +34,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.position = mul(output.position, Projection);
     float3 normal = mul(input.normal, (float3x3) World);
     normal = normalize(normal);
-    output.diffuse = saturate(dot(normal, (float3) LightDir[0])) * LightColor[0];
-    output.diffuse += saturate(dot(normal, (float3) LightDir[1])) * LightColor[1];
+    output.diffuse = saturate(dot(normal, (float3) -LightDir)) * LightColor;
 	output.uv = input.uv;
 
 	return output;

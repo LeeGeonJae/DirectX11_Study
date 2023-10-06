@@ -15,8 +15,8 @@ struct ConstantData
 	DirectX::SimpleMath::Matrix World;		// 월드좌표계 공간으로 변환을 위한 행렬.
 	DirectX::SimpleMath::Matrix View;			// 뷰좌표계 공간으로 변환을 위한 행렬.
 	DirectX::SimpleMath::Matrix Projection;	// 단위장치좌표계( Normalized Device Coordinate) 공간으로 변환을 위한 행렬.
-	Vector4 LightDir[2];
-	Vector4 LightColor[2];
+	Vector4 LightDir;
+	Vector4 LightColor;
 };
 
 struct LightData

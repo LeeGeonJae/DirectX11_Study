@@ -3,7 +3,7 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 #include "ImGuiMenu.h"
-#include "ShaderStruct.h"
+#include "BufferStruct.h"
 
 #include <imgui.h>
 
@@ -91,7 +91,8 @@ private:
 	ComPtr<ID3DBlob> m_psBlob = nullptr;
 
 	// SRV
-	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView = nullptr;
+	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView1 = nullptr;
+	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView2 = nullptr;
 
 	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 	ComPtr<ID3D11BlendState> m_blendState = nullptr;
@@ -100,13 +101,19 @@ private:
 private:
 	ImGuiMenu* m_imgui;
 
-	ConstantData m_transformData;
-	ComPtr<ID3D11Buffer> m_constantBuffer;
+	CBCoordinateData	m_CBChangesEveryFrame;
+	CBLightData			m_CBLightData;
+	CBCameraData		m_CBCamera;
+	CBNormalMap			m_CBNormalMap;
+
+	ComPtr<ID3D11Buffer> m_pCBChangesEveryFrame = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBLight = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBCamera = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBNormalMap = nullptr;
 
 	DirectX::SimpleMath::Matrix m_World;
 	DirectX::SimpleMath::Matrix m_View;
 	DirectX::SimpleMath::Matrix m_Projection;
-
 
 private:
 	XMFLOAT4 m_DirectionLight;

@@ -23,9 +23,12 @@ public:
 
 	static Vector3 CubePosition;
 	static Vector2 CubeRotation;
+	static Vector3 CubeScale;
 
 	static Vector4 DirectionLightDir;
 	static Vector4 DirectionLightColor;
+	static float SpecularPower;
+	static Vector3 AmbientColor;
 
 private:
 	DemoApp* m_Owner;

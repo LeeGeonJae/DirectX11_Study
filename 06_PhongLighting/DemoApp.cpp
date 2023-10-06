@@ -4,9 +4,10 @@
 
 #include "DemoApp.h"
 #include <DirectXMath.h>
+#include <Directxtk/DDSTextureLoader.h>
 
 
-#define USE_FLIPMODE 0			//경고 메세지를 없애려면 Flip 모드를 사용한다.
+#define USE_FLIPMODE 0
 
 DemoApp::DemoApp(HINSTANCE hInstance)
 	:GameApp::GameApp(hInstance)
@@ -65,14 +66,15 @@ void DemoApp::Update()
 		// 1st Cube
 		XMMATRIX mSpin1 = XMMatrixRotationX(ImGuiMenu::CubeRotation.x * 3.14f);
 		XMMATRIX mSpin2 = XMMatrixRotationY(ImGuiMenu::CubeRotation.y * 3.14f);
+		XMMATRIX mScale = XMMatrixScaling(ImGuiMenu::CubeScale.x, ImGuiMenu::CubeScale.y, ImGuiMenu::CubeScale.z);
 		XMMATRIX mTranslate1 = XMMatrixTranslation(ImGuiMenu::CubePosition.x, ImGuiMenu::CubePosition.y, ImGuiMenu::CubePosition.z);
 
 		// Cube World Setting
-		m_World = mSpin1 * mSpin2 * mTranslate1;
+		m_World = mScale * mSpin1 * mSpin2 * mTranslate1;
 
-		m_transformData.World = XMMatrixTranspose(m_World);
-		m_transformData.View = XMMatrixTranspose(m_View);
-		m_transformData.Projection = XMMatrixTranspose(m_Projection);
+		m_CBChangesEveryFrame.World = XMMatrixTranspose(m_World);
+		m_CBChangesEveryFrame.View = XMMatrixTranspose(m_View);
+		m_CBChangesEveryFrame.Projection = XMMatrixTranspose(m_Projection);
 	}
 
 	// Camera
@@ -82,16 +84,22 @@ void DemoApp::Update()
 		XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		m_View = XMMatrixLookAtLH(Eye, At, Up);
 		m_Projection = XMMatrixPerspectiveFovLH(ImGuiMenu::CameraFov, m_ClientWidth / (FLOAT)m_ClientHeight, ImGuiMenu::CameraNearFar[0], ImGuiMenu::CameraNearFar[1]);
-	}
+		m_CBCamera.CameraPosition = Vector4{ ImGuiMenu::CameraPos.x, ImGuiMenu::CameraPos.y, ImGuiMenu::CameraPos.z, 0.f };
+ 	}
 
 	// Lighting
 	{
-		XMFLOAT4 LightNormal = ImGuiMenu::DirectionLightDir;
+		XMFLOAT4 LightDirection = ImGuiMenu::DirectionLightDir;
 		Color LightColor = ImGuiMenu::DirectionLightColor;
+		Vector3 AmbientColor = ImGuiMenu::AmbientColor;
+		float SpeclarPower = ImGuiMenu::SpecularPower;
 
-		m_transformData.LightDir = LightNormal;
-		m_transformData.LightColor = LightColor;
+		m_CBLightData.LightDir = LightDirection;
+		m_CBLightData.LightColor = LightColor;
+		m_CBLightData.AmbientColor = AmbientColor;
+		m_CBLightData.SpecularPower = SpeclarPower;
 	}
+
 }
 
 void DemoApp::Render()
@@ -110,7 +118,9 @@ void DemoApp::Render()
 
 		// VS
 		m_DeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-		m_DeviceContext->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+		m_DeviceContext->VSSetConstantBuffers(0, 1, m_pCBChangesEveryFrame.GetAddressOf());
+		m_DeviceContext->VSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
+		m_DeviceContext->VSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
 
 		// RAS
 		m_DeviceContext->RSSetState(m_rasterizerState.Get());
@@ -121,12 +131,16 @@ void DemoApp::Render()
 		m_DeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 		m_DeviceContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
 		m_DeviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
-		m_DeviceContext->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+		m_DeviceContext->PSSetConstantBuffers(0, 1, m_pCBChangesEveryFrame.GetAddressOf());
+		m_DeviceContext->PSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
+		m_DeviceContext->PSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
 
 		// OM
 
 		//
-		m_DeviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &m_transformData, 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBChangesEveryFrame.Get(), 0, nullptr, &m_CBChangesEveryFrame, 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBLight.Get(), 0, nullptr, &m_CBLightData, 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBCamera.Get(), 0, nullptr, &m_CBCamera, 0, 0);
 		m_DeviceContext->DrawIndexed(m_indices.size(), 0, 0);
 	}
 
@@ -262,35 +276,35 @@ void DemoApp::createGeometry()
 	{
 		m_vertices.resize(24);
 
-		m_vertices[0].position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[0].normal = Vector3(0.0f, 1.0f, 0.0f);  m_vertices[0].uv = Vector2(1.0f, 0.0f);
-		m_vertices[1].position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[1].normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[1].uv = Vector2(0.0f, 0.0f);
-		m_vertices[2].position = Vector3(1.0f, 1.0f, 1.0f);		m_vertices[2].normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[2].uv = Vector2(0.0f, 1.0f);
-		m_vertices[3].position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[3].normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[3].uv = Vector2(1.0f, 1.0f);
-		
-		m_vertices[4].position = Vector3(-1.0f, -1.0f, -1.0f);	m_vertices[4].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[4].uv = Vector2(0.0f, 0.0f);
-		m_vertices[5].position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[5].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[5].uv = Vector2(1.0f, 0.0f);
-		m_vertices[6].position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[6].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[6].uv = Vector2(1.0f, 1.0f);
-		m_vertices[7].position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[7].normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[7].uv = Vector2(0.0f, 1.0f);
-		
-		m_vertices[8].position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[8].normal = Vector3(-1.0f, 0.0f, 0.0f);	m_vertices[8].uv = Vector2(0.0f, 1.0f);
-		m_vertices[9].position = Vector3(-1.0f, -1.0f, -1.0f);	m_vertices[9].normal = Vector3(-1.0f, 0.0f, 0.0f);	m_vertices[9].uv = Vector2(1.0f, 1.0f);
-		m_vertices[10].position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[10].normal = Vector3(-1.0f, 0.0f, 0.0f); m_vertices[10].uv = Vector2(1.0f, 0.0f);
-		m_vertices[11].position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[11].normal = Vector3(-1.0f, 0.0f, 0.0f); m_vertices[11].uv = Vector2(0.0f, 0.0f);
-		
-		m_vertices[12].position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[12].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[12].uv = Vector2(1.0f, 1.0f);
-		m_vertices[13].position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[13].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[13].uv = Vector2(0.0f, 1.0f);
-		m_vertices[14].position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[14].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[14].uv = Vector2(0.0f, 0.0f);
-		m_vertices[15].position = Vector3(1.0f, 1.0f, 1.0f);	m_vertices[15].normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[15].uv = Vector2(1.0f, 0.0f);
-		
-		m_vertices[16].position = Vector3(-1.0f, -1.0f, -1.0f); m_vertices[16].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[16].uv = Vector2(0.0f, 1.0f);
-		m_vertices[17].position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[17].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[17].uv = Vector2(1.0f, 1.0f);
-		m_vertices[18].position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[18].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[18].uv = Vector2(1.0f, 0.0f);
-		m_vertices[19].position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[19].normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[19].uv = Vector2(0.0f, 0.0f);
-
-		m_vertices[20].position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[20].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[20].uv = Vector2(1.0f, 1.0f);
-		m_vertices[21].position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[21].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[21].uv = Vector2(0.0f, 1.0f);
-		m_vertices[22].position = Vector3(1.0f, 1.0f, 1.0f);	m_vertices[22].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[22].uv = Vector2(0.0f, 0.0f);
-		m_vertices[23].position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[23].normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[23].uv = Vector2(1.0f, 0.0f);
+		m_vertices[0].Position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[0].Normal = Vector3(0.0f, 1.0f, 0.0f);  m_vertices[0].UV = Vector2(1.0f, 0.0f);
+		m_vertices[1].Position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[1].Normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[1].UV = Vector2(0.0f, 0.0f);
+		m_vertices[2].Position = Vector3(1.0f, 1.0f, 1.0f);		m_vertices[2].Normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[2].UV = Vector2(0.0f, 1.0f);
+		m_vertices[3].Position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[3].Normal = Vector3(0.0f, 1.0f, 0.0f);	m_vertices[3].UV = Vector2(1.0f, 1.0f);
+					  														  													  
+		m_vertices[4].Position = Vector3(-1.0f, -1.0f, -1.0f);	m_vertices[4].Normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[4].UV = Vector2(0.0f, 0.0f);
+		m_vertices[5].Position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[5].Normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[5].UV = Vector2(1.0f, 0.0f);
+		m_vertices[6].Position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[6].Normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[6].UV = Vector2(1.0f, 1.0f);
+		m_vertices[7].Position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[7].Normal = Vector3(0.0f, -1.0f, 0.0f);	m_vertices[7].UV = Vector2(0.0f, 1.0f);
+					  														  													   
+		m_vertices[8].Position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[8].Normal = Vector3(-1.0f, 0.0f, 0.0f);	m_vertices[8].UV = Vector2(0.0f, 1.0f);
+		m_vertices[9].Position = Vector3(-1.0f, -1.0f, -1.0f);	m_vertices[9].Normal = Vector3(-1.0f, 0.0f, 0.0f);	m_vertices[9].UV = Vector2(1.0f, 1.0f);
+		m_vertices[10].Position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[10].Normal = Vector3(-1.0f, 0.0f, 0.0f); m_vertices[10].UV = Vector2(1.0f, 0.0f);
+		m_vertices[11].Position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[11].Normal = Vector3(-1.0f, 0.0f, 0.0f); m_vertices[11].UV = Vector2(0.0f, 0.0f);
+					   														   													   	
+		m_vertices[12].Position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[12].Normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[12].UV = Vector2(1.0f, 1.0f);
+		m_vertices[13].Position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[13].Normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[13].UV = Vector2(0.0f, 1.0f);
+		m_vertices[14].Position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[14].Normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[14].UV = Vector2(0.0f, 0.0f);
+		m_vertices[15].Position = Vector3(1.0f, 1.0f, 1.0f);	m_vertices[15].Normal = Vector3(1.0f, 0.0f, 0.0f);	m_vertices[15].UV = Vector2(1.0f, 0.0f);
+					   														   													   	
+		m_vertices[16].Position = Vector3(-1.0f, -1.0f, -1.0f); m_vertices[16].Normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[16].UV = Vector2(0.0f, 1.0f);
+		m_vertices[17].Position = Vector3(1.0f, -1.0f, -1.0f);	m_vertices[17].Normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[17].UV = Vector2(1.0f, 1.0f);
+		m_vertices[18].Position = Vector3(1.0f, 1.0f, -1.0f);	m_vertices[18].Normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[18].UV = Vector2(1.0f, 0.0f);
+		m_vertices[19].Position = Vector3(-1.0f, 1.0f, -1.0f);	m_vertices[19].Normal = Vector3(0.0f, 0.0f, -1.0f); m_vertices[19].UV = Vector2(0.0f, 0.0f);
+					   														   													   	
+		m_vertices[20].Position = Vector3(-1.0f, -1.0f, 1.0f);	m_vertices[20].Normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[20].UV = Vector2(1.0f, 1.0f);
+		m_vertices[21].Position = Vector3(1.0f, -1.0f, 1.0f);	m_vertices[21].Normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[21].UV = Vector2(0.0f, 1.0f);
+		m_vertices[22].Position = Vector3(1.0f, 1.0f, 1.0f);	m_vertices[22].Normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[22].UV = Vector2(0.0f, 0.0f);
+		m_vertices[23].Position = Vector3(-1.0f, 1.0f, 1.0f);	m_vertices[23].Normal = Vector3(0.0f, 0.0f, 1.0f);	m_vertices[23].UV = Vector2(1.0f, 0.0f);
 	}
 
 	// VertexBuffer
@@ -349,7 +363,7 @@ void DemoApp::createInputLayout()
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	}; 
+	};
 
 	const int count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
 	m_Device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
@@ -357,14 +371,31 @@ void DemoApp::createInputLayout()
 
 void DemoApp::createConstantBuffer()
 {
+	HRESULT hr;
 	D3D11_BUFFER_DESC desc;
-	ZeroMemory(&desc, sizeof(desc));
-	desc.Usage = D3D11_USAGE_DEFAULT; // CPU_Write + GPU_Read
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.ByteWidth = sizeof(ConstantData);
-	desc.CPUAccessFlags = 0;
 
-	HRESULT hr = m_Device->CreateBuffer(&desc, nullptr, m_constantBuffer.GetAddressOf());
+	// 좌표(World, View, Projection) 데이터 Constant Buffer로 넘겨주기
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(CBChangesEveryFrame);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBChangesEveryFrame.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	// Light 데이터 Constant Buffer로 넘겨주기
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(CBLightData);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBLight.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	// Camera 데이터 Constant Buffer로 넘겨주기
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(CBCameraData);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBCamera.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 
@@ -422,7 +453,7 @@ void DemoApp::createBlendState()
 	ZeroMemory(&desc, sizeof(D3D11_BLEND_DESC));
 	desc.AlphaToCoverageEnable = false;
 	desc.IndependentBlendEnable = false;
-	
+
 	desc.RenderTarget[0].BlendEnable = true;
 	desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 	desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -438,12 +469,16 @@ void DemoApp::createBlendState()
 
 void DemoApp::createSRV()
 {
-	DirectX::TexMetadata md;
-	DirectX::ScratchImage img;
-	HRESULT hr = ::LoadFromWICFile(L"ground.jpg", WIC_FLAGS_NONE, &md, img);
-	assert(SUCCEEDED(hr));
+	HRESULT hr;
+	//DirectX::TexMetadata md;
+	//DirectX::ScratchImage img;
+	//hr = ::LoadFromWICFile(L"seafloor.dds", WIC_FLAGS_NONE, &md, img);
+	//assert(SUCCEEDED(hr));
 
-	hr = ::CreateShaderResourceView(m_Device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView.GetAddressOf());
+	//hr = ::CreateShaderResourceView(m_Device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView.GetAddressOf());
+	//assert(SUCCEEDED(hr));
+
+	hr = ::CreateDDSTextureFromFile(m_Device.Get(), L"seafloor.dds", nullptr, m_shaderResourceView.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 
@@ -469,7 +504,7 @@ void DemoApp::LoadShaderFromFile(const wstring& path, const string& name, const 
 void DemoApp::setTransform()
 {
 	m_World = XMMatrixIdentity();
-	m_DirectionLight = Vector4{1.f, 0.f, 0.f, 0.f};
+	m_DirectionLight = Vector4{ 1.f, 0.f, 0.f, 0.f };
 }
 
 void DemoApp::Release()

@@ -3,7 +3,7 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 #include "ImGuiMenu.h"
-#include "ShaderStruct.h"
+#include "BufferStruct.h"
 
 #include <imgui.h>
 
@@ -100,13 +100,17 @@ private:
 private:
 	ImGuiMenu* m_imgui;
 
-	ConstantData m_transformData;
-	ComPtr<ID3D11Buffer> m_constantBuffer;
+	CBChangesEveryFrame m_CBChangesEveryFrame;
+	CBLightData			m_CBLightData;
+	CBCameraData		m_CBCamera;
+
+	ComPtr<ID3D11Buffer> m_pCBChangesEveryFrame = nullptr; 
+	ComPtr<ID3D11Buffer> m_pCBLight = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBCamera = nullptr;
 
 	DirectX::SimpleMath::Matrix m_World;
 	DirectX::SimpleMath::Matrix m_View;
 	DirectX::SimpleMath::Matrix m_Projection;
-
 
 private:
 	XMFLOAT4 m_DirectionLight;

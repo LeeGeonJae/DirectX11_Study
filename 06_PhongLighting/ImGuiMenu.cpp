@@ -4,15 +4,18 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-Vector4 ImGuiMenu::CameraPos = { 0.f, 1.f, -15.f, 0.f};
+Vector4 ImGuiMenu::CameraPos = { 0.f, 0.f, -50.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
 float ImGuiMenu::CameraNearFar[2] = { 0.01f , 100.0f };
 
 Vector3 ImGuiMenu::CubePosition = {};
 Vector2 ImGuiMenu::CubeRotation = {};
+Vector3 ImGuiMenu::CubeScale = {10.f, 10.f, 10.f};
 
-Vector4 ImGuiMenu::DirectionLightDir =		{ 0.f, 0.f, 1.f, 1.0f };
-Vector4 ImGuiMenu::DirectionLightColor =	{ 1.f, 1.f, 1.f, 1.f };
+Vector4 ImGuiMenu::DirectionLightDir = { 0.f, 0.f, 1.f, 0.0f };
+Vector4 ImGuiMenu::DirectionLightColor = { 0.5f, 0.5f, 0.5f, 1.f };
+Vector3 ImGuiMenu::AmbientColor = { 0.1f, 0.1f, 0.1f };
+float ImGuiMenu::SpecularPower = 300.f;
 
 ImGuiMenu::ImGuiMenu(DemoApp* owner)
 	:m_Owner(owner)
@@ -66,12 +69,18 @@ void ImGuiMenu::Render()
 			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 100.f);
 
 			CameraFov = camerafov * 3.14f / 180.f;
+
+			if (CameraNearFar[0] > CameraNearFar[1])
+			{
+				CameraNearFar[0] = CameraNearFar[1] - 0.1f;
+			}
 		}
 
 		// Cube
 		if (ImGui::CollapsingHeader("Cube Position Setting"))
 		{
 			ImGui::SliderFloat3("Cube Position", (float*)&CubePosition, -20.f, 20.f);
+			ImGui::SliderFloat3("Cube Scale", (float*)&CubeScale, 0.f, 20.f);
 			ImGui::SliderFloat2("Cube Rotation", (float*)&CubeRotation, 0.f, 1.f);
 		}
 
@@ -80,12 +89,14 @@ void ImGuiMenu::Render()
 
 	// Light
 	{
-		ImGui::Begin("Direction Light Menu");
+		ImGui::Begin("Light Menu");
 
-		if (ImGui::CollapsingHeader("Direction Light"))
+		if (ImGui::CollapsingHeader("Light"))
 		{
-			ImGui::SliderFloat3("Light Direction", (float*)&DirectionLightDir, -1.f, 1.f);
+			ImGui::SliderFloat4("Light Direction", (float*)&DirectionLightDir, -1.f, 1.f);
 			ImGui::ColorEdit4("Light Color", (float*)&DirectionLightColor);
+			ImGui::ColorEdit3("Ambient Color", (float*)&AmbientColor);
+			ImGui::SliderFloat("Specular power", &SpecularPower, 0.f, 500.f);
 		}
 
 		ImGui::End();
