@@ -35,5 +35,7 @@ struct CBCameraData
 struct CBNormalMap
 {
 	int UseNormalMap;
-	Vector3 dummy;
+	int UseSpecularMap;
+	int UseGammaCorrection;
+	int dummy;
 };

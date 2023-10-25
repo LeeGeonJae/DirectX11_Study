@@ -31,6 +31,8 @@ public:
 	static Vector3 AmbientColor;
 
 	static bool bIsNormalMap;
+	static bool bIsSpecularMap;
+	static bool bIsGammaCorrection;
 
 private:
 	DemoApp* m_Owner;

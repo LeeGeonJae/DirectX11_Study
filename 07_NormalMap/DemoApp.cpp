@@ -103,6 +103,8 @@ void DemoApp::Update()
 	// NormalMap
 	{
 		m_CBNormalMap.UseNormalMap = ImGuiMenu::bIsNormalMap;
+		m_CBNormalMap.UseSpecularMap = ImGuiMenu::bIsSpecularMap;
+		m_CBNormalMap.UseGammaCorrection = ImGuiMenu::bIsGammaCorrection;
 	}
 }
 
@@ -136,6 +138,7 @@ void DemoApp::Render()
 		m_DeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 		m_DeviceContext->PSSetShaderResources(0, 1, m_shaderResourceView1.GetAddressOf());
 		m_DeviceContext->PSSetShaderResources(1, 1, m_shaderResourceView2.GetAddressOf());
+		m_DeviceContext->PSSetShaderResources(2, 1, m_shaderResourceView3.GetAddressOf());
 		m_DeviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(0, 1, m_pCBChangesEveryFrame.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
@@ -451,19 +454,19 @@ void DemoApp::createSamplerState()
 {
 	D3D11_SAMPLER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	desc.BorderColor[0] = 1;
-	desc.BorderColor[1] = 0;
-	desc.BorderColor[2] = 0;
-	desc.BorderColor[3] = 1;
-	desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//desc.BorderColor[0] = 1;
+	//desc.BorderColor[1] = 0;
+	//desc.BorderColor[2] = 0;
+	//desc.BorderColor[3] = 1;
+	desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
-	desc.MaxAnisotropy = 16;
-	desc.MaxLOD = FLT_MAX;
-	desc.MaxLOD = FLT_MIN;
-	desc.MipLODBias = 0.0f;
+	//desc.MaxAnisotropy = 16;
+	desc.MaxLOD = 0;
+	desc.MaxLOD = D3D11_FLOAT32_MAX;
+	//desc.MipLODBias = 0.0f;
 
 	HRESULT hr = m_Device->CreateSamplerState(&desc, m_samplerState.GetAddressOf());
 	assert(SUCCEEDED(hr));
@@ -504,6 +507,12 @@ void DemoApp::createSRV()
 	assert(SUCCEEDED(hr));
 
 	hr = ::CreateShaderResourceView(m_Device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView2.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	hr = ::LoadFromWICFile(L"Wall_Specular.png", WIC_FLAGS_NONE, &md, img);
+	assert(SUCCEEDED(hr));
+
+	hr = ::CreateShaderResourceView(m_Device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView3.GetAddressOf());
 	assert(SUCCEEDED(hr));
 
 	//hr = ::CreateDDSTextureFromFile(m_Device.Get(), L"seafloor.dds", nullptr, m_shaderResourceView.GetAddressOf());

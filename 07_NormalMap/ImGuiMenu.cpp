@@ -13,11 +13,13 @@ Vector2 ImGuiMenu::CubeRotation = {};
 Vector3 ImGuiMenu::CubeScale = { 10.f, 10.f, 10.f };
 
 Vector4 ImGuiMenu::DirectionLightDir = { 0.f, 0.f, 1.f, 0.0f };
-Vector4 ImGuiMenu::DirectionLightColor = { 0.8f, 0.8f, 0.8f, 1.f };
+Vector4 ImGuiMenu::DirectionLightColor = { 1.f, 1.f, 1.f, 1.f };
 Vector3 ImGuiMenu::AmbientColor = { 0.1f, 0.1f, 0.1f };
-float ImGuiMenu::SpecularPower = 150.f;
+float ImGuiMenu::SpecularPower = 50.f;
 
 bool ImGuiMenu::bIsNormalMap = true;
+bool ImGuiMenu::bIsSpecularMap = true;
+bool ImGuiMenu::bIsGammaCorrection = true;
 
 ImGuiMenu::ImGuiMenu(DemoApp* owner)
 	:m_Owner(owner)
@@ -60,8 +62,6 @@ void ImGuiMenu::Render()
 	{
 		ImGui::Begin("Camera & Cube Menu");
 
-		ImGui::Checkbox("NormalMap Check", &bIsNormalMap);
-
 		// Camera
 		if (ImGui::CollapsingHeader("Camera Setting"))
 		{
@@ -84,8 +84,12 @@ void ImGuiMenu::Render()
 		{
 			ImGui::SliderFloat3("Cube Position", (float*)&CubePosition, -20.f, 20.f);
 			ImGui::SliderFloat3("Cube Scale", (float*)&CubeScale, 0.f, 20.f);
-			ImGui::SliderFloat2("Cube Rotation", (float*)&CubeRotation, 0.f, 1.f);
+			ImGui::SliderFloat2("Cube Rotation", (float*)&CubeRotation, -1.f, 1.f);
 		}
+
+		ImGui::Checkbox("NormalMap Check", &bIsNormalMap);
+		ImGui::Checkbox("SpecularMap Check", &bIsSpecularMap);
+		ImGui::Checkbox("GammaCorrection Check", &bIsGammaCorrection);
 
 		ImGui::End();
 	}
@@ -99,7 +103,7 @@ void ImGuiMenu::Render()
 			ImGui::SliderFloat4("Light Direction", (float*)&DirectionLightDir, -1.f, 1.f);
 			ImGui::ColorEdit4("Light Color", (float*)&DirectionLightColor);
 			ImGui::ColorEdit3("Ambient Color", (float*)&AmbientColor);
-			ImGui::SliderFloat("Specular power", &SpecularPower, 0.f, 500.f);
+			ImGui::SliderFloat("Specular power", &SpecularPower, 1.f, 500.f);
 		}
 
 		ImGui::End();

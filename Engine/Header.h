@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <string>
 #include <unordered_map>
 using namespace std;
 

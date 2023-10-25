@@ -93,6 +93,7 @@ private:
 	// SRV
 	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView1 = nullptr;
 	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView2 = nullptr;
+	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView3 = nullptr;
 
 	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 	ComPtr<ID3D11BlendState> m_blendState = nullptr;

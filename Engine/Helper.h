@@ -22,3 +22,12 @@ DirectX::XMFLOAT3 CalculateNormalVector(const DirectX::XMFLOAT3& vertex1, const 
 
     return result;
 }
+
+std::string GetFileName(const aiString& str)
+{
+    std::string filename = str.C_Str();
+
+    filename.erase(filename.begin(), filename.begin() + filename.find_last_of('\\') + 1);
+
+    return filename;
+}

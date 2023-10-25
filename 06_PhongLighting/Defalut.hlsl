@@ -17,7 +17,7 @@ struct VS_OUTPUT
     float2 mUV : TEXCOORD1;
     float3 mViewDir : TEXCOORD2;
     float4 mDiffuse : COLOR;
-    float3 mReflection : NORMAL;
+    float3 mNormal : NORMAL;
 };
 
 // 좌표 변환 Constant Buffer
@@ -66,11 +66,10 @@ VS_OUTPUT VS(VS_INPUT input)
     // 오브젝트 월드에서 노말 벡터 계산 (오브젝트의 정면에 90도를 이루는 벡터)
     float3 worldNormal = mul(input.mNormal, (float3x3) World);
     worldNormal = normalize(worldNormal);
+    output.mNormal = worldNormal;
     
     // 난반사(Diffuse) 내적으로 구하기
-    // 반사광(Reflection) 오브젝트의 노말 벡터를 법선 벡터로 하여 빛의 입사광을 반사광으로 변환
     output.mDiffuse = dot(-lightDir, worldNormal);
-    output.mReflection = reflect(lightDir, worldNormal);
     
     // 텍스처를 입히기 위한 UV값 전달
     output.mUV = input.mUV;
@@ -88,21 +87,23 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float3 diffuse = saturate(input.mDiffuse) * color * LightColor;
     
     // 반사광의 노멀라이즈(정규화), 오브젝트에서 카메라까지의 거리 노멀라이즈(정규화)
-    float3 reflection = normalize(input.mReflection);
-    float3 viewDir = normalize(input.mViewDir);
+    float3 normal = normalize(input.mNormal);
     float3 specular = 0;
     
     // 반사광과 카메라(반전) 방향 내적하여 직접광의 값 구한 후
     // SpecularPower 값만큼 제곱하여 빛의 확산 조절
+    // 퐁을 -> 블린퐁으로 수정함 ( 빛 방향 + 카메라 방향 )을 노말값과 내적
     if (diffuse.x > 0)
     {
-        specular = saturate(dot(reflection, -viewDir));
-        specular = pow(specular, SpecularPower) * (float3) color * (float3) LightColor;
+        float3 lightdir = normalize(LightDir);
+        float3 halfDirection = normalize(lightdir + input.mViewDir);
+        float specularDot = saturate(dot(normal, -halfDirection));
+        specular = pow(specularDot, SpecularPower) * (float3) color * (float3) LightColor;
     }
     
     // Ambient(주변광)
     //float3 ambient = float3(0.1f, 0.1f, 0.1f);
-    float3 ambient = AmbientColor * (float3) color * 0.7f;
+    float3 ambient = AmbientColor * (float3) color * 0.1f;
     
     // (난반사광 + 직접광 + 주변광)
     return float4(diffuse + specular + ambient, 1);
