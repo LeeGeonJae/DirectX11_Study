@@ -7,5 +7,6 @@ enum class TextureType
 	SPECULAR,
 	OPACITY,
 
+
 	END
 };

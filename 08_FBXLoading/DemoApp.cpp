@@ -45,7 +45,7 @@ void DemoApp::initD3D()
 
 void DemoApp::initScene()
 {
-	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/Tree.fbx");
+	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx");
 
 	createVS();
 	createInputLayout();

@@ -15,3 +15,8 @@ using Vector2 = DirectX::XMFLOAT2;
 using Vector3 = DirectX::XMFLOAT3;
 using Vector4 = DirectX::XMFLOAT4;
 using Color = DirectX::XMFLOAT4;
+
+struct Quaternion
+{
+	float x, y, z, w;
+};

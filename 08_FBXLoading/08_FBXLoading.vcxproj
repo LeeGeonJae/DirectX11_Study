@@ -135,16 +135,20 @@
     <ClCompile Include="DemoApp.cpp" />
     <ClCompile Include="ImGuiMenu.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
+    <ClCompile Include="Object.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BufferStruct.h" />
     <ClInclude Include="DemoApp.h" />
     <ClInclude Include="enum.h" />
     <ClInclude Include="ImGuiMenu.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>

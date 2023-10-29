@@ -30,9 +30,6 @@
     <ClInclude Include="Values.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Struct.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="TimeManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -40,6 +37,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Header.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

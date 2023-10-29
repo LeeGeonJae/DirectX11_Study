@@ -6,11 +6,17 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <memory>
 using namespace std;
 
 // WIN
 #include <Windows.h>
 #include <assert.h>
+
+// assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 // DX
 #include <d3d11.h>
