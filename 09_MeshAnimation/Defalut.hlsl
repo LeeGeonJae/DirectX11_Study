@@ -73,9 +73,9 @@ VS_OUTPUT VS(VS_INPUT input)
     output.mPosition = mul(output.mPosition, Projection);
     
     // 오브젝트 월드에서 노말 벡터 계산 (오브젝트의 정면에 90도를 이루는 벡터)
-    output.mNormal = normalize(mul(input.mNormal, (float3x3) World));
-    output.mTangent = normalize(mul(input.mTangent, (float3x3) World));
-    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) World));
+    output.mNormal = normalize(mul(input.mNormal, (float3x3) meshWorld));
+    output.mTangent = normalize(mul(input.mTangent, (float3x3) meshWorld));
+    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) meshWorld));
     
     // 난반사(Diffuse) 내적으로 구하기
     output.mDiffuse = saturate(dot(-lightDir, output.mNormal));
@@ -93,84 +93,9 @@ Texture2D specular0 : register(t2);
 Texture2D opcity0 : register(t3);
 SamplerState sampler0 : register(s0);
 
-//Pixel Shader(PS) 프로그래밍
-
-//float4 PS(VS_OUTPUT input) : SV_Target
-//{
-//    // 텍스처
-//    float4 TextureColor = texture0.Sample(sampler0, input.mUV);
-    
-//    // 감마 콜렉션
-//    if (UseGammaCorrection)
-//    {
-//        TextureColor.rgb = TextureColor.rgb * TextureColor.rgb;
-//    }
-    
-//    // 노말
-//    float3 Normal = input.mNormal;
-//    float3 lightDir = normalize(LightDir);
-    
-//    float3 NormalTangentSpace = normal0.Sample(sampler0, input.mUV).rgb * 2.f - 1.f;
-    
-//    if (UseNormalMap && NormalTangentSpace.x != -1.f)
-//    {
-//        // 노멀 맵을 샘플링하여 노멀 벡터를 가져옵니다.
-//        NormalTangentSpace = normalize(NormalTangentSpace);
-        
-//        // 노멀 맵에서 가져온 벡터를 노멀 맵 좌표계에서 월드 좌표계로 변환합니다.
-//        float3x3 WorldTransform = float3x3(input.mTangent, input.mBiTangent, input.mNormal);
-//        Normal = mul(NormalTangentSpace, WorldTransform);
-        
-//        // 노멀 벡터를 정규화합니다.
-//        Normal = normalize(Normal);
-        
-//        // 노말 맵 라이팅 적용
-//        input.mDiffuse = saturate(dot(-lightDir, Normal));
-//    }
-    
-//    float4 diffuse = input.mDiffuse * LightColor;
-    
-//    // 반사광의 노멀라이즈(정규화), 오브젝트에서 카메라까지의 거리 노멀라이즈(정규화)
-//    float3 viewDir = normalize(input.mViewDir);
-//    float4 specular = 0;
-    
-//    // 블린 퐁 적용
-//    if (diffuse.x > 0)
-//    {
-//        float4 specularMap = UseSpecularMap ? specular0.Sample(sampler0, input.mUV) : float4(1.f, 1.f, 1.f, 1.f);
-//        if (specularMap.x != -1.f)
-//            specularMap = float4(1.f, 1.f, 1.f, 1.f);
-        
-//        float3 halfDirection = normalize(lightDir + viewDir);
-//        float speculardot = saturate(dot(-halfDirection, Normal));
-//        specular = pow(speculardot, SpecularPower) * LightColor * specularMap;
-//    }
-    
-//    float alpha = 0.f;
-//    if (TextureColor.a < 1.f)
-//    {
-//        alpha = opcity0.Sample(sampler0, input.mUV).a;
-//        clip(alpha < 0.5f ? -1.f : 1.f);
-//    }
-    
-//    float4 TotalAmbient = float4(AmbientColor, 1) * float4(TextureColor.rgb, alpha) * 0.1f;
-//    float4 TotalSpecular = specular * float4(TextureColor.rgb, alpha);
-//    float4 TotalDiffuse = diffuse * float4(TextureColor.rgb, alpha);
-//    float4 finalColor = float4(TotalDiffuse.rgb + TotalSpecular.rgb + TotalAmbient.rgb, alpha);
-    
-//    // 감마 콜렉션
-//    if (UseGammaCorrection)
-//    {
-//        finalColor.rgb = sqrt(finalColor.rgb);
-//    }
-    
-//    //(난반사광 + 직접광 + 주변광)
-//    return finalColor;
-//}
-
 // Pixel Shader(PS) 프로그래밍
 float4 PS(VS_OUTPUT input) : SV_Target
 {
     //(난반사광 + 직접광 + 주변광)
-    return float4(1.f, 1.f, 1.f, 1.f);
+    return float4(1.f, 1.f, 0.6f, 1.f);
 }

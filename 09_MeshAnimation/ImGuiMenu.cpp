@@ -4,7 +4,7 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-Vector4 ImGuiMenu::CameraPos = { 0.f, 10.f, -1000.f, 0.f };
+Vector4 ImGuiMenu::CameraPos = { 0.f, 300.f, -500.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
 float ImGuiMenu::CameraNearFar[2] = { 0.01f , 1500.0f };
 

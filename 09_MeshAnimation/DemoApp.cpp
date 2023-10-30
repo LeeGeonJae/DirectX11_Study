@@ -45,7 +45,7 @@ void DemoApp::initD3D()
 
 void DemoApp::initScene()
 {
-	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/cube.fbx");
+	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx");
 
 	createVS();
 	createInputLayout();
@@ -123,6 +123,7 @@ void DemoApp::Render()
 	{
 		m_DeviceContext->IASetInputLayout(m_inputLayout.Get());
 		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 		// VS
 		m_DeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);

@@ -47,6 +47,11 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* dev
 
 	SetMeshParent();
 
+	aiMatrix4x4 root;
+	aiMatrix4x4::Translation(aiVector3D{0.f, 0.f, 0.f}, root);
+
+	m_HeadMesh->SetVertices(root, m_Device);
+
 	return true;
 }
 
@@ -64,8 +69,7 @@ void ModelLoader::processNode(aiNode* node, const aiScene* scene)
 {
 	for (UINT i = 0; i < node->mNumMeshes; i++)
 	{
-		m_Meshes.push_back(processMesh(scene->mMeshes[node->mMeshes[i]], scene,node->mName.C_Str(), node->mParent->mName.C_Str()));
-		
+		m_Meshes.push_back(processMesh(scene->mMeshes[node->mMeshes[i]], scene, node));
 	}
 
 	for (UINT i = 0; i < node->mNumChildren; i++)
@@ -74,14 +78,15 @@ void ModelLoader::processNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const string name, const string parentname)
+Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const aiNode* node)
 {
 	// Data to fill
 	Mesh* myMesh = new Mesh;
 	vector<Texture> textures;
 
-	myMesh->SetName(name);
-	myMesh->SetParentName(parentname);
+	myMesh->SetName(node->mName.C_Str());
+	myMesh->SetParentName(node->mParent->mName.C_Str());
+	myMesh->m_NodeMatrix = node->mTransformation;
 
 	for (UINT i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -161,8 +166,6 @@ Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const string 
 			myMesh->m_CBIsValidTextureMap.bIsValidOpcityMap = true;
 		}
 	}
-
-	myMesh->SetupMesh(m_Device);
 
 	return myMesh;
 }

@@ -23,15 +23,18 @@ public:
 	inline void SetChild(Mesh* child);
 	inline void SetAnimationNode(asAnimationNode* animationNode);
 
+	void SetVertices(aiMatrix4x4 matrix, ID3D11Device* device);
+
 public:
 	vector<ShaderVertex> m_Vertices;
 	vector<UINT> m_Indices;
 	map<int, Texture> m_Textures;
-	ID3D11Device* m_Device;
 	CBIsValidTextureMap		m_CBIsValidTextureMap;
 	CBMeshTransform		m_CBMeshTransform;
 	DirectX::SimpleMath::Matrix m_Local;
 	DirectX::SimpleMath::Matrix m_World;
+
+	aiMatrix4x4 m_NodeMatrix;
 
 private:
 	ID3D11Buffer* m_VertexBuffer;

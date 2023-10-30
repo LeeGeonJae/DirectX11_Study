@@ -19,7 +19,7 @@ public:
 
 private:
 	void processNode(aiNode* node, const aiScene* scene);
-	Mesh* processMesh(aiMesh* mesh, const aiScene* scene, const string name, const string parentname);
+	Mesh* processMesh(aiMesh* mesh, const aiScene* scene, const aiNode* node);
 	vector<Texture> loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene);
 	ID3D11ShaderResourceView* loadEmbeddedTexture(const aiTexture* embeddedTexture);
 

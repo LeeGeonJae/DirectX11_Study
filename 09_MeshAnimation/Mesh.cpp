@@ -18,9 +18,9 @@ void Mesh::Draw(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer> meshDat
 		//position.x = m_AnimationNode->m_KeyFrame[0].m_Transtation.x;
 		//position.y = m_AnimationNode->m_KeyFrame[0].m_Transtation.y;
 		//position.z = m_AnimationNode->m_KeyFrame[0].m_Transtation.z;
-		position.x =0.1f;
-		position.y =0.1f;
-		position.z =0.1f;
+		position.x =0.f;
+		position.y =0.f;
+		position.z =0.f;
 		//scaling.x = m_AnimationNode->m_KeyFrame[0].m_Scale.x;
 		//scaling.y = m_AnimationNode->m_KeyFrame[0].m_Scale.y;
 		//scaling.z = m_AnimationNode->m_KeyFrame[0].m_Scale.z;
@@ -35,11 +35,15 @@ void Mesh::Draw(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer> meshDat
 		rotation.y = 0.f;
 		rotation.z = 0.f;
 		rotation.w = 0.f;
-		m_Local = Math::Matrix::CreateScale(scaling) * Math::Matrix::CreateFromQuaternion(rotation) * Math::Matrix::CreateTranslation(position);
-	}
-	else
-	{
-		XMMATRIX mTranslate = XMMatrixTranslation(ImGuiMenu::CubePosition.x, ImGuiMenu::CubePosition.y, ImGuiMenu::CubePosition.z);
+
+		XMMATRIX mSpin1 = XMMatrixRotationX(ImGuiMenu::CubeRotation.x * 3.14f);
+		XMMATRIX mSpin2 = XMMatrixRotationY(ImGuiMenu::CubeRotation.y * 3.14f);
+
+		//m_Local = Math::Matrix::CreateScale(scaling) * Math::Matrix::CreateFromQuaternion(rotation) * Math::Matrix::CreateTranslation(position);
+		m_Local = Math::Matrix::CreateScale(scaling) * mSpin1 * mSpin2 * Math::Matrix::CreateTranslation(position);
+
+		//XMMATRIX mTranslate = XMMatrixTranslation(ImGuiMenu::CubePosition.x, ImGuiMenu::CubePosition.y, ImGuiMenu::CubePosition.z);
+		//m_Local = mTranslate;
 	}
 
 	 //부모가 있으면 해당 부모의 트랜스폼 곱하기
@@ -65,6 +69,9 @@ void Mesh::Draw(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer> meshDat
 			deviceContext->PSSetShaderResources(i, 1, &(find->second.m_Texture));
 		}
 	}
+
+	m_Name;
+	m_ParnetName;
 
 	deviceContext->UpdateSubresource(meshDataBuffer.Get(), 0, nullptr, &m_CBMeshTransform, 0, 0);
 	deviceContext->DrawIndexed(static_cast<UINT>(m_Indices.size()), 0, 0);
@@ -122,4 +129,30 @@ void Mesh::SetupMesh(ID3D11Device* device)
 
 	hr = device->CreateBuffer(&indexDesc, &initData, &m_IndexBuffer);
 	assert(SUCCEEDED(hr));
+}
+
+void Mesh::SetVertices(aiMatrix4x4 matrix, ID3D11Device* device)
+{
+	m_NodeMatrix *= matrix;
+
+	for (int i = 0; i < m_Vertices.size(); i++)
+	{
+		aiVector3D vec;
+		vec.x = m_Vertices[i].m_Position.x;
+		vec.y = m_Vertices[i].m_Position.y;
+		vec.z = m_Vertices[i].m_Position.z;
+
+		vec = m_NodeMatrix * vec;
+
+		m_Vertices[i].m_Position.x = vec.x;
+		m_Vertices[i].m_Position.y = vec.y;
+		m_Vertices[i].m_Position.z = vec.z;
+	}
+
+	for (auto child : m_pChilds)
+	{
+		child->SetVertices(m_NodeMatrix, device);
+	}
+
+	SetupMesh(device);
 }
