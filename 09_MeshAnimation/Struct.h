@@ -1,6 +1,7 @@
 #pragma once
 #include "../Engine/Header.h"
 #include "../Engine/Types.h"
+#include "enum.h"
 
 struct Texture
 {
@@ -15,6 +16,26 @@ struct Texture
 			delete m_Texture;
 			m_Texture = nullptr;
 		}
+	}
+};
+
+struct Material
+{
+	map<int, Texture> m_Textures;
+
+	// 텍스처가 있는지
+	bool HasTexture(TextureType type)
+	{
+		return m_Textures.find(static_cast<int>(type)) != m_Textures.end();
+	}
+
+	// 텍스처 타입의 텍스처 찾기
+	Texture* GetTexture(TextureType type)
+	{
+		if (m_Textures.find(static_cast<int>(type)) != m_Textures.end())
+			return &(m_Textures.find(static_cast<int>(type))->second);
+
+		return nullptr;
 	}
 };
 

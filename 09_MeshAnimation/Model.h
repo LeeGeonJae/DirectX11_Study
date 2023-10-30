@@ -3,7 +3,7 @@
 #include "Struct.h"
 #include "BufferStruct.h"
 
-class Mesh;
+class Node;
 
 class Model
 {
@@ -11,13 +11,14 @@ public:
 	Model();
 	~Model();
 
+public:
+	void Draw();
+
 private:
 
 
 private:
-	ID3D11Device* m_Device;
-	ID3D11DeviceContext* m_DeviceContext;
-	vector<Mesh>			m_Meshes;
-	vector<Texture>			m_Textures;
-	shared_ptr<asAnimation> m_Animation;
+	ComPtr<ID3D11Device>			m_Device;
+	ComPtr<ID3D11DeviceContext>		m_DeviceContext;
+	vector<Node*>					m_Meshes;
 };

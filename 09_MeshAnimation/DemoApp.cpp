@@ -19,6 +19,7 @@ DemoApp::DemoApp(HINSTANCE hInstance)
 
 DemoApp::~DemoApp()
 {
+	delete m_ModelLoader;
 }
 
 void DemoApp::Initialize(UINT Width, UINT Height)

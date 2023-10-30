@@ -3,6 +3,8 @@
 
 #include <Directxtk/WICTextureLoader.h>
 
+ModelLoader* ModelLoader::pInstance = nullptr;
+
 ModelLoader::ModelLoader()
 	: m_Device(nullptr)
 	, m_DeviceContext(nullptr)
@@ -11,13 +13,20 @@ ModelLoader::ModelLoader()
 	, m_Textures()
 	, m_Hwnd(nullptr)
 {
+	pInstance = this;
 }
 
 ModelLoader::~ModelLoader()
 {
 }
 
-bool ModelLoader::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, string fileName)
+ModelLoader* ModelLoader::GetInstance()
+{
+	assert(pInstance != nullptr);
+	return pInstance;
+}
+
+bool ModelLoader::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, string fileName, Model* model)
 {
 	m_Device = device;
 	m_DeviceContext = deviceContext;

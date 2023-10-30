@@ -2,14 +2,21 @@
 #include "../Engine/Header.h"
 #include "Mesh.h"
 
-// 진짜 억지 코드.. 수정해야함.. node class 만들어서 수정 예정
+class Model;
+
 class ModelLoader
 {
+private:
+	static ModelLoader* pInstance;
+
+public:
+	static ModelLoader* GetInstance();
+
 public:
 	ModelLoader();
 	~ModelLoader();
 
-	bool Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, string fileName);
+	bool Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, string fileName, Model* model);
 	void Draw(ID3D11DeviceContext* deviceContext);
 
 	void Close();
