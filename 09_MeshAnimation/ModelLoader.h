@@ -27,7 +27,7 @@ public:
 private:
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh* processMesh(aiMesh* mesh, const aiScene* scene, const aiNode* node);
-	vector<Texture> loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene);
+	vector<Texture*> loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene);
 	ID3D11ShaderResourceView* loadEmbeddedTexture(const aiTexture* embeddedTexture);
 
 	void processAnimation(aiAnimation* srcAnimation);
@@ -39,13 +39,16 @@ private:
 	ID3D11Device*			m_Device;
 	ID3D11DeviceContext*	m_DeviceContext;
 	vector<Mesh*>			m_Meshes;
-	vector<Texture>			m_Textures;
+	vector<Texture*>		m_Textures;
 	asAnimation*			m_Animation = nullptr;
 	string					m_Directory;
 	HWND					m_Hwnd;
 	ComPtr<ID3D11Buffer>	m_pCBMeshData;
 
 	Mesh*					m_HeadMesh;
+
+private:
+	Model* m_pLoadModel;
 };
 
 void ModelLoader::SetCBMeshData(ComPtr<ID3D11Buffer> meshbuffer)

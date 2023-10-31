@@ -1,19 +1,21 @@
 #include "Node.h"
+#include "Mesh.h"
 
 Node::Node()
-	:m_Name(),
-	m_ParentName(),
-	m_Parent(nullptr),
-	m_Children(),
-	m_Transform(),
-	m_Mesh(nullptr),
-	m_Material(nullptr)
+	: m_Name()
+	, m_ParentName()
+	, m_Parent(nullptr)
+	, m_Children()
+	, m_Transform()
+	, m_Mesh(nullptr)
+	, m_Material(nullptr)
+	, m_Animation(nullptr)
 {
-
 }
 
 void Node::Draw(ID3D11DeviceContext* deviceContext)
 {
+
 
 }
 

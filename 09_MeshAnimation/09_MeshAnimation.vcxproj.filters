@@ -19,12 +19,18 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{3b5440a0-bfa0-41ba-a2cf-3f7313d0b543}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{4931fb2b-5e82-4838-8917-972bd3c4bb3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\소스 파일">
+      <UniqueIdentifier>{bc34742b-10d2-40b2-9ebe-b71587a47a8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\헤더 파일">
+      <UniqueIdentifier>{3067bf46-cb98-4437-9bc2-d79c55cc6a1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DemoApp.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelLoader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="enum.h">
@@ -36,16 +42,22 @@
     <ClInclude Include="BufferStruct.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="ImGuiMenu.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Model\헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="Model.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Model\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>Model\헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Node.h">
+      <Filter>Model\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoadManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,19 +68,22 @@
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="ImGuiMenu.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Model\소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="Model.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Model\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>Model\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Node.cpp">
+      <Filter>Model\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoadManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

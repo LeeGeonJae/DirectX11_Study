@@ -66,7 +66,7 @@ void Mesh::Draw(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer> meshDat
 		auto find = m_Textures.find(i);
 		if (find != m_Textures.end())
 		{
-			deviceContext->PSSetShaderResources(i, 1, &(find->second.m_Texture));
+			deviceContext->PSSetShaderResources(i, 1, &(find->second->m_Texture));
 		}
 	}
 

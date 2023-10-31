@@ -8,6 +8,7 @@
 
 class ImGuiMenu;
 class ModelLoader;
+class Model;
 
 class DemoApp
 	: public GameApp
@@ -124,4 +125,5 @@ private:
 	ModelLoader* m_ModelLoader = nullptr;
 	const aiScene* m_Scene = nullptr;
 	vector<aiMesh*> m_Meshes;
+	Model* myModel;
 };

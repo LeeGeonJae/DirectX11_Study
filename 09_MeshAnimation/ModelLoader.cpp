@@ -1,5 +1,6 @@
 #include "ModelLoader.h"
 #include "ImGuiMenu.h"
+#include "Model.h"
 
 #include <Directxtk/WICTextureLoader.h>
 
@@ -31,6 +32,7 @@ bool ModelLoader::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* dev
 	m_Device = device;
 	m_DeviceContext = deviceContext;
 	m_Hwnd = hwnd;
+	m_pLoadModel = model;
 	m_Animation = new asAnimation;
 
 	Assimp::Importer importer;
@@ -91,7 +93,6 @@ Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const aiNode*
 {
 	// Data to fill
 	Mesh* myMesh = new Mesh;
-	vector<Texture> textures;
 
 	myMesh->SetName(node->mName.C_Str());
 	myMesh->SetParentName(node->mParent->mName.C_Str());
@@ -147,28 +148,28 @@ Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const aiNode*
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
+		vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
 		if (diffuseMaps.size() > 0)
 		{
 			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
 			myMesh->m_CBIsValidTextureMap.bIsValidDiffuseMap = true;
 		}
 
-		vector<Texture> NormalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normals", scene);
+		vector<Texture*> NormalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normals", scene);
 		if (NormalMaps.size() > 0)
 		{
 			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
 			myMesh->m_CBIsValidTextureMap.bIsValidNormalMap = true;
 		}
 
-		vector<Texture> SpecularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", scene);
+		vector<Texture*> SpecularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", scene);
 		if (SpecularMaps.size() > 0)
 		{
 			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
 			myMesh->m_CBIsValidTextureMap.bIsValidSpecularMap = true;
 		}
 
-		vector<Texture> OpacityMaps = loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity", scene);
+		vector<Texture*> OpacityMaps = loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity", scene);
 		if (OpacityMaps.size() > 0)
 		{
 			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
@@ -179,9 +180,9 @@ Mesh* ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene, const aiNode*
 	return myMesh;
 }
 
-vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene)
+vector<Texture*> ModelLoader::loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene)
 {
-	vector<Texture> textures;
+	vector<Texture*> textures;
 
 	// 머티리얼(material)에서 특정 타입(type)의 텍스처 개수만큼 반복합니다.
 	for (UINT i = 0; i < material->GetTextureCount(type); i++)
@@ -194,7 +195,7 @@ vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial* material, aiTextur
 		// 이미 로드한 텍스처를 저장하는 m_Textures 벡터를 순회하여 현재 텍스처가 이미 로드되었는지 확인합니다.
 		for (UINT j = 0; j < m_Textures.size(); j++)
 		{
-			if (strcmp(m_Textures[j].m_Path.c_str(), str.C_Str()) == 0)
+			if (strcmp(m_Textures[j]->m_Path.c_str(), str.C_Str()) == 0)
 			{
 				textures.push_back(m_Textures[j]);
 				skip = true;
@@ -206,14 +207,14 @@ vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial* material, aiTextur
 		if (!skip)
 		{
 			HRESULT hr;
-			Texture texture;
+			Texture* texture = new Texture;
 
 			// 내장 텍스처(embedded texture)를 사용할 경우
 			const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(str.C_Str());
 			if (embeddedTexture != nullptr)
 			{
 				// 내장 텍스처를 로드하고 해당 텍스처를 texture.m_Texture에 저장합니다.
-				texture.m_Texture = loadEmbeddedTexture(embeddedTexture);
+				texture->m_Texture = loadEmbeddedTexture(embeddedTexture);
 			}
 			// 파일에서 텍스처를 로드해야 하는 경우
 			else
@@ -229,12 +230,12 @@ vector<Texture> ModelLoader::loadMaterialTextures(aiMaterial* material, aiTextur
 				hr = ::LoadFromWICFile(filenamews.c_str(), WIC_FLAGS_NONE, &md, img);
 				assert(SUCCEEDED(hr));
 
-				hr = ::CreateShaderResourceView(m_Device, img.GetImages(), img.GetImageCount(), md, &(texture.m_Texture));
+				hr = ::CreateShaderResourceView(m_Device, img.GetImages(), img.GetImageCount(), md, &(texture->m_Texture));
 				assert(SUCCEEDED(hr));
 			}
 
-			texture.m_Type = typeName;
-			texture.m_Path = str.C_Str();
+			texture->m_Type = typeName;
+			texture->m_Path = str.C_Str();
 			textures.push_back(texture);
 			m_Textures.push_back(texture);
 		}

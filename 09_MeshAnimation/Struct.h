@@ -21,7 +21,7 @@ struct Texture
 
 struct Material
 {
-	map<int, Texture> m_Textures;
+	map<int, Texture*> m_Textures;
 
 	// 텍스처가 있는지
 	bool HasTexture(TextureType type)
@@ -33,7 +33,7 @@ struct Material
 	Texture* GetTexture(TextureType type)
 	{
 		if (m_Textures.find(static_cast<int>(type)) != m_Textures.end())
-			return &(m_Textures.find(static_cast<int>(type))->second);
+			return m_Textures.find(static_cast<int>(type))->second;
 
 		return nullptr;
 	}

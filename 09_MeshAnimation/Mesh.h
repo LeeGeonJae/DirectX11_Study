@@ -28,7 +28,7 @@ public:
 public:
 	vector<ShaderVertex> m_Vertices;
 	vector<UINT> m_Indices;
-	map<int, Texture> m_Textures;
+	map<int, Texture*> m_Textures;
 	CBIsValidTextureMap		m_CBIsValidTextureMap;
 	CBMeshTransform		m_CBMeshTransform;
 	DirectX::SimpleMath::Matrix m_Local;

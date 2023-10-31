@@ -8,6 +8,7 @@
 
 #include "ImGuiMenu.h"
 #include "ModelLoader.h"
+#include "Model.h"
 
 
 #define USE_FLIPMODE 0
@@ -46,7 +47,8 @@ void DemoApp::initD3D()
 
 void DemoApp::initScene()
 {
-	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx");
+	myModel = new Model;
+	ModelLoader::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx", myModel);
 
 	createVS();
 	createInputLayout();
