@@ -1,6 +1,9 @@
 #pragma once
 #include "Struct.h"
+#include "BufferStruct.h"
+
 #include "../Engine/Header.h"
+#include "Struct.h"
 
 class Mesh;
 
@@ -13,7 +16,12 @@ public:
 	~Node();
 
 public:
+	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer);
+	void Update(ID3D11DeviceContext* deviceContext);
 	void Draw(ID3D11DeviceContext* deviceContext);
+
+private:
+	void interpolateAnimationData(float currentTime, Vector3& outPosition, Vector3& outScaling, Math::Quaternion& outRotation);
 
 public:
 	inline void SetName(string name);
@@ -30,17 +38,25 @@ public:
 	inline Material* GetMaterial();
 	inline void SetAnimation(asAnimationNode* animation);
 	inline asAnimationNode* GetAnimation();
+	inline DirectX::SimpleMath::Matrix GetNodeTransform();
 
 private:
 	string				m_Name;
 	string				m_ParentName;
 	Node*				m_Parent;
 	vector<Node*>		m_Children;
-	aiMatrix4x4			m_Transform;
 
 	Mesh*				m_Mesh;
 	Material*			m_Material;
 	asAnimationNode*	m_Animation;
+
+private:
+	DirectX::SimpleMath::Matrix m_Local;
+	DirectX::SimpleMath::Matrix m_World;
+	aiMatrix4x4			m_Transform;
+
+	CBModelTransform		m_CBNodeTransform;
+	ComPtr<ID3D11Buffer>			m_NodeBuffer;
 };
 
 void Node::SetName(string name)
@@ -125,4 +141,16 @@ asAnimationNode* Node::GetAnimation()
 		return m_Animation;
 
 	return nullptr;
+}
+
+DirectX::SimpleMath::Matrix Node::GetNodeTransform()
+{
+	DirectX::SimpleMath::Matrix transform(
+		m_Transform.a1, m_Transform.a2, m_Transform.a3, m_Transform.a4,
+		m_Transform.b1, m_Transform.b2, m_Transform.b3, m_Transform.b4,
+		m_Transform.c1, m_Transform.c2, m_Transform.c3, m_Transform.c4,
+		m_Transform.d1, m_Transform.d2, m_Transform.d3, m_Transform.d4
+	);
+
+	return transform;
 }

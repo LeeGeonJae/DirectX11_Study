@@ -62,7 +62,7 @@ void GameApp::Initialize(UINT Width, UINT Height)
     ShowWindow(m_hWnd, SW_SHOW);
     UpdateWindow(m_hWnd);
 
-    m_currentTime = m_previousTime = (float)GetTickCount64() / 1000.0f;
+    TimeManager::GetInstance()->Initialize();
 }
 
 bool GameApp::Run()
@@ -90,7 +90,7 @@ bool GameApp::Run()
 
 void GameApp::Update()
 {
-    m_Timer.Tick();
+    TimeManager::GetInstance()->Update();
 }
 
 void GameApp::Render()

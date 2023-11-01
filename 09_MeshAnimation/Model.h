@@ -12,7 +12,8 @@ public:
 	~Model();
 
 public:
-	void Draw();
+	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> modelData);
+	void Update(ID3D11DeviceContext* deviceContext);
 
 public:
 	inline void SetHeadNode(Node* node);
@@ -22,16 +23,18 @@ public:
 	inline bool HasNode();
 	inline void SetAnimation(asAnimation* animation);
 	inline asAnimation* GetAnimation();
-	inline void SetCBMeshData(ComPtr<ID3D11Buffer> meshData);
+	inline void SetMaterial(Material* material);
+	inline Material* GetMaterial();
 
 private:
 
 
 private:
-	vector<Node*>		m_Nodes;
-	Node*				m_HeadNode;
-	asAnimation*		m_Animation;
-	ComPtr<ID3D11Buffer> m_CBMeshData;
+	vector<Node*>			m_Nodes;
+	Node*					m_HeadNode;
+	asAnimation*			m_Animation;
+	Material*				m_Material;
+	ComPtr<ID3D11Buffer>			m_CBNodeData = nullptr;
 };
 
 void Model::SetHeadNode(Node* node)
@@ -41,7 +44,10 @@ void Model::SetHeadNode(Node* node)
 
 Node* Model::GetHeadNode()
 {
-	return m_HeadNode;
+	if (m_HeadNode != nullptr)
+		return m_HeadNode;
+
+	return nullptr;
 }
 
 void Model::SetNode(Node* node)
@@ -66,10 +72,21 @@ void Model::SetAnimation(asAnimation* animation)
 
 asAnimation* Model::GetAnimation()
 {
-	return m_Animation;
+	if (m_Animation != nullptr)
+		return m_Animation;
+
+	return nullptr;
 }
 
-void Model::SetCBMeshData(ComPtr<ID3D11Buffer> meshData)
+void Model::SetMaterial(Material* material)
 {
-	m_CBMeshData = meshData;
+	m_Material = material;
+}
+
+Material* Model::GetMaterial()
+{
+	if (m_Material != nullptr)
+		return m_Material;
+
+	return nullptr;
 }

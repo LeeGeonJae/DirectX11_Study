@@ -25,7 +25,6 @@
     <ClInclude Include="ImGuiMenu.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="ModelLoadManager.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Struct.h" />
@@ -36,7 +35,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="ModelLoadManager.cpp" />
     <ClCompile Include="Node.cpp" />
   </ItemGroup>

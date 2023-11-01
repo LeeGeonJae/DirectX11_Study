@@ -7,7 +7,7 @@
 #include <Directxtk/DDSTextureLoader.h>
 
 #include "ImGuiMenu.h"
-#include "ModelLoader.h"
+#include "ModelLoadManager.h"
 #include "Model.h"
 
 
@@ -27,7 +27,7 @@ void DemoApp::Initialize(UINT Width, UINT Height)
 {
 	__super::Initialize(Width, Height);
 
-	m_ModelLoader = new ModelLoader;
+	m_ModelLoader = new ModelLoadManager();
 
 	initD3D();
 	initScene();
@@ -48,7 +48,7 @@ void DemoApp::initD3D()
 void DemoApp::initScene()
 {
 	myModel = new Model;
-	ModelLoader::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx", myModel);
+	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx", myModel);
 
 	createVS();
 	createInputLayout();
@@ -60,7 +60,8 @@ void DemoApp::initScene()
 	createPS();
 
 	createConstantBuffer();
-	m_ModelLoader->SetCBMeshData(m_pCBMeshData);
+
+	myModel->Init(m_Device.Get(), m_pCBModelData.Get());
 
 	setTransform();
 }
@@ -68,8 +69,6 @@ void DemoApp::initScene()
 void DemoApp::Update()
 {
 	__super::Update();
-
-	float t = GameTimer::m_Instance->TotalTime();
 
 	// Cube
 	{
@@ -126,15 +125,22 @@ void DemoApp::Render()
 	{
 		m_DeviceContext->IASetInputLayout(m_inputLayout.Get());
 		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		static bool tem = false;
 
+		if (GetAsyncKeyState('A') & 0x8000)
+		{
+			tem = !tem;
+		}
+		if (tem == true)
+		{
+			m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		}
 		// VS
 		m_DeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 		m_DeviceContext->VSSetConstantBuffers(0, 1, m_pCBCoordinateData.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(3, 1, m_pCBNormalMap.GetAddressOf());
-		m_DeviceContext->VSSetConstantBuffers(4, 1, m_pCBMeshData.GetAddressOf());
 
 		// RAS
 		m_DeviceContext->RSSetState(m_rasterizerState.Get());
@@ -148,7 +154,6 @@ void DemoApp::Render()
 		m_DeviceContext->PSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(3, 1, m_pCBNormalMap.GetAddressOf());
-		m_DeviceContext->PSSetConstantBuffers(4, 1, m_pCBMeshData.GetAddressOf());
 		// OM
 
 		//
@@ -158,8 +163,7 @@ void DemoApp::Render()
 		m_DeviceContext->UpdateSubresource(m_pCBNormalMap.Get(), 0, nullptr, &m_CBNormalMap, 0, 0);
 		//m_DeviceContext->DrawIndexed(m_indices.size(), 0, 0);
 
-		m_ModelLoader->Draw(m_DeviceContext.Get());
-
+		myModel->Update(m_DeviceContext.Get());
 	}
 
 	// ImGUI
@@ -341,9 +345,9 @@ void DemoApp::createConstantBuffer()
 	// Mesh 데이터 Constant Buffer로 넘겨주기
 	desc = {};
 	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.ByteWidth = sizeof(CBMeshTransform);
+	desc.ByteWidth = sizeof(CBModelTransform);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBMeshData.GetAddressOf());
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBModelData.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 

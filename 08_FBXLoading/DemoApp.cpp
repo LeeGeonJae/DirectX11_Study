@@ -45,7 +45,7 @@ void DemoApp::initD3D()
 
 void DemoApp::initScene()
 {
-	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx");
+	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/zeldaPosed001.fbx");
 
 	createVS();
 	createInputLayout();

@@ -22,6 +22,7 @@ struct Texture
 struct Material
 {
 	map<int, Texture*> m_Textures;
+	string m_Name;
 
 	// 텍스처가 있는지
 	bool HasTexture(TextureType type)
@@ -68,5 +69,6 @@ struct asAnimation
 	unsigned int m_FrameCount;
 	float m_FrameRate;
 	float m_Duration;
-	vector<asAnimationNode> m_Nodes;
+	vector<asAnimationNode*> m_Nodes;
 };
+

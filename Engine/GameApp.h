@@ -30,10 +30,6 @@ protected:
 	UINT m_ClientWidth;
 	UINT m_ClientHeight;
 
-	float m_previousTime;
-	float m_currentTime;
-	GameTimer m_Timer;
-
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deivceContext = nullptr;

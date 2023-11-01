@@ -19,7 +19,7 @@ struct CBCoordinateData
 	Vector4 MeshColor;
 };
 
-struct CBMeshTransform
+struct CBModelTransform
 {
 	DirectX::SimpleMath::Matrix World;
 };

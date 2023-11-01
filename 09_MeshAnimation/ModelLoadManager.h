@@ -21,11 +21,11 @@ public:
 
 private:
 	void processNode(const aiNode* headNode, const aiScene* scene, Node* headnode);		// 노드
-	Mesh* processMesh(const aiMesh* aimesh, const aiScene* scene);						// 메시
+	Mesh* processMesh(const aiMesh* aimesh, const aiScene* scene, Node* node);						// 메시
 
 	// 애니메이션
 	void processAnimation(aiAnimation* srcAnimation);
-	asAnimationNode ParseAnimationNode(asAnimation* animation, aiNodeAnim* srcNode);
+	asAnimationNode* ParseAnimationNode(asAnimation* animation, aiNodeAnim* srcNode);
 
 	// 텍스쳐 파일 가져오기
 	vector<Texture*> loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene);

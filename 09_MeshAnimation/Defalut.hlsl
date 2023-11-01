@@ -61,7 +61,7 @@ VS_OUTPUT VS(VS_INPUT input)
     VS_OUTPUT output;
 
     // 오브젝트 월드 변환
-    output.mPosition = mul(input.mPosition, meshWorld);
+    output.mPosition = mul(input.mPosition, meshWorld * World);
 
     // 빛 방향, 오브젝트에서 카메라 방향 계산 ( 월드 )
     float3 lightDir = normalize(LightDir);
@@ -96,6 +96,7 @@ SamplerState sampler0 : register(s0);
 // Pixel Shader(PS) 프로그래밍
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    //(난반사광 + 직접광 + 주변광)
-    return float4(1.f, 1.f, 0.6f, 1.f);
+    float4 finalColor = input.mDiffuse * LightColor;
+	
+    return finalColor;
 }

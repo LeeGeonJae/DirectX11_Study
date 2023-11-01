@@ -7,7 +7,7 @@
 #include <imgui.h>
 
 class ImGuiMenu;
-class ModelLoader;
+class ModelLoadManager;
 class Model;
 
 class DemoApp
@@ -113,7 +113,7 @@ private:
 	ComPtr<ID3D11Buffer> m_pCBLight = nullptr;
 	ComPtr<ID3D11Buffer> m_pCBCamera = nullptr;
 	ComPtr<ID3D11Buffer> m_pCBNormalMap = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBMeshData = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBModelData = nullptr;
 
 	DirectX::SimpleMath::Matrix m_World;
 	DirectX::SimpleMath::Matrix m_View;
@@ -122,7 +122,7 @@ private:
 	XMFLOAT4 m_LightColor;
 
 private:
-	ModelLoader* m_ModelLoader = nullptr;
+	ModelLoadManager* m_ModelLoader = nullptr;
 	const aiScene* m_Scene = nullptr;
 	vector<aiMesh*> m_Meshes;
 	Model* myModel;

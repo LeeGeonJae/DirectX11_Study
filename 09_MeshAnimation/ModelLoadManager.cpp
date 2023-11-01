@@ -33,22 +33,30 @@ bool ModelLoadManager::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext
 	m_DeviceContext = deviceContext;
 	m_Hwnd = hwnd;
 	m_pLoadModel = model;
-
-	Assimp::Importer importer;
-	unsigned int importFalgs = aiProcess_Triangulate |
-		aiProcess_GenNormals |
-		aiProcess_GenUVCoords |
-		aiProcess_CalcTangentSpace |
-		aiProcess_ConvertToLeftHanded;
-
-	const aiScene* pScene = importer.ReadFile(fileName, importFalgs);
-
-	if (pScene == nullptr)
-		return false;
-
 	m_Directory = fileName.substr(0, fileName.find_last_of("/\\"));
 
-	processNode(pScene->mRootNode, pScene, nullptr);
+	// 임포터
+	{
+		Assimp::Importer importer;
+		unsigned int importFalgs = aiProcess_Triangulate |
+			aiProcess_GenNormals |
+			aiProcess_GenUVCoords |
+			aiProcess_CalcTangentSpace |
+			aiProcess_ConvertToLeftHanded;
+
+		const aiScene* pScene = importer.ReadFile(fileName, importFalgs);
+
+		if (pScene == nullptr)
+			return false;
+
+		processNode(pScene->mRootNode, pScene, nullptr);
+
+		// 애니메이션 로드
+		if (pScene->HasAnimations())
+		{
+			processAnimation(*pScene->mAnimations);
+		}
+	}
 
 	return true;
 }
@@ -73,8 +81,10 @@ void ModelLoadManager::processNode(const aiNode* aiNode, const aiScene* scene, N
 	// 메시 로드
 	for (int i = 0; i < aiNode->mNumMeshes; i++)
 	{
-		tempNode->SetMesh(processMesh(scene->mMeshes[aiNode->mMeshes[i]], scene));
+		tempNode->SetMesh(processMesh(scene->mMeshes[aiNode->mMeshes[i]], scene, tempNode));
 	}
+
+
 
 	// 자식 노드 실행
 	for (int i = 0; i < aiNode->mNumChildren; i++)
@@ -85,7 +95,7 @@ void ModelLoadManager::processNode(const aiNode* aiNode, const aiScene* scene, N
 	m_pLoadModel->SetNode(tempNode);
 }
 
-Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene)
+Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, Node* node)
 {
 	// Data to fill
 	Mesh* myMesh = new Mesh;
@@ -128,37 +138,48 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene)
 		myMesh->m_Vertices.push_back(vertex);
 	}
 
+	for (UINT i = 0; i < aimesh->mNumFaces; i++)
+	{
+		aiFace face = aimesh->mFaces[i];
+
+		for (UINT j = 0; j < face.mNumIndices; j++)
+		{
+			myMesh->m_Indices.push_back(face.mIndices[j]);
+		}
+	}
+
 	if (aimesh->mMaterialIndex >= 0)
 	{
-		aiMaterial* material = scene->mMaterials[aimesh->mMaterialIndex];
+		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
-		vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
+		Material* material = new Material;
+		material->m_Name = aimaterial->GetName().C_Str();
+
+		vector<Texture*> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
 		if (diffuseMaps.size() > 0)
 		{
-			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
-			myMesh->m_CBIsValidTextureMap.bIsValidDiffuseMap = true;
+			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
 		}
 
-		vector<Texture*> NormalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normals", scene);
+		vector<Texture*> NormalMaps = loadMaterialTextures(aimaterial, aiTextureType_NORMALS, "texture_normals", scene);
 		if (NormalMaps.size() > 0)
 		{
-			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
-			myMesh->m_CBIsValidTextureMap.bIsValidNormalMap = true;
+			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
 		}
 
-		vector<Texture*> SpecularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", scene);
+		vector<Texture*> SpecularMaps = loadMaterialTextures(aimaterial, aiTextureType_SPECULAR, "texture_specular", scene);
 		if (SpecularMaps.size() > 0)
 		{
-			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
-			myMesh->m_CBIsValidTextureMap.bIsValidSpecularMap = true;
+			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
 		}
 
-		vector<Texture*> OpacityMaps = loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity", scene);
+		vector<Texture*> OpacityMaps = loadMaterialTextures(aimaterial, aiTextureType_OPACITY, "texture_opacity", scene);
 		if (OpacityMaps.size() > 0)
 		{
-			myMesh->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
-			myMesh->m_CBIsValidTextureMap.bIsValidOpcityMap = true;
+			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
 		}
+
+		node->SetMaterial(material);
 	}
 
 	return myMesh;
@@ -179,28 +200,28 @@ void ModelLoadManager::processAnimation(aiAnimation* srcAnimation)
 		aiNodeAnim* node = srcAnimation->mChannels[i];
 
 		// 애니메이션 노드 데이터 파싱
-		asAnimationNode nodeanimation = ParseAnimationNode(animation, node);
+		asAnimationNode* nodeanimation = ParseAnimationNode(animation, node);
 		animation->m_Nodes.push_back(nodeanimation);
-	}
 
-	// 이름이 맞는 노드를 찾아서 해당 노드에 애니메이션 등록
-	for (int i = 0; i < m_pLoadModel->GetNode().size(); i++)
-	{
-		if (animation->m_Name == m_pLoadModel->GetNode()[i]->GetName())
+		// 이름이 맞는 노드를 찾아서 해당 노드에 애니메이션 등록
+		for (int i = 0; i < m_pLoadModel->GetNode().size(); i++)
 		{
-			m_pLoadModel->SetAnimation(animation);
+			if (m_pLoadModel->GetNode()[i]->GetName() == nodeanimation->m_Name)
+				m_pLoadModel->GetNode()[i]->SetAnimation(nodeanimation);
 		}
 	}
+
+	m_pLoadModel->SetAnimation(animation);
 }
 
-asAnimationNode ModelLoadManager::ParseAnimationNode(asAnimation* animation, aiNodeAnim* srcNode)
+asAnimationNode* ModelLoadManager::ParseAnimationNode(asAnimation* animation, aiNodeAnim* srcNode)
 {
 	// 애니메이션 노드 세팅하기
-	asAnimationNode node;
-	node.m_Duration = animation->m_Duration;
-	node.m_FrameCount = animation->m_FrameCount;
-	node.m_FrameRate = animation->m_FrameRate;
-	node.m_Name = srcNode->mNodeName.C_Str();
+	asAnimationNode* node = new asAnimationNode;
+	node->m_Duration = animation->m_Duration;
+	node->m_FrameCount = animation->m_FrameCount;
+	node->m_FrameRate = animation->m_FrameRate;
+	node->m_Name = srcNode->mNodeName.C_Str();
 
 	int keyCount = max(max(srcNode->mNumPositionKeys, srcNode->mNumScalingKeys), srcNode->mNumRotationKeys);
 
@@ -209,7 +230,7 @@ asAnimationNode ModelLoadManager::ParseAnimationNode(asAnimation* animation, aiN
 		asKeyFrameData frameData;
 
 		bool found = false;
-		unsigned int t = node.m_KeyFrame.size();
+		unsigned int t = node->m_KeyFrame.size();
 
 		// Position
 		if (fabsf((float)srcNode->mPositionKeys[i].mTime - (float)t) <= 0.0001f)		// 실수의 절대값을 반환
@@ -250,18 +271,18 @@ asAnimationNode ModelLoadManager::ParseAnimationNode(asAnimation* animation, aiN
 		}
 
 		if (found == true)
-			node.m_KeyFrame.push_back(frameData);
+			node->m_KeyFrame.push_back(frameData);
 	}
 
 	// Keyframe 늘려주기
-	if (node.m_KeyFrame.size() < animation->m_FrameCount)
+	if (node->m_KeyFrame.size() < animation->m_FrameCount)
 	{
-		unsigned int count = animation->m_FrameCount - node.m_KeyFrame.size();
-		asKeyFrameData keyFrame = node.m_KeyFrame.back();
+		unsigned int count = animation->m_FrameCount - node->m_KeyFrame.size();
+		asKeyFrameData keyFrame = node->m_KeyFrame.back();
 
-		for (int i = 0; i < count; i++)
+		for (unsigned int i = 0; i < count; i++)
 		{
-			node.m_KeyFrame.push_back(keyFrame);
+			node->m_KeyFrame.push_back(keyFrame);
 		}
 	}
 

@@ -1,138 +1,57 @@
-//***************************************************************************************
-// GameTimer.cpp by Frank Luna (C) 2011 All Rights Reserved.
-//***************************************************************************************
 #include "pch.h"
-#include <windows.h>
 #include "TimeManager.h"
 
-GameTimer* GameTimer::m_Instance = nullptr;
 
-GameTimer::GameTimer()
-	: mSecondsPerCount(0.0), mDeltaTime(-1.0), mBaseTime(0),
-	mPausedTime(0), mPrevTime(0), mCurrTime(0), mStopped(false)
+TimeManager::TimeManager()
+	:m_llcurCount{}
+	, m_llPrevCount{}
+	, m_llFrequency{}
+	, m_dDT(0.)
+	, m_iCallCount(0)
 {
-	__int64 countsPerSec;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
-	mSecondsPerCount = 1.0 / (double)countsPerSec;
-
-	if (m_Instance == nullptr)
-	{
-		m_Instance = this;
-	}
 
 }
 
-// Returns the total time elapsed since Reset() was called, NOT counting any
-// time when the clock is stopped.
-float GameTimer::TotalTime()const
+TimeManager::~TimeManager()
 {
-	// If we are stopped, do not count the time that has passed since we stopped.
-	// Moreover, if we previously already had a pause, the distance 
-	// mStopTime - mBaseTime includes paused time, which we do not want to count.
-	// To correct this, we can subtract the paused time from mStopTime:  
-	//
-	//                     |<--paused time-->|
-	// ----*---------------*-----------------*------------*------------*------> time
-	//  mBaseTime       mStopTime        startTime     mStopTime    mCurrTime
 
-	if (mStopped)
-	{
-		return (float)(((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
-	}
-
-	// The distance mCurrTime - mBaseTime includes paused time,
-	// which we do not want to count.  To correct this, we can subtract 
-	// the paused time from mCurrTime:  
-	//
-	//  (mCurrTime - mPausedTime) - mBaseTime 
-	//
-	//                     |<--paused time-->|
-	// ----*---------------*-----------------*------------*------> time
-	//  mBaseTime       mStopTime        startTime     mCurrTime
-
-	else
-	{
-		return (float)(((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
-	}
 }
 
-float GameTimer::DeltaTime()const
+void TimeManager::Initialize()
 {
-	return (float)mDeltaTime;
+	// 현재 카운트
+	QueryPerformanceCounter(&m_llPrevCount);
+
+	// 초당 카운트 횟수 (천만)
+	QueryPerformanceFrequency(&m_llFrequency);
 }
 
-void GameTimer::Reset()
+void TimeManager::Update()
 {
-	__int64 currTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+	QueryPerformanceCounter(&m_llcurCount);
 
-	mBaseTime = currTime;
-	mPrevTime = currTime;
-	mStopTime = 0;
-	mStopped = false;
+	// 이전 프레임의 카운팅과 현재 프레임 카운팅 값의 차이를 구한다.
+	m_dDT = (double)(m_llcurCount.QuadPart - m_llPrevCount.QuadPart) / (double)m_llFrequency.QuadPart;
+
+	// 이전카운트 값을 현재값으로 갱신 (다음번에 계산을 위해서)
+	m_llPrevCount = m_llcurCount;
+
+	// 만약에 중단점을 찍고 검사하는 디버깅 상태라면 시간이 흐르는 것을 방지하기 위해 만들어둔 전처리기
+#ifdef _DEBUG
+	if (m_dDT > (1. / 60.))
+		m_dDT = (1. / 60.);
+#endif
 }
 
-void GameTimer::Start()
+void TimeManager::Render()
 {
-	__int64 startTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
+	++m_iCallCount;
+	m_dAcc += m_dDT;	// DT 누적
 
-
-	// Accumulate the time elapsed between stop and start pairs.
-	//
-	//                     |<-------d------->|
-	// ----*---------------*-----------------*------------> time
-	//  mBaseTime       mStopTime        startTime     
-
-	if (mStopped)
+	if (m_dAcc >= 1.)
 	{
-		mPausedTime += (startTime - mStopTime);
-
-		mPrevTime = startTime;
-		mStopTime = 0;
-		mStopped = false;
+		m_iFPS = m_iCallCount;
+		m_dAcc = 0.;
+		m_iCallCount = 0;
 	}
 }
-
-void GameTimer::Stop()
-{
-	if (!mStopped)
-	{
-		__int64 currTime;
-		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-
-		mStopTime = currTime;
-		mStopped = true;
-	}
-}
-
-void GameTimer::Tick()
-{
-	if (mStopped)
-	{
-		mDeltaTime = 0.0;
-		return;
-	}
-
-	__int64 currTime;
-	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-	mCurrTime = currTime;
-
-	// Time difference between this frame and the previous.
-	mDeltaTime = (mCurrTime - mPrevTime) * mSecondsPerCount;
-
-	// Prepare for next frame.
-	mPrevTime = mCurrTime;
-
-	// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
-	// processor goes into a power save mode or we get shuffled to another
-	// processor, then mDeltaTime can be negative.
-	if (mDeltaTime < 0.0)
-	{
-		mDeltaTime = 0.0;
-	}
-}
-
-
-
-
