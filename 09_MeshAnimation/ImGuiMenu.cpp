@@ -4,9 +4,9 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-Vector4 ImGuiMenu::CameraPos = { 0.f, 0.f, -500.f, 0.f };
+Vector4 ImGuiMenu::CameraPos = { 0.f, 0.f, -1000.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
-float ImGuiMenu::CameraNearFar[2] = { 0.01f , 1500.0f };
+float ImGuiMenu::CameraNearFar[2] = { 0.01f , 30000.0f };
 
 Vector3 ImGuiMenu::CubePosition = {};
 Vector2 ImGuiMenu::CubeRotation = {};
@@ -67,7 +67,7 @@ void ImGuiMenu::Render()
 		{
 			static float camerafov = 50.f;
 
-			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -100.f, 100.f);
+			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -600.f, 500.f);
 			ImGui::SliderFloat("Camera Fov", &camerafov, 0.01f, 180.f);
 			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 500.f);
 

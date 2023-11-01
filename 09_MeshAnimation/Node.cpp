@@ -50,14 +50,12 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 			interpolateAnimationData(currentTime, position, scaling, rotation);
 
 			m_Local = Math::Matrix::CreateScale(scaling) * Math::Matrix::CreateFromQuaternion(rotation) * Math::Matrix::CreateTranslation(position);
-			m_Local = m_Local.Transpose();
 		}
 		else
 		{
 			m_Local = GetNodeTransform();
+			m_Local = m_Local.Transpose();
 		}
-
-		m_Local = GetNodeTransform();
 
 		//부모가 있으면 해당 부모의 트랜스폼 곱하기
 		if (m_Parent != nullptr)

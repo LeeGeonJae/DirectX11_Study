@@ -61,7 +61,7 @@ VS_OUTPUT VS(VS_INPUT input)
     VS_OUTPUT output;
 
     // 오브젝트 월드 변환
-    output.mPosition = mul(input.mPosition, meshWorld * World);
+    output.mPosition = mul(input.mPosition, meshWorld);
 
     // 빛 방향, 오브젝트에서 카메라 방향 계산 ( 월드 )
     float3 lightDir = normalize(LightDir);
