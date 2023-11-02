@@ -21,6 +21,7 @@ DemoApp::DemoApp(HINSTANCE hInstance)
 DemoApp::~DemoApp()
 {
 	delete m_ModelLoader;
+	delete myModel;
 }
 
 void DemoApp::Initialize(UINT Width, UINT Height)
@@ -34,7 +35,6 @@ void DemoApp::Initialize(UINT Width, UINT Height)
 
 	m_imgui = new ImGuiMenu(this);
 	m_imgui->Init(m_hWnd, m_Device.Get(), m_DeviceContext.Get());
-
 }
 
 void DemoApp::initD3D()
@@ -48,7 +48,7 @@ void DemoApp::initD3D()
 void DemoApp::initScene()
 {
 	myModel = new Model;
-	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/dummy_walk_test_1023.fbx", myModel);
+	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/SkinningTest.fbx", myModel);
 
 	createVS();
 	createInputLayout();
@@ -61,7 +61,7 @@ void DemoApp::initScene()
 
 	createConstantBuffer();
 
-	myModel->Init(m_Device.Get(), m_pCBModelData.Get());
+	myModel->Init(m_Device.Get(), m_pCBModelData.Get(), m_pCBbisTextureMap.Get());
 
 	setTransform();
 }
@@ -126,7 +126,7 @@ void DemoApp::Render()
 		m_DeviceContext->VSSetConstantBuffers(0, 1, m_pCBCoordinateData.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
-		m_DeviceContext->VSSetConstantBuffers(3, 1, m_pCBNormalMap.GetAddressOf());
+		m_DeviceContext->VSSetConstantBuffers(3, 1, m_pCBUseTextureMap.GetAddressOf());
 
 		// RAS
 		m_DeviceContext->RSSetState(m_rasterizerState.Get());
@@ -139,16 +139,16 @@ void DemoApp::Render()
 		m_DeviceContext->PSSetConstantBuffers(0, 1, m_pCBCoordinateData.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
-		m_DeviceContext->PSSetConstantBuffers(3, 1, m_pCBNormalMap.GetAddressOf());
+		m_DeviceContext->PSSetConstantBuffers(3, 1, m_pCBUseTextureMap.GetAddressOf());
 		// OM
 
 		//
 		m_DeviceContext->UpdateSubresource(m_pCBCoordinateData.Get(), 0, nullptr, &m_CBCoordinateData, 0, 0);
 		m_DeviceContext->UpdateSubresource(m_pCBLight.Get(), 0, nullptr, &m_CBLightData, 0, 0);
 		m_DeviceContext->UpdateSubresource(m_pCBCamera.Get(), 0, nullptr, &m_CBCamera, 0, 0);
-		m_DeviceContext->UpdateSubresource(m_pCBNormalMap.Get(), 0, nullptr, &m_CBNormalMap, 0, 0);
-		//m_DeviceContext->DrawIndexed(m_indices.size(), 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBUseTextureMap.Get(), 0, nullptr, &m_CBNormalMap, 0, 0);
 
+		// 모델 업데이트
 		myModel->Update(m_DeviceContext.Get());
 	}
 
@@ -284,7 +284,9 @@ void DemoApp::createInputLayout()
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"BLENDWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 72, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	const int count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
@@ -320,12 +322,20 @@ void DemoApp::createConstantBuffer()
 	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBCamera.GetAddressOf());
 	assert(SUCCEEDED(hr));
 
-	// Camera 데이터 Constant Buffer로 넘겨주기
+	// TextureMap 데이터 Constant Buffer로 넘겨주기
 	desc = {};
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.ByteWidth = sizeof(CBUseTextureMap);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBNormalMap.GetAddressOf());
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBUseTextureMap.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	// TextureMap있는지 체크하는 데이터 Constant Buffer로 넘겨주기
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(CBIsValidTextureMap);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBbisTextureMap.GetAddressOf());
 	assert(SUCCEEDED(hr));
 
 	// Mesh 데이터 Constant Buffer로 넘겨주기
@@ -334,6 +344,14 @@ void DemoApp::createConstantBuffer()
 	desc.ByteWidth = sizeof(CBModelTransform);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBModelData.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	// Mesh 데이터 Constant Buffer로 넘겨주기
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(CBMatrixPallete);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBBoneTransformData.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 

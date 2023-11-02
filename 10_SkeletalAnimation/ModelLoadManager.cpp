@@ -38,11 +38,13 @@ bool ModelLoadManager::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext
 	// 임포터
 	{
 		Assimp::Importer importer;
-		unsigned int importFalgs = aiProcess_Triangulate |
-			aiProcess_GenNormals |
-			aiProcess_GenUVCoords |
-			aiProcess_CalcTangentSpace |
-			aiProcess_ConvertToLeftHanded;
+		unsigned int importFalgs = 
+			aiProcess_Triangulate |			// 삼각형으로 변환
+			aiProcess_GenNormals |			// 노말 생성
+			aiProcess_GenUVCoords |			// UV 생성
+			aiProcess_CalcTangentSpace |	// 탄젠트 생성
+			aiProcess_LimitBoneWeights |	// 본의 영향을 받는 장점의 최대 갯수를 4개로 제한
+			aiProcess_ConvertToLeftHanded;	// 왼손 좌표계로 변환
 
 		const aiScene* pScene = importer.ReadFile(fileName, importFalgs);
 
@@ -84,8 +86,6 @@ void ModelLoadManager::processNode(const aiNode* aiNode, const aiScene* scene, N
 		tempNode->SetMesh(processMesh(scene->mMeshes[aiNode->mMeshes[i]], scene, tempNode));
 	}
 
-
-
 	// 자식 노드 실행
 	for (int i = 0; i < aiNode->mNumChildren; i++)
 	{
@@ -100,6 +100,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 	// Data to fill
 	Mesh* myMesh = new Mesh;
 
+	// 메시 버텍스 가져오기
 	for (UINT i = 0; i < aimesh->mNumVertices; i++)
 	{
 		ShaderVertex vertex;
@@ -138,6 +139,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 		myMesh->m_Vertices.push_back(vertex);
 	}
 
+	// 메시 인덱스 가져오기
 	for (UINT i = 0; i < aimesh->mNumFaces; i++)
 	{
 		aiFace face = aimesh->mFaces[i];
@@ -148,6 +150,28 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 		}
 	}
 
+	// 메시 본 가져오기
+	for (UINT i = 0; i < aimesh->mNumBones; i++)
+	{
+		aiBone* aibone = aimesh->mBones[i];
+
+		Bone* bone = new Bone;
+
+		bone->m_Name = aibone->mName.C_Str();
+		bone->m_NumWeights = aibone->mNumWeights;
+		bone->m_Weights.AddBoneData(aibone->mWeights->mVertexId, aibone->mWeights->mWeight);
+
+		bone->m_OffsetMatrix = DirectX::SimpleMath::Matrix(
+			aibone->mOffsetMatrix.a1, aibone->mOffsetMatrix.a2, aibone->mOffsetMatrix.a3, aibone->mOffsetMatrix.a4,
+			aibone->mOffsetMatrix.b1, aibone->mOffsetMatrix.b2, aibone->mOffsetMatrix.b3, aibone->mOffsetMatrix.b4,
+			aibone->mOffsetMatrix.c1, aibone->mOffsetMatrix.c2, aibone->mOffsetMatrix.c3, aibone->mOffsetMatrix.c4,
+			aibone->mOffsetMatrix.d1, aibone->mOffsetMatrix.d2, aibone->mOffsetMatrix.d3, aibone->mOffsetMatrix.d4
+		);
+
+		m_pLoadModel->SetBone(bone);
+	}
+
+	// 메시 머터리얼 가져오기
 	if (aimesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
@@ -159,24 +183,28 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 		if (diffuseMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
+			node->GetIsValidTextureMap()->bIsValidDiffuseMap = true;
 		}
 
 		vector<Texture*> NormalMaps = loadMaterialTextures(aimaterial, aiTextureType_NORMALS, "texture_normals", scene);
 		if (NormalMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
+			node->GetIsValidTextureMap()->bIsValidNormalMap = true;
 		}
 
 		vector<Texture*> SpecularMaps = loadMaterialTextures(aimaterial, aiTextureType_SPECULAR, "texture_specular", scene);
 		if (SpecularMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
+			node->GetIsValidTextureMap()->bIsValidSpecularMap = true;
 		}
 
 		vector<Texture*> OpacityMaps = loadMaterialTextures(aimaterial, aiTextureType_OPACITY, "texture_opacity", scene);
 		if (OpacityMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
+			node->GetIsValidTextureMap()->bIsValidOpcityMap = true;
 		}
 
 		node->SetMaterial(material);
@@ -361,17 +389,17 @@ ID3D11ShaderResourceView* ModelLoadManager::loadEmbeddedTexture(const aiTexture*
 	if (embeddedTexture->mHeight != 0)
 	{
 		D3D11_TEXTURE2D_DESC desc;
-		desc.Width = embeddedTexture->mWidth;  // 텍스처의 너비
-		desc.Height = embeddedTexture->mHeight;  // 텍스처의 높이
-		desc.MipLevels = 1;  // 미입 레벨 수
-		desc.ArraySize = 1;  // 배열 크기
-		desc.SampleDesc.Count = 1;  // 샘플링 수
-		desc.SampleDesc.Quality = 0;  // 샘플링 품질
-		desc.Usage = D3D11_USAGE_DEFAULT;  // 사용 방식 (기본 사용)
-		desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;  // 텍스처 형식 (8비트 Red, Green, Blue 및 8비트 Alpha 채널)
-		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;  // 바인딩 플래그 (Shader Resource로 바인딩)
-		desc.CPUAccessFlags = 0;  // CPU 엑세스 플래그 (없음)
-		desc.MiscFlags = 0;  // 기타 플래그 (없음)
+		desc.Width = embeddedTexture->mWidth;			// 텍스처의 너비
+		desc.Height = embeddedTexture->mHeight;			// 텍스처의 높이
+		desc.MipLevels = 1;								// 미입 레벨 수
+		desc.ArraySize = 1;								// 배열 크기
+		desc.SampleDesc.Count = 1;						// 샘플링 수
+		desc.SampleDesc.Quality = 0;					// 샘플링 품질
+		desc.Usage = D3D11_USAGE_DEFAULT;				// 사용 방식 (기본 사용)
+		desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;		// 텍스처 형식 (8비트 Red, Green, Blue 및 8비트 Alpha 채널)
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;	// 바인딩 플래그 (Shader Resource로 바인딩)
+		desc.CPUAccessFlags = 0;						// CPU 엑세스 플래그 (없음)
+		desc.MiscFlags = 0;								// 기타 플래그 (없음)
 
 		// 텍스처 데이터를 저장하는 서브리소스 데이터 구조체를 생성하고 초기화합니다.
 		D3D11_SUBRESOURCE_DATA subresourceData;

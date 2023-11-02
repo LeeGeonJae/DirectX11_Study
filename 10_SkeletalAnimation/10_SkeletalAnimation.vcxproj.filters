@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="header">
+      <UniqueIdentifier>{e377a557-3855-4175-95db-70ae9d73d976}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{d04ebb5a-1065-4ed1-863b-1ca655d083e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Defalut">
+      <UniqueIdentifier>{d31ace92-4e1a-47ef-98be-8ad0f92763da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Defalut\헤더 파일">
+      <UniqueIdentifier>{cdbd15d2-9ce5-409b-bba9-30b2f35194b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\헤더 파일">
+      <UniqueIdentifier>{8aadc051-452b-4450-8533-a24038e0c9f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\소스 파일">
+      <UniqueIdentifier>{185226cd-0ae3-4f51-9f40-1d8066000be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{c1c4c5ba-f256-4179-a336-2f47586914f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Defalut\소스 파일">
+      <UniqueIdentifier>{eb951944-49ef-4c17-a729-c943414ae1d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{adfb4144-17fc-4731-8754-bf1b4181ffbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\소스 파일">
+      <UniqueIdentifier>{5a64ee1b-6d0a-42d4-aa7a-38e48d1165f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\헤더 파일">
+      <UniqueIdentifier>{97e7b176-ea70-4cf0-ba76-5f8656d8ddc6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Defalut\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoApp.cpp">
+      <Filter>Defalut\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiMenu.cpp">
+      <Filter>Defalut\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Model\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Model\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Model\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoadManager.cpp">
+      <Filter>Manager\소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="enum.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferStruct.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoApp.h">
+      <Filter>Defalut\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiMenu.h">
+      <Filter>Defalut\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Model\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Model\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Model\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoadManager.h">
+      <Filter>Manager\헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Defalut.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

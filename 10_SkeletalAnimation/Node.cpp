@@ -13,12 +13,21 @@ Node::Node()
 	, m_Mesh(nullptr)
 	, m_Material(nullptr)
 	, m_Animation(nullptr)
+	, m_NodeBuffer(nullptr)
+	, m_bisTextureMapBuffer(nullptr)
 {
+	m_CBIsValidTextureMap.bIsValidDiffuseMap = false;
+	m_CBIsValidTextureMap.bIsValidNormalMap = false;
+	m_CBIsValidTextureMap.bIsValidOpcityMap = false;
+	m_CBIsValidTextureMap.bIsValidSpecularMap = false;
+	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
 }
 
-void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer)
+void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer, ComPtr<ID3D11Buffer> BoneTransformBuffer)
 {
 	m_NodeBuffer = nodeBuffer;
+	m_bisTextureMapBuffer = bisTextureMapBuffer;
+	m_BoneTransformBuffer = BoneTransformBuffer;
 
 	if (m_Mesh != nullptr)
 		m_Mesh->SetupMesh(device);
@@ -27,7 +36,7 @@ void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer)
 	{
 		if (child != nullptr)
 		{
-			child->Init(device, nodeBuffer);
+			child->Init(device, nodeBuffer, bisTextureMapBuffer, BoneTransformBuffer);
 		}
 	}
 }
@@ -99,11 +108,17 @@ void Node::Draw(ID3D11DeviceContext* deviceContext)
 	}
 
 	auto matrix = m_CBNodeTransform.World.Transpose();
+	deviceContext->UpdateSubresource(m_bisTextureMapBuffer.Get(), 0, nullptr, &m_CBIsValidTextureMap, 0, 0);
 	deviceContext->UpdateSubresource(m_NodeBuffer.Get(), 0, nullptr, &matrix, 0, 0);
+	deviceContext->UpdateSubresource(m_BoneTransformBuffer.Get(), 0, nullptr, &m_CBMatrixPallete, 0, 0);
 
-	deviceContext->VSSetConstantBuffers(4, 1, m_NodeBuffer.GetAddressOf());
-	deviceContext->PSSetConstantBuffers(4, 1, m_NodeBuffer.GetAddressOf());
-	
+	deviceContext->VSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
+	deviceContext->PSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
+	deviceContext->VSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
+	deviceContext->PSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
+	deviceContext->VSSetConstantBuffers(6, 1, m_BoneTransformBuffer.GetAddressOf());
+	deviceContext->PSSetConstantBuffers(6, 1, m_BoneTransformBuffer.GetAddressOf());
+
 	m_Mesh->Draw(deviceContext);
 }
 
@@ -138,7 +153,7 @@ void Node::interpolateAnimationData(float currentTime, Vector3& outPosition, Vec
 
 	// 애니메이션 데이터의 키프레임 개수를 가져옴
 	unsigned int numFrames = m_Animation->m_FrameCount;
-	
+
 	// 첫 번째 키프레임 데이터
 	unsigned int frameIndex = 0;
 

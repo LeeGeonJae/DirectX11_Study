@@ -1,4 +1,5 @@
 #include "ImGuiMenu.h"
+#include "../Engine/TimeManager.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -53,6 +54,13 @@ void ImGuiMenu::Init(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* devic
 
 void ImGuiMenu::Render()
 {
+	static float durationTime = 0.f;
+	static unsigned int fpsCount = 0;
+	static string fps;
+	static string pfs;
+	durationTime += TimeManager::GetInstance()->GetfDT();
+	fpsCount++;
+
 	// Start the Dear ImGui frame
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -79,9 +87,24 @@ void ImGuiMenu::Render()
 			}
 		}
 
+		// ¸Ê Ã¼Å©
 		ImGui::Checkbox("NormalMap Check", &bIsNormalMap);
 		ImGui::Checkbox("SpecularMap Check", &bIsSpecularMap);
 		ImGui::Checkbox("GammaCorrection Check", &bIsGammaCorrection);
+
+		if (durationTime >= 1.f)
+		{
+			fps = "FPS : ";
+			pfs = "PFS(second) : ";
+			fps += to_string(fpsCount);
+			pfs += to_string(durationTime / fpsCount);
+
+			fpsCount = 0;
+			durationTime = -1.f;
+		}
+
+		ImGui::Text(fps.c_str());
+		ImGui::Text(pfs.c_str());
 
 		ImGui::End();
 	}
