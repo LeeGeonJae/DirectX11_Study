@@ -72,7 +72,7 @@ private:
 
 private:
 	// Geometry
-	vector<ShaderVertex> m_vertices;
+	vector<BoneWeightVertex> m_vertices;
 	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
 	vector<uint32> m_indices;
 	ComPtr<ID3D11Buffer> m_indexBuffer = nullptr;

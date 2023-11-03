@@ -16,7 +16,7 @@ public:
 	~Node();
 
 public:
-	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer, ComPtr<ID3D11Buffer> BoneTransformBuffer);
+	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer);
 	void Update(ID3D11DeviceContext* deviceContext);
 	void Draw(ID3D11DeviceContext* deviceContext);
 
@@ -38,8 +38,13 @@ public:
 	inline Material* GetMaterial();
 	inline void SetAnimation(asAnimationNode* animation);
 	inline asAnimationNode* GetAnimation();
+	inline void SetBone(Bone* bone);
+	inline Bone* GetBone();
+
 	inline DirectX::SimpleMath::Matrix GetNodeTransform();
 	inline CBIsValidTextureMap* GetIsValidTextureMap();
+
+	inline Math::Matrix GetNodeWorldTransform();
 
 private:
 	string				m_Name;
@@ -50,18 +55,17 @@ private:
 	Mesh*				m_Mesh;
 	Material*			m_Material;
 	asAnimationNode*	m_Animation;
+	Bone*				m_Bone;
 
 private:
-	DirectX::SimpleMath::Matrix m_Local;
-	DirectX::SimpleMath::Matrix m_World;
+	Math::Matrix m_Local;
+	Math::Matrix m_World;
 	aiMatrix4x4					m_Transform;
 
 	CBIsValidTextureMap			m_CBIsValidTextureMap;
 	CBModelTransform			m_CBNodeTransform;
-	CBMatrixPallete				m_CBMatrixPallete;
 	ComPtr<ID3D11Buffer>		m_bisTextureMapBuffer;
 	ComPtr<ID3D11Buffer>		m_NodeBuffer;
-	ComPtr<ID3D11Buffer>		m_BoneTransformBuffer;
 };
 
 void Node::SetName(string name)
@@ -78,15 +82,12 @@ void Node::SetParentNode(Node* parent)
 {
 	m_Parent = parent;
 
-	m_Parent->SetChildNode(this);
+	parent->SetChildNode(this);
 }
 
 Node* Node::GetParentNode()
 {
-	if (m_Parent != nullptr)
-		return m_Parent;
-
-	return nullptr;
+	return m_Parent;
 }
 
 void Node::SetChildNode(Node* child)
@@ -116,10 +117,7 @@ void Node::SetMesh(Mesh* mesh)
 
 Mesh* Node::GetMesh()
 {
-	if (m_Mesh != nullptr)
-		return m_Mesh;
-
-	return nullptr;
+	return m_Mesh;
 }
 
 void Node::SetMaterial(Material* material)
@@ -129,15 +127,22 @@ void Node::SetMaterial(Material* material)
 
 Material* Node::GetMaterial()
 {
-	if (m_Material != nullptr)
-		return m_Material;
-
-	return nullptr;
+	return m_Material;
 }
 
 void Node::SetAnimation(asAnimationNode* animation)
 {
 	m_Animation = animation;
+}
+
+void Node::SetBone(Bone* bone)
+{
+	m_Bone = bone;
+}
+
+Bone* Node::GetBone()
+{
+	return m_Bone;
 }
 
 asAnimationNode* Node::GetAnimation()
@@ -151,10 +156,10 @@ asAnimationNode* Node::GetAnimation()
 DirectX::SimpleMath::Matrix Node::GetNodeTransform()
 {
 	DirectX::SimpleMath::Matrix transform(
-		m_Transform.a1, m_Transform.a2, m_Transform.a3, m_Transform.a4,
-		m_Transform.b1, m_Transform.b2, m_Transform.b3, m_Transform.b4,
-		m_Transform.c1, m_Transform.c2, m_Transform.c3, m_Transform.c4,
-		m_Transform.d1, m_Transform.d2, m_Transform.d3, m_Transform.d4
+		m_Transform.a1, m_Transform.b1, m_Transform.c1, m_Transform.d1,
+		m_Transform.a2, m_Transform.b2, m_Transform.c2, m_Transform.d2,
+		m_Transform.a3, m_Transform.b3, m_Transform.c3, m_Transform.d3,
+		m_Transform.a4, m_Transform.b4, m_Transform.c4, m_Transform.d4
 	);
 
 	return transform;
@@ -163,4 +168,9 @@ DirectX::SimpleMath::Matrix Node::GetNodeTransform()
 CBIsValidTextureMap* Node::GetIsValidTextureMap()
 {
 	return &m_CBIsValidTextureMap;
+}
+
+Math::Matrix Node::GetNodeWorldTransform()
+{
+	return m_World;
 }

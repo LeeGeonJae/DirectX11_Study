@@ -15,6 +15,9 @@ public:
 	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> modelBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer, ComPtr<ID3D11Buffer> BoneTransformBuffer);
 	void Update(ID3D11DeviceContext* deviceContext);
 
+private:
+	void updateMatrixPallete(ID3D11DeviceContext* deviceContext);
+
 public:
 	inline void SetHeadNode(Node* node);
 	inline Node* GetHeadNode();
@@ -34,6 +37,10 @@ private:
 	Node*					m_HeadNode;
 	asAnimation*			m_Animation;
 	Material*				m_Material;
+
+private:
+	CBMatrixPallete			m_CBMatrixPallete;
+	ComPtr<ID3D11Buffer>	m_BoneTransformBuffer;
 };
 
 void Model::SetHeadNode(Node* node)

@@ -38,6 +38,8 @@ bool ModelLoadManager::Load(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext
 	// 임포터
 	{
 		Assimp::Importer importer;
+		importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, 0); // $assimp_fbx$ 노드 생성안함	
+
 		unsigned int importFalgs = 
 			aiProcess_Triangulate |			// 삼각형으로 변환
 			aiProcess_GenNormals |			// 노말 생성
@@ -103,7 +105,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 	// 메시 버텍스 가져오기
 	for (UINT i = 0; i < aimesh->mNumVertices; i++)
 	{
-		ShaderVertex vertex;
+		BoneWeightVertex vertex;
 
 		if (aimesh->HasPositions())
 		{
@@ -136,7 +138,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 			vertex.m_BiTangetns.z = aimesh->mBitangents[i].z;
 		}
 
-		myMesh->m_Vertices.push_back(vertex);
+		myMesh->m_BoneWeightVertices.push_back(vertex);
 	}
 
 	// 메시 인덱스 가져오기
@@ -151,24 +153,63 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 	}
 
 	// 메시 본 가져오기
-	for (UINT i = 0; i < aimesh->mNumBones; i++)
 	{
-		aiBone* aibone = aimesh->mBones[i];
+		UINT meshBoneCount = aimesh->mNumBones;
+		UINT boneIndexCounter = 0;
+		map<string, int> BoneMapping;
 
-		Bone* bone = new Bone;
+		for (int i = 0; i < m_pLoadModel->GetBones().size(); i++)
+		{
+			BoneMapping.insert(make_pair(m_pLoadModel->GetBones()[i]->m_Name, i));
+		}
 
-		bone->m_Name = aibone->mName.C_Str();
-		bone->m_NumWeights = aibone->mNumWeights;
-		bone->m_Weights.AddBoneData(aibone->mWeights->mVertexId, aibone->mWeights->mWeight);
+		m_pLoadModel->GetBones().resize(meshBoneCount);
 
-		bone->m_OffsetMatrix = DirectX::SimpleMath::Matrix(
-			aibone->mOffsetMatrix.a1, aibone->mOffsetMatrix.a2, aibone->mOffsetMatrix.a3, aibone->mOffsetMatrix.a4,
-			aibone->mOffsetMatrix.b1, aibone->mOffsetMatrix.b2, aibone->mOffsetMatrix.b3, aibone->mOffsetMatrix.b4,
-			aibone->mOffsetMatrix.c1, aibone->mOffsetMatrix.c2, aibone->mOffsetMatrix.c3, aibone->mOffsetMatrix.c4,
-			aibone->mOffsetMatrix.d1, aibone->mOffsetMatrix.d2, aibone->mOffsetMatrix.d3, aibone->mOffsetMatrix.d4
-		);
+		for (UINT i = 0; i < meshBoneCount; i++)
+		{
+			aiBone* aibone = aimesh->mBones[i];
+			UINT boneIndex = 0;
+			
+			if (BoneMapping.find(aibone->mName.C_Str()) == BoneMapping.end())
+			{
+				Bone* bone = new Bone;
 
-		m_pLoadModel->SetBone(bone);
+				bone->m_Name = aibone->mName.C_Str();
+				bone->m_NumWeights = aibone->mNumWeights;
+
+				bone->m_OffsetMatrix = DirectX::SimpleMath::Matrix(
+					aibone->mOffsetMatrix.a1, aibone->mOffsetMatrix.b1, aibone->mOffsetMatrix.c1, aibone->mOffsetMatrix.d1,
+					aibone->mOffsetMatrix.a2, aibone->mOffsetMatrix.b2, aibone->mOffsetMatrix.c2, aibone->mOffsetMatrix.d2,
+					aibone->mOffsetMatrix.a3, aibone->mOffsetMatrix.b3, aibone->mOffsetMatrix.c3, aibone->mOffsetMatrix.d3,
+					aibone->mOffsetMatrix.a4, aibone->mOffsetMatrix.b4, aibone->mOffsetMatrix.c4, aibone->mOffsetMatrix.d4
+				);
+
+
+
+				for (auto node : m_pLoadModel->GetNode())
+				{
+					if (node->GetName() == bone->m_Name)
+					{
+						node->SetBone(bone);
+						bone->m_Owner = node;
+					}
+				}
+
+				m_pLoadModel->SetBone(bone);
+			}
+			else
+			{
+				boneIndex = BoneMapping[aibone->mName.C_Str()];
+			}
+
+			for (UINT j = 0; j < aibone->mNumWeights; j++)
+			{
+				UINT vertexID = aibone->mWeights[j].mVertexId;
+				float weight = aibone->mWeights[j].mWeight;
+
+				myMesh->m_BoneWeightVertices[vertexID].AddBoneData(boneIndex, weight);
+			}
+		}
 	}
 
 	// 메시 머터리얼 가져오기

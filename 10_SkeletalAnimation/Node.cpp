@@ -13,6 +13,7 @@ Node::Node()
 	, m_Mesh(nullptr)
 	, m_Material(nullptr)
 	, m_Animation(nullptr)
+	, m_Bone(nullptr)
 	, m_NodeBuffer(nullptr)
 	, m_bisTextureMapBuffer(nullptr)
 {
@@ -23,11 +24,10 @@ Node::Node()
 	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
 }
 
-void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer, ComPtr<ID3D11Buffer> BoneTransformBuffer)
+void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer)
 {
 	m_NodeBuffer = nodeBuffer;
 	m_bisTextureMapBuffer = bisTextureMapBuffer;
-	m_BoneTransformBuffer = BoneTransformBuffer;
 
 	if (m_Mesh != nullptr)
 		m_Mesh->SetupMesh(device);
@@ -36,7 +36,7 @@ void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID
 	{
 		if (child != nullptr)
 		{
-			child->Init(device, nodeBuffer, bisTextureMapBuffer, BoneTransformBuffer);
+			child->Init(device, nodeBuffer, bisTextureMapBuffer);
 		}
 	}
 }
@@ -51,7 +51,7 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		if (m_Animation != nullptr)
 		{
 			static float currentTime = 0.f;
-			currentTime += TimeManager::GetInstance()->GetfDT();
+			currentTime += TimeManager::GetInstance()->GetfDT() / 10;
 
 			if (currentTime > m_Animation->m_FrameCount)
 			{
@@ -66,7 +66,7 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		else
 		{
 			m_Local = GetNodeTransform();
-			m_Local = m_Local.Transpose();
+			m_Local = m_Local;
 		}
 
 		//부모가 있으면 해당 부모의 트랜스폼 곱하기
@@ -82,10 +82,6 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		}
 	}
 
-	if (m_Mesh != nullptr)
-		Draw(deviceContext);
-
-
 	// 자식 노드 업데이트
 	for (auto child : m_Children)
 	{
@@ -98,28 +94,39 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 
 void Node::Draw(ID3D11DeviceContext* deviceContext)
 {
-	for (int i = 0; i < static_cast<int>(TextureType::END); i++)
+	if (m_Mesh != nullptr)
 	{
-		auto find = m_Material->GetTexture(static_cast<TextureType>(i));
-		if (find != nullptr)
+		for (int i = 0; i < static_cast<int>(TextureType::END); i++)
 		{
-			deviceContext->PSSetShaderResources(i, 1, &find->m_Texture);
+			auto find = m_Material->GetTexture(static_cast<TextureType>(i));
+			if (find != nullptr)
+			{
+				deviceContext->PSSetShaderResources(i, 1, &find->m_Texture);
+			}
 		}
+
+		auto matrix = m_CBNodeTransform.World.Transpose();
+		deviceContext->UpdateSubresource(m_bisTextureMapBuffer.Get(), 0, nullptr, &m_CBIsValidTextureMap, 0, 0);
+		deviceContext->UpdateSubresource(m_NodeBuffer.Get(), 0, nullptr, &matrix, 0, 0);
+
+
+		deviceContext->VSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
+		deviceContext->PSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
+		deviceContext->VSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
+		deviceContext->PSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
+
+
+		m_Mesh->Draw(deviceContext);
 	}
 
-	auto matrix = m_CBNodeTransform.World.Transpose();
-	deviceContext->UpdateSubresource(m_bisTextureMapBuffer.Get(), 0, nullptr, &m_CBIsValidTextureMap, 0, 0);
-	deviceContext->UpdateSubresource(m_NodeBuffer.Get(), 0, nullptr, &matrix, 0, 0);
-	deviceContext->UpdateSubresource(m_BoneTransformBuffer.Get(), 0, nullptr, &m_CBMatrixPallete, 0, 0);
-
-	deviceContext->VSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
-	deviceContext->PSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
-	deviceContext->VSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
-	deviceContext->PSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
-	deviceContext->VSSetConstantBuffers(6, 1, m_BoneTransformBuffer.GetAddressOf());
-	deviceContext->PSSetConstantBuffers(6, 1, m_BoneTransformBuffer.GetAddressOf());
-
-	m_Mesh->Draw(deviceContext);
+	// 자식 노드 렌더
+	for (auto child : m_Children)
+	{
+		if (child != nullptr)
+		{
+			child->Draw(deviceContext);
+		}
+	}
 }
 
 Node::~Node()

@@ -61,7 +61,7 @@ void DemoApp::initScene()
 
 	createConstantBuffer();
 
-	myModel->Init(m_Device.Get(), m_pCBModelData.Get(), m_pCBbisTextureMap.Get());
+	myModel->Init(m_Device.Get(), m_pCBModelData.Get(), m_pCBbisTextureMap.Get(), m_pCBBoneTransformData.Get());
 
 	setTransform();
 }

@@ -77,7 +77,7 @@ void ImGuiMenu::Render()
 
 			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -600.f, 500.f);
 			ImGui::SliderFloat("Camera Fov", &camerafov, 0.01f, 180.f);
-			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 500.f);
+			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 30000.f);
 
 			CameraFov = camerafov * 3.14f / 180.f;
 

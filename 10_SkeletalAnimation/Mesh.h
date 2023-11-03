@@ -12,16 +12,17 @@ public:
 	void Draw(ID3D11DeviceContext* deviceContext);
 	void Close();
 
-	void SetupMesh(ID3D11Device* device);
 
 public:
+	void SetupMesh(ID3D11Device* device);
+
 	inline string GetName();
 	inline void SetName(string name);
 	inline string GetParentName();
 	inline void SetParentName(string name);
 
 public:
-	vector<ShaderVertex> m_Vertices;
+	vector<BoneWeightVertex> m_BoneWeightVertices;
 	vector<UINT> m_Indices;
 
 private:

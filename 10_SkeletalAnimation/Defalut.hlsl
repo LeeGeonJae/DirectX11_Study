@@ -16,7 +16,8 @@ struct VS_INPUT
 // HLSL상에서 이미 예약되어 있는 이름이고 렌더링 파이프라인 상에서의 의미가 정해져있다.
 struct VS_OUTPUT
 {
-    float4 mPosition : SV_POSITION;
+    float4 mPositionProj : SV_POSITION;
+    float4 mPositionWorld : POSITION;
     float2 mUV : TEXCOORD1;
     float3 mViewDir : TEXCOORD2;
     float4 mDiffuse : COLOR;
@@ -78,16 +79,27 @@ VS_OUTPUT VS(VS_INPUT input)
     VS_OUTPUT output;
 
     // 오브젝트 월드 변환
-    output.mPosition = mul(input.mPosition, meshWorld);
-
+    float4 pos = input.mPosition;
+    float4x4 matWorldBlended;
+    
+    matWorldBlended = mul(input.mBlendWeights.x, MatrixPalleteArray[input.mBlendIndices.x]);
+    matWorldBlended += mul(input.mBlendWeights.y, MatrixPalleteArray[input.mBlendIndices.y]);
+    matWorldBlended += mul(input.mBlendWeights.z, MatrixPalleteArray[input.mBlendIndices.z]);
+    matWorldBlended += mul(input.mBlendWeights.w, MatrixPalleteArray[input.mBlendIndices.w]);
+    
+    // 월드 내의 위치
+    pos = mul(pos, matWorldBlended);
+    output.mPositionWorld = pos;
+    
+    // ndc 공간 내의 위치
+    pos = mul(pos, View);
+    pos = mul(pos, Projection);
+    output.mPositionProj = pos;
+    
     // 빛 방향, 오브젝트에서 카메라 방향 계산 ( 월드 )
     float3 lightDir = normalize(LightDir);
-    float3 viewDir = normalize(output.mPosition.xyz - CameraPos.xyz);
+    float3 viewDir = normalize(output.mPositionWorld.xyz - CameraPos.xyz);
     output.mViewDir = viewDir;
-    
-    // 오브젝트 카메라 변환, 투영 변환
-    output.mPosition = mul(output.mPosition, View);
-    output.mPosition = mul(output.mPosition, Projection);
     
     // 오브젝트 월드에서 노말 벡터 계산 (오브젝트의 정면에 90도를 이루는 벡터)
     output.mNormal = normalize(mul(input.mNormal, (float3x3) meshWorld));

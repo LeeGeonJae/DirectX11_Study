@@ -22,6 +22,7 @@ public:
 private:
 	void processNode(const aiNode* headNode, const aiScene* scene, Node* headnode);			// 노드
 	Mesh* processMesh(const aiMesh* aimesh, const aiScene* scene, Node* node);				// 메시
+	void processBone(const aiMesh* aimesh);
 
 	// 애니메이션
 	void processAnimation(aiAnimation* srcAnimation);

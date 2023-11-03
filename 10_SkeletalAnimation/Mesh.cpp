@@ -6,7 +6,7 @@ namespace Math = DirectX::SimpleMath;
 
 void Mesh::Draw(ID3D11DeviceContext* deviceContext)
 {
-	UINT stride = sizeof(ShaderVertex);
+	UINT stride = sizeof(BoneWeightVertex);
 	UINT offset = 0;
 
 	deviceContext->IASetVertexBuffers(0, 1, &m_VertexBuffer, &stride, &offset);
@@ -37,12 +37,12 @@ void Mesh::SetupMesh(ID3D11Device* device)
 	D3D11_BUFFER_DESC vertexDesc;
 	vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexDesc.ByteWidth = static_cast<UINT>(sizeof(ShaderVertex) * m_Vertices.size());
+	vertexDesc.ByteWidth = static_cast<UINT>(sizeof(BoneWeightVertex) * m_BoneWeightVertices.size());
 	vertexDesc.CPUAccessFlags = 0;
 	vertexDesc.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA initData;
-	initData.pSysMem = &m_Vertices[0];
+	initData.pSysMem = &m_BoneWeightVertices[0];
 
 	hr = device->CreateBuffer(&vertexDesc, &initData, &m_VertexBuffer);
 	assert(SUCCEEDED(hr));

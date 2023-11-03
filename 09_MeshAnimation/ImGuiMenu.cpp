@@ -6,7 +6,7 @@
 
 Vector4 ImGuiMenu::CameraPos = { 0.f, 0.f, -1000.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
-float ImGuiMenu::CameraNearFar[2] = { 0.01f , 30000.0f };
+float ImGuiMenu::CameraNearFar[2] = { 1.0f , 30000.0f };
 
 Vector3 ImGuiMenu::CubePosition = {};
 Vector2 ImGuiMenu::CubeRotation = {};
@@ -68,7 +68,7 @@ void ImGuiMenu::Render()
 			static float camerafov = 50.f;
 
 			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -600.f, 500.f);
-			ImGui::SliderFloat("Camera Fov", &camerafov, 0.01f, 180.f);
+			ImGui::SliderFloat("Camera Fov", &camerafov, 1.0f, 180.f);
 			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 500.f);
 
 			CameraFov = camerafov * 3.14f / 180.f;
