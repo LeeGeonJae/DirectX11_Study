@@ -60,6 +60,7 @@ cbuffer bisTextureMapData : register(b4)
     bool bIsValidNormalMap;
     bool bIsValidSpecularMap;
     bool bIsValidOpcityMap;
+    bool bIsValidBone;
 }
 // 메시 월드 좌표 ConstantBuffer
 cbuffer MeshData : register(b5)
@@ -80,14 +81,15 @@ VS_OUTPUT VS(VS_INPUT input)
 
     // 오브젝트 월드 변환
     float4 pos = input.mPosition;
-    float4x4 matWorldBlended;
+    float4x4 matWorldBlended = MatrixPalleteArray[0];
     
+    // 본이 있으면 본의 월드 트랜스폼 위치에 맞춰서 위치 아니면 기존 월드 트랜스폼 위치에 위치
+
+        // 월드 내의 위치
     matWorldBlended = mul(input.mBlendWeights.x, MatrixPalleteArray[input.mBlendIndices.x]);
     matWorldBlended += mul(input.mBlendWeights.y, MatrixPalleteArray[input.mBlendIndices.y]);
     matWorldBlended += mul(input.mBlendWeights.z, MatrixPalleteArray[input.mBlendIndices.z]);
     matWorldBlended += mul(input.mBlendWeights.w, MatrixPalleteArray[input.mBlendIndices.w]);
-    
-    // 월드 내의 위치
     pos = mul(pos, matWorldBlended);
     output.mPositionWorld = pos;
     
@@ -102,9 +104,9 @@ VS_OUTPUT VS(VS_INPUT input)
     output.mViewDir = viewDir;
     
     // 오브젝트 월드에서 노말 벡터 계산 (오브젝트의 정면에 90도를 이루는 벡터)
-    output.mNormal = normalize(mul(input.mNormal, (float3x3) meshWorld));
-    output.mTangent = normalize(mul(input.mTangent, (float3x3) meshWorld));
-    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) meshWorld));
+    output.mNormal = normalize(mul(input.mNormal, (float3x3) matWorldBlended));
+    output.mTangent = normalize(mul(input.mTangent, (float3x3) matWorldBlended));
+    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) matWorldBlended));
     
     // 난반사(Diffuse) 내적으로 구하기
     output.mDiffuse = saturate(dot(-lightDir, output.mNormal));
@@ -116,10 +118,11 @@ VS_OUTPUT VS(VS_INPUT input)
 }
 
 // Texture, Sampler 
-Texture2D texture0 : register(t0);
-Texture2D normal0 : register(t1);
-Texture2D specular0 : register(t2);
-Texture2D opcity0 : register(t3);
+Texture2D basecolor : register(t0);
+Texture2D texture0 : register(t1);
+Texture2D normal0 : register(t2);
+Texture2D specular0 : register(t3);
+Texture2D opcity0 : register(t4);
 SamplerState sampler0 : register(s0);
 
 // Pixel Shader(PS) 프로그래밍
@@ -130,7 +133,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     // 텍스처
     if (bIsValidDiffuseMap)
     {
-        float4 TextureColor = texture0.Sample(sampler0, input.mUV);
+        TextureColor = texture0.Sample(sampler0, input.mUV);
     }
     
     // 감마 콜렉션
@@ -179,10 +182,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
         specular = pow(speculardot, SpecularPower) * LightColor * specularMap;
     }
     
+    // 오파시티 맵이 있으면 해당 오파시티 맵의 알파값에 따라 픽셀 버리기
     float alpha = 0.f;
-    if (TextureColor.a < 1.f && bIsValidOpcityMap)
+    if (TextureColor.a < 1.f)
     {
-        alpha = opcity0.Sample(sampler0, input.mUV).a;
+        alpha = TextureColor.a;
         clip(alpha < 0.5f ? -1.f : 1.f);
     }
     

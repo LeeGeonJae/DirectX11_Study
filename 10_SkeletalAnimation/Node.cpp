@@ -21,6 +21,7 @@ Node::Node()
 	m_CBIsValidTextureMap.bIsValidNormalMap = false;
 	m_CBIsValidTextureMap.bIsValidOpcityMap = false;
 	m_CBIsValidTextureMap.bIsValidSpecularMap = false;
+	m_CBIsValidTextureMap.bIsValidBone = false;
 	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
 }
 
@@ -51,7 +52,7 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		if (m_Animation != nullptr)
 		{
 			static float currentTime = 0.f;
-			currentTime += TimeManager::GetInstance()->GetfDT() / 10;
+			currentTime += TimeManager::GetInstance()->GetfDT() / 2;
 
 			if (currentTime > m_Animation->m_FrameCount)
 			{
@@ -109,12 +110,10 @@ void Node::Draw(ID3D11DeviceContext* deviceContext)
 		deviceContext->UpdateSubresource(m_bisTextureMapBuffer.Get(), 0, nullptr, &m_CBIsValidTextureMap, 0, 0);
 		deviceContext->UpdateSubresource(m_NodeBuffer.Get(), 0, nullptr, &matrix, 0, 0);
 
-
 		deviceContext->VSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
 		deviceContext->PSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
 		deviceContext->VSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
 		deviceContext->PSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
-
 
 		m_Mesh->Draw(deviceContext);
 	}

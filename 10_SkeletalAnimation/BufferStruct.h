@@ -71,7 +71,8 @@ struct CBIsValidTextureMap
 	bool bIsValidNormalMap;
 	bool bIsValidSpecularMap;
 	bool bIsValidOpcityMap;
-	Vector3 dummy;
+	bool bIsValidBone;
+	Vector2 dummy;
 };
 
 struct CBMatrixPallete

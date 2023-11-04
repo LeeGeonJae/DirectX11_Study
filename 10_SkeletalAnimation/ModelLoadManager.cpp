@@ -101,6 +101,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 {
 	// Data to fill
 	Mesh* myMesh = new Mesh;
+	myMesh->SetName(aimesh->mName.C_Str());
 
 	// 메시 버텍스 가져오기
 	for (UINT i = 0; i < aimesh->mNumVertices; i++)
@@ -151,9 +152,12 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 			myMesh->m_Indices.push_back(face.mIndices[j]);
 		}
 	}
-
+	
 	// 메시 본 가져오기
+	if (aimesh->HasBones())
 	{
+		node->GetIsValidTextureMap()->bIsValidBone = true;
+
 		UINT meshBoneCount = aimesh->mNumBones;
 		UINT boneIndexCounter = 0;
 		map<string, int> BoneMapping;
@@ -165,6 +169,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 
 		m_pLoadModel->GetBones().resize(meshBoneCount);
 
+		// 본의 갯수만큼 본 생성
 		for (UINT i = 0; i < meshBoneCount; i++)
 		{
 			aiBone* aibone = aimesh->mBones[i];
@@ -174,6 +179,8 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 			{
 				Bone* bone = new Bone;
 
+				boneIndex = boneIndexCounter;
+				boneIndexCounter++;
 				bone->m_Name = aibone->mName.C_Str();
 				bone->m_NumWeights = aibone->mNumWeights;
 
@@ -183,8 +190,6 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 					aibone->mOffsetMatrix.a3, aibone->mOffsetMatrix.b3, aibone->mOffsetMatrix.c3, aibone->mOffsetMatrix.d3,
 					aibone->mOffsetMatrix.a4, aibone->mOffsetMatrix.b4, aibone->mOffsetMatrix.c4, aibone->mOffsetMatrix.d4
 				);
-
-
 
 				for (auto node : m_pLoadModel->GetNode())
 				{
@@ -219,6 +224,12 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 
 		Material* material = new Material;
 		material->m_Name = aimaterial->GetName().C_Str();
+
+		vector<Texture*> baseColor = loadMaterialTextures(aimaterial, aiTextureType_BASE_COLOR, "texture_baseColor", scene);
+		if (baseColor.size() > 0)
+		{
+			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::BASECOLOR), baseColor[0]));
+		}
 
 		vector<Texture*> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
 		if (diffuseMaps.size() > 0)

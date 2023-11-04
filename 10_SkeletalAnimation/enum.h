@@ -2,7 +2,8 @@
 
 enum class TextureType
 {
-	DIFFUSE = 0,
+	BASECOLOR = 0,
+	DIFFUSE,
 	NORMAL,
 	SPECULAR,
 	OPACITY,
