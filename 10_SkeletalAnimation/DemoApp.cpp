@@ -61,7 +61,7 @@ void DemoApp::initScene()
 
 	createConstantBuffer();
 
-	myModel->Init(m_Device.Get(), m_pCBModelData.Get(), m_pCBbisTextureMap.Get(), m_pCBBoneTransformData.Get());
+	myModel->Init(m_Device.Get(), m_ModelCBBuffer);
 
 	setTransform();
 }
@@ -297,6 +297,7 @@ void DemoApp::createConstantBuffer()
 {
 	HRESULT hr;
 	D3D11_BUFFER_DESC desc;
+	m_ModelCBBuffer = make_shared<ModelCBBuffer>();
 
 	// 좌표(World, View, Projection) 데이터 Constant Buffer로 넘겨주기
 	desc = {};
@@ -335,15 +336,23 @@ void DemoApp::createConstantBuffer()
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.ByteWidth = sizeof(CBIsValidTextureMap);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBbisTextureMap.GetAddressOf());
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_ModelCBBuffer->m_pCBbisTextureMap.GetAddressOf());
 	assert(SUCCEEDED(hr));
 
-	// Mesh 데이터 Constant Buffer로 넘겨주기
+	// Material 데이터 Constant Buffer로 넘겨주기
 	desc = {};
 	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.ByteWidth = sizeof(CBModelTransform);
+	desc.ByteWidth = sizeof(CBMaterial);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBModelData.GetAddressOf());
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_ModelCBBuffer->m_pCBMaterialData.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	// Model 데이터 Constant Buffer로 넘겨주기
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(CBNodeTransform);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_ModelCBBuffer->m_pCBNodelData.GetAddressOf());
 	assert(SUCCEEDED(hr));
 
 	// Mesh 데이터 Constant Buffer로 넘겨주기
@@ -351,7 +360,7 @@ void DemoApp::createConstantBuffer()
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.ByteWidth = sizeof(CBMatrixPallete);
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	hr = m_Device->CreateBuffer(&desc, nullptr, m_pCBBoneTransformData.GetAddressOf());
+	hr = m_Device->CreateBuffer(&desc, nullptr, m_ModelCBBuffer->m_pCBBoneTransformData.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 

@@ -25,10 +25,11 @@ Node::Node()
 	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
 }
 
-void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer)
+void Node::Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> NodeBuffer)
 {
-	m_NodeBuffer = nodeBuffer;
-	m_bisTextureMapBuffer = bisTextureMapBuffer;
+	m_NodeBuffer = NodeBuffer->m_pCBNodelData;
+	m_bisTextureMapBuffer = NodeBuffer->m_pCBbisTextureMap;
+	m_MaterialBuffer = NodeBuffer->m_pCBMaterialData;
 
 	if (m_Mesh != nullptr)
 		m_Mesh->SetupMesh(device);
@@ -37,7 +38,7 @@ void Node::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID
 	{
 		if (child != nullptr)
 		{
-			child->Init(device, nodeBuffer, bisTextureMapBuffer);
+			child->Init(device, NodeBuffer);
 		}
 	}
 }
@@ -97,6 +98,7 @@ void Node::Draw(ID3D11DeviceContext* deviceContext)
 {
 	if (m_Mesh != nullptr)
 	{
+		// 텍스쳐 파일 세팅
 		for (int i = 0; i < static_cast<int>(TextureType::END); i++)
 		{
 			auto find = m_Material->GetTexture(static_cast<TextureType>(i));
@@ -107,13 +109,18 @@ void Node::Draw(ID3D11DeviceContext* deviceContext)
 		}
 
 		auto matrix = m_CBNodeTransform.World.Transpose();
+		m_CBMaterial.basecolor = Color(m_Material->basecolor.x, m_Material->basecolor.y, m_Material->basecolor.z, 1.f);
+
 		deviceContext->UpdateSubresource(m_bisTextureMapBuffer.Get(), 0, nullptr, &m_CBIsValidTextureMap, 0, 0);
+		deviceContext->UpdateSubresource(m_MaterialBuffer.Get(), 0, nullptr, &m_CBMaterial, 0, 0);
 		deviceContext->UpdateSubresource(m_NodeBuffer.Get(), 0, nullptr, &matrix, 0, 0);
 
 		deviceContext->VSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
 		deviceContext->PSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
-		deviceContext->VSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
-		deviceContext->PSSetConstantBuffers(5, 1, m_NodeBuffer.GetAddressOf());
+		deviceContext->VSSetConstantBuffers(5, 1, m_MaterialBuffer.GetAddressOf());
+		deviceContext->PSSetConstantBuffers(5, 1, m_MaterialBuffer.GetAddressOf());
+		deviceContext->VSSetConstantBuffers(6, 1, m_NodeBuffer.GetAddressOf());
+		deviceContext->PSSetConstantBuffers(6, 1, m_NodeBuffer.GetAddressOf());
 
 		m_Mesh->Draw(deviceContext);
 	}

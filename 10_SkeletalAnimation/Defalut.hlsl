@@ -62,13 +62,19 @@ cbuffer bisTextureMapData : register(b4)
     bool bIsValidOpcityMap;
     bool bIsValidBone;
 }
+
+cbuffer MaterialData : register(b5)
+{
+    float4 baseColor;
+}
+
 // 메시 월드 좌표 ConstantBuffer
-cbuffer MeshData : register(b5)
+cbuffer MeshData : register(b6)
 {
     matrix meshWorld;
 }
 // 본 오프셋 좌표 ConstantBuffer
-cbuffer MeshData : register(b6)
+cbuffer MeshData : register(b7)
 {
     matrix MatrixPalleteArray[128];
 }
@@ -128,7 +134,7 @@ SamplerState sampler0 : register(s0);
 // Pixel Shader(PS) 프로그래밍
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    float4 TextureColor = float4(1.f, 1.f, 1.f, 1.f);
+    float4 TextureColor = baseColor;
     
     // 텍스처
     if (bIsValidDiffuseMap)

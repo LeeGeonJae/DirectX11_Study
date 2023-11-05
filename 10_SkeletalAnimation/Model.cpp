@@ -1,5 +1,4 @@
 #include "Model.h"
-
 #include "Node.h"
 
 Model::Model()
@@ -14,11 +13,11 @@ Model::~Model()
 {
 }
 
-void Model::Init(ID3D11Device* device, ComPtr<ID3D11Buffer> modelBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer, ComPtr<ID3D11Buffer> BoneTransformBuffer)
+void Model::Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> ModelBuffer)
 {
-	m_BoneTransformBuffer = BoneTransformBuffer;
+	m_BoneTransformBuffer = ModelBuffer->m_pCBBoneTransformData;
 
-	m_HeadNode->Init(device, modelBuffer, bisTextureMapBuffer);
+	m_HeadNode->Init(device, ModelBuffer);
 }
 
 void Model::Update(ID3D11DeviceContext* deviceContext)
@@ -44,6 +43,6 @@ void Model::updateMatrixPallete(ID3D11DeviceContext* deviceContext)
 	}
 
 	deviceContext->UpdateSubresource(m_BoneTransformBuffer.Get(), 0, nullptr, &m_CBMatrixPallete, 0, 0);
-	deviceContext->VSSetConstantBuffers(6, 1, m_BoneTransformBuffer.GetAddressOf());
-	deviceContext->PSSetConstantBuffers(6, 1, m_BoneTransformBuffer.GetAddressOf());
+	deviceContext->VSSetConstantBuffers(7, 1, m_BoneTransformBuffer.GetAddressOf());
+	deviceContext->PSSetConstantBuffers(7, 1, m_BoneTransformBuffer.GetAddressOf());
 }

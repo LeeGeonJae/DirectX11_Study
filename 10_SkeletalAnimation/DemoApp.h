@@ -72,10 +72,6 @@ private:
 
 private:
 	// Geometry
-	vector<BoneWeightVertex> m_vertices;
-	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
-	vector<uint32> m_indices;
-	ComPtr<ID3D11Buffer> m_indexBuffer = nullptr;
 	ComPtr<ID3D11InputLayout> m_inputLayout = nullptr;
 
 	// VS
@@ -91,11 +87,6 @@ private:
 	// PS
 	ComPtr<ID3D11PixelShader> m_pixelShader = nullptr;
 	ComPtr<ID3DBlob> m_psBlob = nullptr;
-
-	// SRV
-	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView1 = nullptr;
-	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView2 = nullptr;
-	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView3 = nullptr;
 
 	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 	ComPtr<ID3D11BlendState> m_blendState = nullptr;
@@ -113,9 +104,7 @@ private:
 	ComPtr<ID3D11Buffer> m_pCBLight = nullptr;
 	ComPtr<ID3D11Buffer> m_pCBCamera = nullptr;
 	ComPtr<ID3D11Buffer> m_pCBUseTextureMap = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBbisTextureMap = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBModelData = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBBoneTransformData = nullptr;
+	shared_ptr<ModelCBBuffer> m_ModelCBBuffer = nullptr;
 
 	DirectX::SimpleMath::Matrix m_World;
 	DirectX::SimpleMath::Matrix m_View;
@@ -125,7 +114,5 @@ private:
 
 private:
 	ModelLoadManager* m_ModelLoader = nullptr;
-	const aiScene* m_Scene = nullptr;
-	vector<aiMesh*> m_Meshes;
 	Model* myModel;
 };

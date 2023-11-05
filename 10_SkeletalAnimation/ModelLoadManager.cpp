@@ -223,13 +223,10 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
 		Material* material = new Material;
-		material->m_Name = aimaterial->GetName().C_Str();
 
-		vector<Texture*> baseColor = loadMaterialTextures(aimaterial, aiTextureType_BASE_COLOR, "texture_baseColor", scene);
-		if (baseColor.size() > 0)
-		{
-			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::BASECOLOR), baseColor[0]));
-		}
+		aiColor3D basecolor(0.f, 0.f, 0.f);
+		aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, basecolor);
+		material->basecolor = Vector3(basecolor.r, basecolor.g, basecolor.b);
 
 		vector<Texture*> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
 		if (diffuseMaps.size() > 0)

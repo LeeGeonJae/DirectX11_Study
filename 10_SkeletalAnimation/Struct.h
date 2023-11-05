@@ -23,8 +23,9 @@ struct Texture
 
 struct Material
 {
-	map<int, Texture*> m_Textures;
 	string m_Name;
+	Vector3 basecolor;
+	map<int, Texture*> m_Textures;
 
 	// 텍스처가 있는지
 	bool HasTexture(TextureType type)

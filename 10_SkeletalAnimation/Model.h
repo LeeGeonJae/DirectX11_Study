@@ -12,7 +12,7 @@ public:
 	~Model();
 
 public:
-	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> modelBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer, ComPtr<ID3D11Buffer> BoneTransformBuffer);
+	void Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> ModelBuffer);
 	void Update(ID3D11DeviceContext* deviceContext);
 
 private:

@@ -48,14 +48,14 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Model\소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Model\소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Node.cpp">
       <Filter>Model\소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoadManager.cpp">
       <Filter>Manager\소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -77,14 +77,14 @@
     <ClInclude Include="Mesh.h">
       <Filter>Model\헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Model\헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Node.h">
       <Filter>Model\헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoadManager.h">
       <Filter>Manager\헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

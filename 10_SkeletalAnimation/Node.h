@@ -16,7 +16,7 @@ public:
 	~Node();
 
 public:
-	void Init(ID3D11Device* device, ComPtr<ID3D11Buffer> nodeBuffer, ComPtr<ID3D11Buffer> bisTextureMapBuffer);
+	void Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> NodeBuffer);
 	void Update(ID3D11DeviceContext* deviceContext);
 	void Draw(ID3D11DeviceContext* deviceContext);
 
@@ -63,8 +63,10 @@ private:
 	aiMatrix4x4					m_Transform;
 
 	CBIsValidTextureMap			m_CBIsValidTextureMap;
-	CBModelTransform			m_CBNodeTransform;
+	CBMaterial					m_CBMaterial;
+	CBNodeTransform				m_CBNodeTransform;
 	ComPtr<ID3D11Buffer>		m_bisTextureMapBuffer;
+	ComPtr<ID3D11Buffer>		m_MaterialBuffer;
 	ComPtr<ID3D11Buffer>		m_NodeBuffer;
 };
 

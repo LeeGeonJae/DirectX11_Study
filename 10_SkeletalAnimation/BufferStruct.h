@@ -38,7 +38,7 @@ struct CBCoordinateData
 	Vector4 MeshColor;
 };
 
-struct CBModelTransform
+struct CBNodeTransform
 {
 	DirectX::SimpleMath::Matrix World;
 };
@@ -65,6 +65,11 @@ struct CBUseTextureMap
 	Vector3 dummy2;
 };
 
+struct CBMaterial
+{
+	Color basecolor;
+};
+
 struct CBIsValidTextureMap
 {
 	bool bIsValidDiffuseMap;
@@ -78,4 +83,12 @@ struct CBIsValidTextureMap
 struct CBMatrixPallete
 {
 	DirectX::SimpleMath::Matrix Array[128];
+};
+
+struct ModelCBBuffer
+{
+	ComPtr<ID3D11Buffer> m_pCBBoneTransformData = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBbisTextureMap = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBMaterialData = nullptr;
+	ComPtr<ID3D11Buffer> m_pCBNodelData = nullptr;
 };
