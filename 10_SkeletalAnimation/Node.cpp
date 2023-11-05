@@ -23,6 +23,7 @@ Node::Node()
 	m_CBIsValidTextureMap.bIsValidSpecularMap = false;
 	m_CBIsValidTextureMap.bIsValidBone = false;
 	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
+	m_CBMaterial.basecolor = Color(1.f, 1.f, 1.f, 1.f);
 }
 
 void Node::Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> NodeBuffer)
