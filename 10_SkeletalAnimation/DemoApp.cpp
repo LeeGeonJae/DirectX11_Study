@@ -48,7 +48,7 @@ void DemoApp::initD3D()
 void DemoApp::initScene()
 {
 	myModel = new Model;
-	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/SkinningTest.fbx", myModel);
+	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/Dying.fbx", myModel);
 
 	createVS();
 	createInputLayout();

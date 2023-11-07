@@ -58,11 +58,10 @@ struct CBCameraData
 
 struct CBUseTextureMap
 {
-	bool UseNormalMap;
-	bool UseSpecularMap;
-	bool UseGammaCorrection;
-	bool dummy;
-	Vector3 dummy2;
+	int UseNormalMap;
+	int UseSpecularMap;
+	int UseGammaCorrection;
+	int dummy;
 };
 
 struct CBMaterial
@@ -72,12 +71,12 @@ struct CBMaterial
 
 struct CBIsValidTextureMap
 {
-	bool bIsValidDiffuseMap;
-	bool bIsValidNormalMap;
-	bool bIsValidSpecularMap;
-	bool bIsValidOpcityMap;
-	bool bIsValidBone;
-	Vector2 dummy;
+	int bIsValidDiffuseMap;
+	int bIsValidNormalMap;
+	int bIsValidSpecularMap;
+	int bIsValidOpcityMap;
+	int bIsValidBone;
+	Vector3 dummy;
 };
 
 struct CBMatrixPallete

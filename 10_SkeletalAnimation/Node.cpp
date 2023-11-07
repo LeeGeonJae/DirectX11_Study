@@ -54,7 +54,7 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		if (m_Animation != nullptr)
 		{
 			static float currentTime = 0.f;
-			currentTime += TimeManager::GetInstance()->GetfDT() / 2;
+			currentTime += TimeManager::GetInstance()->GetfDT() / 1.5;
 
 			if (currentTime > m_Animation->m_FrameCount)
 			{

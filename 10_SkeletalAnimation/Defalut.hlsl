@@ -49,18 +49,18 @@ cbuffer Camera : register(b2)
 // ImGui로 텍스쳐 체크해주는 Constant Buffer
 cbuffer NormalMap : register(b3)
 {
-    bool UseNormalMap;
-    bool UseSpecularMap;
-    bool UseGammaCorrection;
+    int UseNormalMap;
+    int UseSpecularMap;
+    int UseGammaCorrection;
 }
 // 텍스쳐 맵이 있는지 체크하는 Constant Buffer
 cbuffer bisTextureMapData : register(b4)
 {
-    bool bIsValidDiffuseMap;
-    bool bIsValidNormalMap;
-    bool bIsValidSpecularMap;
-    bool bIsValidOpcityMap;
-    bool bIsValidBone;
+    int bIsValidDiffuseMap;
+    int bIsValidNormalMap;
+    int bIsValidSpecularMap;
+    int bIsValidOpcityMap;
+    int bIsValidBone;
 }
 
 cbuffer MaterialData : register(b5)
