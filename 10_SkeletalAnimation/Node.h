@@ -1,9 +1,7 @@
 #pragma once
 #include "Struct.h"
-#include "BufferStruct.h"
 
 #include "../Engine/Header.h"
-#include "Struct.h"
 
 class Mesh;
 
@@ -33,7 +31,7 @@ public:
 	inline void SetTransform(aiMatrix4x4 transform);
 	inline aiMatrix4x4 GetTransform();
 	inline void SetMesh(Mesh* mesh);
-	inline Mesh* GetMesh();
+	inline vector<Mesh*> GetMesh();
 	inline void SetMaterial(Material* material);
 	inline Material* GetMaterial();
 	inline void SetAnimation(asAnimationNode* animation);
@@ -49,24 +47,22 @@ public:
 private:
 	string				m_Name;
 	string				m_ParentName;
+
 	Node*				m_Parent;
 	vector<Node*>		m_Children;
 
-	Mesh*				m_Mesh;
-	Material*			m_Material;
-	asAnimationNode*	m_Animation;
+	vector<Mesh*>		m_Mesh;
 	Bone*				m_Bone;
+	asAnimationNode*	m_Animation;
 
 private:
 	Math::Matrix m_Local;
 	Math::Matrix m_World;
 	aiMatrix4x4					m_Transform;
 
-	CBIsValidTextureMap			m_CBIsValidTextureMap;
-	CBMaterial					m_CBMaterial;
+
+
 	CBNodeTransform				m_CBNodeTransform;
-	ComPtr<ID3D11Buffer>		m_bisTextureMapBuffer;
-	ComPtr<ID3D11Buffer>		m_MaterialBuffer;
 	ComPtr<ID3D11Buffer>		m_NodeBuffer;
 };
 
@@ -114,22 +110,12 @@ aiMatrix4x4 Node::GetTransform()
 
 void Node::SetMesh(Mesh* mesh)
 {
-	m_Mesh = mesh;
+	m_Mesh.push_back(mesh);
 }
 
-Mesh* Node::GetMesh()
+vector<Mesh*> Node::GetMesh()
 {
 	return m_Mesh;
-}
-
-void Node::SetMaterial(Material* material)
-{
-	m_Material = material;
-}
-
-Material* Node::GetMaterial()
-{
-	return m_Material;
 }
 
 void Node::SetAnimation(asAnimationNode* animation)
@@ -165,11 +151,6 @@ DirectX::SimpleMath::Matrix Node::GetNodeTransform()
 	);
 
 	return transform;
-}
-
-CBIsValidTextureMap* Node::GetIsValidTextureMap()
-{
-	return &m_CBIsValidTextureMap;
 }
 
 Math::Matrix Node::GetNodeWorldTransform()

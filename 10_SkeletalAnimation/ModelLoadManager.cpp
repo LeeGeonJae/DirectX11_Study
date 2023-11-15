@@ -1,6 +1,8 @@
 #include "ModelLoadManager.h"
 #include "ImGuiMenu.h"
+
 #include "Model.h"
+#include "Mesh.h"
 #include "Node.h"
 
 #include <Directxtk/WICTextureLoader.h>
@@ -156,7 +158,7 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 	// 메시 본 가져오기
 	if (aimesh->HasBones())
 	{
-		node->GetIsValidTextureMap()->bIsValidBone = true;
+		myMesh->GetIsValidTextureMap()->bIsValidBone = true;
 
 		UINT meshBoneCount = aimesh->mNumBones;
 		UINT boneIndexCounter = 0;
@@ -224,39 +226,48 @@ Mesh* ModelLoadManager::processMesh(const aiMesh* aimesh, const aiScene* scene, 
 
 		Material* material = new Material;
 
-		aiColor3D basecolor(0.f, 0.f, 0.f);
-		aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, basecolor);
-		material->basecolor = Vector3(basecolor.r, basecolor.g, basecolor.b);
+		aiColor3D color(0.f, 0.f, 0.f);
+		aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+		material->m_BaseColor = Vector3(color.r, color.g, color.b);
+		aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+		material->m_EmissiveColor = Vector3(color.r, color.g, color.b);
 
 		vector<Texture*> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
 		if (diffuseMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
-			node->GetIsValidTextureMap()->bIsValidDiffuseMap = true;
+			myMesh->GetIsValidTextureMap()->bIsValidDiffuseMap = true;
 		}
 
 		vector<Texture*> NormalMaps = loadMaterialTextures(aimaterial, aiTextureType_NORMALS, "texture_normals", scene);
 		if (NormalMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
-			node->GetIsValidTextureMap()->bIsValidNormalMap = true;
+			myMesh->GetIsValidTextureMap()->bIsValidNormalMap = true;
 		}
 
 		vector<Texture*> SpecularMaps = loadMaterialTextures(aimaterial, aiTextureType_SPECULAR, "texture_specular", scene);
 		if (SpecularMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
-			node->GetIsValidTextureMap()->bIsValidSpecularMap = true;
+			myMesh->GetIsValidTextureMap()->bIsValidSpecularMap = true;
 		}
 
 		vector<Texture*> OpacityMaps = loadMaterialTextures(aimaterial, aiTextureType_OPACITY, "texture_opacity", scene);
 		if (OpacityMaps.size() > 0)
 		{
 			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
-			node->GetIsValidTextureMap()->bIsValidOpcityMap = true;
+			myMesh->GetIsValidTextureMap()->bIsValidOpcityMap = true;
 		}
 
-		node->SetMaterial(material);
+		vector<Texture*> EmissiveMaps = loadMaterialTextures(aimaterial, aiTextureType_EMISSIVE, "texture_emissive", scene);
+		if (EmissiveMaps.size() > 0)
+		{
+			material->m_Textures.insert(make_pair(static_cast<int>(TextureType::EMISSIVE), EmissiveMaps[0]));
+			myMesh->GetIsValidTextureMap()->bIsValidEmissiveMap = true;
+		}
+
+		myMesh->SetMaterial(material);
 	}
 
 	return myMesh;

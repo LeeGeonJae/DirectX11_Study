@@ -48,7 +48,7 @@ void DemoApp::initD3D()
 void DemoApp::initScene()
 {
 	myModel = new Model;
-	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/Dying.fbx", myModel);
+	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/SkinningTest.fbx", myModel);
 
 	createVS();
 	createInputLayout();
@@ -98,8 +98,10 @@ void DemoApp::Update()
 
 	// NormalMap
 	{
+		m_CBNormalMap.UseDiffuseMap = ImGuiMenu::bIsDiffuseMap;
 		m_CBNormalMap.UseNormalMap = ImGuiMenu::bIsNormalMap;
 		m_CBNormalMap.UseSpecularMap = ImGuiMenu::bIsSpecularMap;
+		m_CBNormalMap.UseEmissiveMap = ImGuiMenu::bIsEmissiveMap;
 		m_CBNormalMap.UseGammaCorrection = ImGuiMenu::bIsGammaCorrection;
 	}
 }

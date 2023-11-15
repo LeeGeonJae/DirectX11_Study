@@ -5,9 +5,9 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-Vector4 ImGuiMenu::CameraPos = { 0.f, 0.f, -1000.f, 0.f };
+Vector4 ImGuiMenu::CameraPos = { 0.f, 70.f, -400.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
-float ImGuiMenu::CameraNearFar[2] = { 0.01f , 30000.0f };
+float ImGuiMenu::CameraNearFar[2] = { 1.f , 30000.0f };
 
 Vector3 ImGuiMenu::CubePosition = {};
 Vector2 ImGuiMenu::CubeRotation = {};
@@ -18,9 +18,15 @@ Vector4 ImGuiMenu::DirectionLightColor = { 1.f, 1.f, 1.f, 1.f };
 Vector3 ImGuiMenu::AmbientColor = { 0.1f, 0.1f, 0.1f };
 float ImGuiMenu::SpecularPower = 50.f;
 
+bool ImGuiMenu::bIsDiffuseMap = true;
 bool ImGuiMenu::bIsNormalMap = true;
 bool ImGuiMenu::bIsSpecularMap = true;
+bool ImGuiMenu::bIsEmissiveMap = true;
 bool ImGuiMenu::bIsGammaCorrection = true;
+float ImGuiMenu::EmissivePower = 1.f;
+float ImGuiMenu::OpacityValue = 0.5f;
+
+float ImGuiMenu::AnimationSpeed = 1.f;
 
 ImGuiMenu::ImGuiMenu(DemoApp* owner)
 	:m_Owner(owner)
@@ -77,7 +83,7 @@ void ImGuiMenu::Render()
 
 			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -600.f, 500.f);
 			ImGui::SliderFloat("Camera Fov", &camerafov, 0.01f, 180.f);
-			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 30000.f);
+			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 1.f, 30000.f);
 
 			CameraFov = camerafov * 3.14f / 180.f;
 
@@ -87,10 +93,14 @@ void ImGuiMenu::Render()
 			}
 		}
 
-		// ¸Ê Ã¼Å©
-		ImGui::Checkbox("NormalMap Check", &bIsNormalMap);
-		ImGui::Checkbox("SpecularMap Check", &bIsSpecularMap);
-		ImGui::Checkbox("GammaCorrection Check", &bIsGammaCorrection);
+		// Cube
+		if (ImGui::CollapsingHeader("Model Setting"))
+		{
+			ImGui::SliderFloat3("Model Position", (float*)&CubePosition, -20.f, 20.f);
+			ImGui::SliderFloat3("Model Scale", (float*)&CubeScale, 0.f, 20.f);
+			ImGui::SliderFloat2("Model Rotation", (float*)&CubeRotation, -1.f, 1.f);
+			ImGui::SliderFloat("Model AnimationSpeed", &AnimationSpeed, 0.f, 5.f);
+		}
 
 		if (durationTime >= 1.f)
 		{
@@ -105,6 +115,23 @@ void ImGuiMenu::Render()
 
 		ImGui::Text(fps.c_str());
 		ImGui::Text(pfs.c_str());
+
+		ImGui::End();
+	}
+
+	// Light
+	{
+		ImGui::Begin("Material Menu");
+
+		// ¸Ê Ã¼Å©
+		ImGui::Checkbox("DiffuseMap Check", &bIsDiffuseMap);
+		ImGui::Checkbox("NormalMap Check", &bIsNormalMap);
+		ImGui::Checkbox("SpecularMap Check", &bIsSpecularMap);
+		ImGui::Checkbox("EmissiveMap Check", &bIsEmissiveMap);
+		ImGui::Checkbox("GammaCorrection Check", &bIsGammaCorrection);
+
+		ImGui::SliderFloat("OpacityValue", &OpacityValue, 0.f, 1.f);
+		ImGui::SliderFloat("EmissivePower", &EmissivePower, 0.f, 5.f);
 
 		ImGui::End();
 	}

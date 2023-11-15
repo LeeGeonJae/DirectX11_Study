@@ -30,9 +30,15 @@ public:
 	static float SpecularPower;
 	static Vector3 AmbientColor;
 
+	static bool bIsDiffuseMap;
 	static bool bIsNormalMap;
 	static bool bIsSpecularMap;
+	static bool bIsEmissiveMap;
 	static bool bIsGammaCorrection;
+	static float EmissivePower;
+	static float OpacityValue;
+
+	static float AnimationSpeed;
 
 private:
 	DemoApp* m_Owner;

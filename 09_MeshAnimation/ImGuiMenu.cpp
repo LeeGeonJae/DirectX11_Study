@@ -4,7 +4,7 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-Vector4 ImGuiMenu::CameraPos = { 0.f, 0.f, -1000.f, 0.f };
+Vector4 ImGuiMenu::CameraPos = { 0.f, 300.f, -1000.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
 float ImGuiMenu::CameraNearFar[2] = { 1.0f , 30000.0f };
 
@@ -13,9 +13,9 @@ Vector2 ImGuiMenu::CubeRotation = {};
 Vector3 ImGuiMenu::CubeScale = { 1.f, 1.f, 1.f };
 
 Vector4 ImGuiMenu::DirectionLightDir = { 0.f, 0.f, 1.f, 0.0f };
-Vector4 ImGuiMenu::DirectionLightColor = { 1.f, 1.f, 1.f, 1.f };
+Vector4 ImGuiMenu::DirectionLightColor = { 0.5f, 0.5f, 0.5f, 1.f };
 Vector3 ImGuiMenu::AmbientColor = { 0.1f, 0.1f, 0.1f };
-float ImGuiMenu::SpecularPower = 50.f;
+float ImGuiMenu::SpecularPower = 500.f;
 
 bool ImGuiMenu::bIsNormalMap = true;
 bool ImGuiMenu::bIsSpecularMap = true;
@@ -69,7 +69,7 @@ void ImGuiMenu::Render()
 
 			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -600.f, 500.f);
 			ImGui::SliderFloat("Camera Fov", &camerafov, 1.0f, 180.f);
-			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 0.1f, 500.f);
+			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 1.f, 500.f);
 
 			CameraFov = camerafov * 3.14f / 180.f;
 

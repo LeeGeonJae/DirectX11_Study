@@ -7,6 +7,7 @@ enum class TextureType
 	NORMAL,
 	SPECULAR,
 	OPACITY,
+	EMISSIVE,
 
 
 	END

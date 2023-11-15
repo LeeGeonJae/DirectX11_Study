@@ -2,6 +2,7 @@
 #include "../Engine/Header.h"
 #include "../Engine/Types.h"
 #include "enum.h"
+#include "BufferStruct.h"
 
 class Node;
 
@@ -24,7 +25,8 @@ struct Texture
 struct Material
 {
 	string m_Name;
-	Vector3 basecolor;
+	Vector3 m_BaseColor;
+	Vector3 m_EmissiveColor;
 	map<int, Texture*> m_Textures;
 
 	// 텍스처가 있는지

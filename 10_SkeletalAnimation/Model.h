@@ -1,7 +1,6 @@
 #pragma once
 #include "../Engine/Header.h"
 #include "Struct.h"
-#include "BufferStruct.h"
 
 class Node;
 

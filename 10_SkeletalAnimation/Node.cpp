@@ -1,6 +1,6 @@
 #include "Node.h"
-#include "Mesh.h"
 
+#include "Mesh.h"
 #include "ImGuiMenu.h"
 #include "../Engine/TimeManager.h"
 
@@ -10,30 +10,22 @@ Node::Node()
 	, m_Parent(nullptr)
 	, m_Children()
 	, m_Transform()
-	, m_Mesh(nullptr)
-	, m_Material(nullptr)
+	, m_Mesh()
 	, m_Animation(nullptr)
 	, m_Bone(nullptr)
 	, m_NodeBuffer(nullptr)
-	, m_bisTextureMapBuffer(nullptr)
 {
-	m_CBIsValidTextureMap.bIsValidDiffuseMap = false;
-	m_CBIsValidTextureMap.bIsValidNormalMap = false;
-	m_CBIsValidTextureMap.bIsValidOpcityMap = false;
-	m_CBIsValidTextureMap.bIsValidSpecularMap = false;
-	m_CBIsValidTextureMap.bIsValidBone = false;
+
 	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
-	m_CBMaterial.basecolor = Color(1.f, 1.f, 1.f, 1.f);
+
 }
 
 void Node::Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> NodeBuffer)
 {
 	m_NodeBuffer = NodeBuffer->m_pCBNodelData;
-	m_bisTextureMapBuffer = NodeBuffer->m_pCBbisTextureMap;
-	m_MaterialBuffer = NodeBuffer->m_pCBMaterialData;
 
-	if (m_Mesh != nullptr)
-		m_Mesh->SetupMesh(device);
+	for(auto mesh : m_Mesh)
+		mesh->SetupMesh(device, NodeBuffer);
 
 	for (auto child : m_Children)
 	{
@@ -54,7 +46,7 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		if (m_Animation != nullptr)
 		{
 			static float currentTime = 0.f;
-			currentTime += TimeManager::GetInstance()->GetfDT() / 1.5;
+			currentTime += TimeManager::GetInstance()->GetfDT() * ImGuiMenu::AnimationSpeed / 1.5f;
 
 			if (currentTime > m_Animation->m_FrameCount)
 			{
@@ -75,12 +67,20 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		//부모가 있으면 해당 부모의 트랜스폼 곱하기
 		if (m_Parent != nullptr)
 		{
-			m_World = m_Local * m_Parent->m_World;
+			m_World = m_Local  * m_Parent->m_World;
 			m_CBNodeTransform.World = m_World;
 		}
 		else
 		{
-			m_World = m_Local;
+			XMMATRIX mSpin1 = XMMatrixRotationX(ImGuiMenu::CubeRotation.x * 3.14f);
+			XMMATRIX mSpin2 = XMMatrixRotationY(ImGuiMenu::CubeRotation.y * 3.14f);
+			XMMATRIX mScale = XMMatrixScaling(ImGuiMenu::CubeScale.x, ImGuiMenu::CubeScale.y, ImGuiMenu::CubeScale.z);
+			XMMATRIX mTranslate1 = XMMatrixTranslation(ImGuiMenu::CubePosition.x, ImGuiMenu::CubePosition.y, ImGuiMenu::CubePosition.z);
+
+			// Cube World Setting
+			XMMATRIX world = mScale * mSpin1 * mSpin2 * mTranslate1;
+
+			m_World = m_Local * world;
 			m_CBNodeTransform.World = m_World;
 		}
 	}
@@ -97,33 +97,18 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 
 void Node::Draw(ID3D11DeviceContext* deviceContext)
 {
-	if (m_Mesh != nullptr)
+	for(auto mesh : m_Mesh)
 	{
-		// 텍스쳐 파일 세팅
-		for (int i = 0; i < static_cast<int>(TextureType::END); i++)
-		{
-			auto find = m_Material->GetTexture(static_cast<TextureType>(i));
-			if (find != nullptr)
-			{
-				deviceContext->PSSetShaderResources(i, 1, &find->m_Texture);
-			}
-		}
+		Math::Matrix matrix = m_CBNodeTransform.World.Transpose();
 
-		auto matrix = m_CBNodeTransform.World.Transpose();
-		m_CBMaterial.basecolor = Color(m_Material->basecolor.x, m_Material->basecolor.y, m_Material->basecolor.z, 1.f);
 
-		deviceContext->UpdateSubresource(m_bisTextureMapBuffer.Get(), 0, nullptr, &m_CBIsValidTextureMap, 0, 0);
-		deviceContext->UpdateSubresource(m_MaterialBuffer.Get(), 0, nullptr, &m_CBMaterial, 0, 0);
 		deviceContext->UpdateSubresource(m_NodeBuffer.Get(), 0, nullptr, &matrix, 0, 0);
 
-		deviceContext->VSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
-		deviceContext->PSSetConstantBuffers(4, 1, m_bisTextureMapBuffer.GetAddressOf());
-		deviceContext->VSSetConstantBuffers(5, 1, m_MaterialBuffer.GetAddressOf());
-		deviceContext->PSSetConstantBuffers(5, 1, m_MaterialBuffer.GetAddressOf());
+
 		deviceContext->VSSetConstantBuffers(6, 1, m_NodeBuffer.GetAddressOf());
 		deviceContext->PSSetConstantBuffers(6, 1, m_NodeBuffer.GetAddressOf());
 
-		m_Mesh->Draw(deviceContext);
+		mesh->Draw(deviceContext);
 	}
 
 	// 자식 노드 렌더
@@ -148,10 +133,12 @@ Node::~Node()
 		child = nullptr;
 	}
 
-	if (m_Mesh != nullptr)
-		delete m_Mesh;
-	if (m_Material != nullptr)
-		delete m_Material;
+	for (auto mesh : m_Mesh)
+	{
+		if (mesh != nullptr)
+			delete mesh;
+	}
+
 	if (m_Animation != nullptr)
 		delete m_Animation;
 }

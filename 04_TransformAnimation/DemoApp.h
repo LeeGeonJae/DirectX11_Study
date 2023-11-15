@@ -2,7 +2,6 @@
 #include <d3d11.h>
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
-#include "../Engine/Struct.h"
 #include "ImGuiMenu.h"
 
 #include <imgui.h>

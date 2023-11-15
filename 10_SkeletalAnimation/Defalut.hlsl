@@ -49,8 +49,10 @@ cbuffer Camera : register(b2)
 // ImGui로 텍스쳐 체크해주는 Constant Buffer
 cbuffer NormalMap : register(b3)
 {
+    int UseDiffuseMap;
     int UseNormalMap;
     int UseSpecularMap;
+    int UseEmissiveMap;
     int UseGammaCorrection;
 }
 // 텍스쳐 맵이 있는지 체크하는 Constant Buffer
@@ -60,12 +62,16 @@ cbuffer bisTextureMapData : register(b4)
     int bIsValidNormalMap;
     int bIsValidSpecularMap;
     int bIsValidOpcityMap;
+    int bIsValidEmissiveMap;
     int bIsValidBone;
 }
 
 cbuffer MaterialData : register(b5)
 {
     float4 baseColor;
+    float4 emissiveColor;
+    float OpacityValue;
+    float EmissivePower;
 }
 
 // 메시 월드 좌표 ConstantBuffer
@@ -92,12 +98,20 @@ VS_OUTPUT VS(VS_INPUT input)
     // 본이 있으면 본의 월드 트랜스폼 위치에 맞춰서 위치 아니면 기존 월드 트랜스폼 위치에 위치
 
         // 월드 내의 위치
-    matWorldBlended = mul(input.mBlendWeights.x, MatrixPalleteArray[input.mBlendIndices.x]);
-    matWorldBlended += mul(input.mBlendWeights.y, MatrixPalleteArray[input.mBlendIndices.y]);
-    matWorldBlended += mul(input.mBlendWeights.z, MatrixPalleteArray[input.mBlendIndices.z]);
-    matWorldBlended += mul(input.mBlendWeights.w, MatrixPalleteArray[input.mBlendIndices.w]);
-    pos = mul(pos, matWorldBlended);
-    output.mPositionWorld = pos;
+    if (bIsValidBone)
+    {
+        matWorldBlended = mul(input.mBlendWeights.x, MatrixPalleteArray[input.mBlendIndices.x]);
+        matWorldBlended += mul(input.mBlendWeights.y, MatrixPalleteArray[input.mBlendIndices.y]);
+        matWorldBlended += mul(input.mBlendWeights.z, MatrixPalleteArray[input.mBlendIndices.z]);
+        matWorldBlended += mul(input.mBlendWeights.w, MatrixPalleteArray[input.mBlendIndices.w]);
+        pos = mul(pos, matWorldBlended);
+        output.mPositionWorld = pos;
+    }
+    else
+    {
+        pos = mul(pos, meshWorld);
+        output.mPositionWorld = pos;
+    }
     
     // ndc 공간 내의 위치
     pos = mul(pos, View);
@@ -110,9 +124,18 @@ VS_OUTPUT VS(VS_INPUT input)
     output.mViewDir = viewDir;
     
     // 오브젝트 월드에서 노말 벡터 계산 (오브젝트의 정면에 90도를 이루는 벡터)
-    output.mNormal = normalize(mul(input.mNormal, (float3x3) matWorldBlended));
-    output.mTangent = normalize(mul(input.mTangent, (float3x3) matWorldBlended));
-    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) matWorldBlended));
+    if (bIsValidBone)
+    {
+        output.mNormal = normalize(mul(input.mNormal, (float3x3) matWorldBlended));
+        output.mTangent = normalize(mul(input.mTangent, (float3x3) matWorldBlended));
+        output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) matWorldBlended));
+    }
+    else
+    {
+        output.mNormal = normalize(mul(input.mNormal, (float3x3) meshWorld));
+        output.mTangent = normalize(mul(input.mTangent, (float3x3) meshWorld));
+        output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) meshWorld));
+    }
     
     // 난반사(Diffuse) 내적으로 구하기
     output.mDiffuse = saturate(dot(-lightDir, output.mNormal));
@@ -129,6 +152,7 @@ Texture2D texture0 : register(t1);
 Texture2D normal0 : register(t2);
 Texture2D specular0 : register(t3);
 Texture2D opcity0 : register(t4);
+Texture2D emissive0 : register(t5);
 SamplerState sampler0 : register(s0);
 
 // Pixel Shader(PS) 프로그래밍
@@ -137,7 +161,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float4 TextureColor = baseColor;
     
     // 텍스처
-    if (bIsValidDiffuseMap)
+    if (bIsValidDiffuseMap && UseDiffuseMap)
     {
         TextureColor = texture0.Sample(sampler0, input.mUV);
     }
@@ -171,7 +195,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     }
     
     float4 diffuse = input.mDiffuse * LightColor;
-    
+        
     // 반사광의 노멀라이즈(정규화), 오브젝트에서 카메라까지의 거리 노멀라이즈(정규화)
     float3 viewDir = normalize(input.mViewDir);
     float4 specular = 0;
@@ -189,17 +213,24 @@ float4 PS(VS_OUTPUT input) : SV_Target
     }
     
     // 오파시티 맵이 있으면 해당 오파시티 맵의 알파값에 따라 픽셀 버리기
-    float alpha = 0.f;
+    float alpha = 1.f;
     if (TextureColor.a < 1.f)
     {
         alpha = TextureColor.a;
-        clip(alpha < 0.5f ? -1.f : 1.f);
+        clip(alpha < OpacityValue ? -1.f : 1.f);
+    }
+    
+    float3 emissive = float3(0.f, 0.f, 0.f);
+    if (bIsValidEmissiveMap && UseEmissiveMap)
+    {
+        emissive = emissive0.Sample(sampler0, input.mUV).rgb;
+        emissive = emissive * emissiveColor.rgb * EmissivePower;
     }
     
     float4 TotalAmbient = float4(AmbientColor, 1) * float4(TextureColor.rgb, alpha) * 0.1f;
     float4 TotalSpecular = specular * float4(TextureColor.rgb, alpha);
     float4 TotalDiffuse = diffuse * float4(TextureColor.rgb, alpha);
-    float4 finalColor = float4(TotalDiffuse.rgb + TotalSpecular.rgb + TotalAmbient.rgb, alpha);
+    float4 finalColor = float4(TotalDiffuse.rgb + TotalSpecular.rgb + TotalAmbient.rgb + emissive.rgb, alpha);
     
     // 감마 콜렉션
     if (UseGammaCorrection)

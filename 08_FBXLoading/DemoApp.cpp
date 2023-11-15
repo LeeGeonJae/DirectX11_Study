@@ -45,7 +45,7 @@ void DemoApp::initD3D()
 
 void DemoApp::initScene()
 {
-	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/zeldaPosed001.fbx");
+	m_ModelLoader->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/Tree.fbx");
 
 	createVS();
 	createInputLayout();

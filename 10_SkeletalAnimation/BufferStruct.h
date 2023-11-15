@@ -58,15 +58,21 @@ struct CBCameraData
 
 struct CBUseTextureMap
 {
+	int UseDiffuseMap;
 	int UseNormalMap;
 	int UseSpecularMap;
+	int UseEmissiveMap;
 	int UseGammaCorrection;
-	int dummy;
+	Vector3 dummy;
 };
 
 struct CBMaterial
 {
-	Color basecolor;
+	Color BaseColor;
+	Color EmissiveColor;
+	float OpacityValue;
+	float EmissivePower;
+	Vector2 dummy;
 };
 
 struct CBIsValidTextureMap
@@ -75,8 +81,9 @@ struct CBIsValidTextureMap
 	int bIsValidNormalMap;
 	int bIsValidSpecularMap;
 	int bIsValidOpcityMap;
+	int bIsValidEmissiveMap;
 	int bIsValidBone;
-	Vector3 dummy;
+	Vector2 dummy;
 };
 
 struct CBMatrixPallete
