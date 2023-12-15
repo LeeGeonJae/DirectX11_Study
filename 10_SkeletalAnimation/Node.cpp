@@ -46,7 +46,7 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		if (m_Animation != nullptr)
 		{
 			static float currentTime = 0.f;
-			currentTime += TimeManager::GetInstance()->GetfDT() * ImGuiMenu::AnimationSpeed / 1.5f;
+			currentTime += TimeManager::GetInstance()->GetfDT() / 1.6f * ImGuiMenu::ModelAnimationSpeed;
 
 			if (currentTime > m_Animation->m_FrameCount)
 			{
@@ -72,10 +72,10 @@ void Node::Update(ID3D11DeviceContext* deviceContext)
 		}
 		else
 		{
-			XMMATRIX mSpin1 = XMMatrixRotationX(ImGuiMenu::CubeRotation.x * 3.14f);
-			XMMATRIX mSpin2 = XMMatrixRotationY(ImGuiMenu::CubeRotation.y * 3.14f);
-			XMMATRIX mScale = XMMatrixScaling(ImGuiMenu::CubeScale.x, ImGuiMenu::CubeScale.y, ImGuiMenu::CubeScale.z);
-			XMMATRIX mTranslate1 = XMMatrixTranslation(ImGuiMenu::CubePosition.x, ImGuiMenu::CubePosition.y, ImGuiMenu::CubePosition.z);
+			XMMATRIX mSpin1 = XMMatrixRotationX(ImGuiMenu::ModelRotation.x * 3.14f);
+			XMMATRIX mSpin2 = XMMatrixRotationY(ImGuiMenu::ModelRotation.y * 3.14f);
+			XMMATRIX mScale = XMMatrixScaling(ImGuiMenu::ModelScale.x, ImGuiMenu::ModelScale.y, ImGuiMenu::ModelScale.z);
+			XMMATRIX mTranslate1 = XMMatrixTranslation(ImGuiMenu::ModelPosition.x, ImGuiMenu::ModelPosition.y, ImGuiMenu::ModelPosition.z);
 
 			// Cube World Setting
 			XMMATRIX world = mScale * mSpin1 * mSpin2 * mTranslate1;

@@ -48,7 +48,7 @@ void DemoApp::initD3D()
 void DemoApp::initScene()
 {
 	myModel = new Model;
-	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/SkinningTest.fbx", myModel);
+	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/cerberus_test.fbx", myModel);
 
 	createVS();
 	createInputLayout();
@@ -98,7 +98,6 @@ void DemoApp::Update()
 
 	// NormalMap
 	{
-		m_CBNormalMap.UseDiffuseMap = ImGuiMenu::bIsDiffuseMap;
 		m_CBNormalMap.UseNormalMap = ImGuiMenu::bIsNormalMap;
 		m_CBNormalMap.UseSpecularMap = ImGuiMenu::bIsSpecularMap;
 		m_CBNormalMap.UseEmissiveMap = ImGuiMenu::bIsEmissiveMap;
@@ -133,7 +132,10 @@ void DemoApp::Render()
 		// RAS
 		m_DeviceContext->RSSetState(m_rasterizerState.Get());
 
-		// RS
+		m_DeviceContext->UpdateSubresource(m_pCBCoordinateData.Get(), 0, nullptr, &m_CBCoordinateData, 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBLight.Get(), 0, nullptr, &m_CBLightData, 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBCamera.Get(), 0, nullptr, &m_CBCamera, 0, 0);
+		m_DeviceContext->UpdateSubresource(m_pCBUseTextureMap.Get(), 0, nullptr, &m_CBNormalMap, 0, 0);
 
 		// PS
 		m_DeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
@@ -145,10 +147,7 @@ void DemoApp::Render()
 		// OM
 
 		//
-		m_DeviceContext->UpdateSubresource(m_pCBCoordinateData.Get(), 0, nullptr, &m_CBCoordinateData, 0, 0);
-		m_DeviceContext->UpdateSubresource(m_pCBLight.Get(), 0, nullptr, &m_CBLightData, 0, 0);
-		m_DeviceContext->UpdateSubresource(m_pCBCamera.Get(), 0, nullptr, &m_CBCamera, 0, 0);
-		m_DeviceContext->UpdateSubresource(m_pCBUseTextureMap.Get(), 0, nullptr, &m_CBNormalMap, 0, 0);
+
 
 		// 모델 업데이트
 		myModel->Update(m_DeviceContext.Get());

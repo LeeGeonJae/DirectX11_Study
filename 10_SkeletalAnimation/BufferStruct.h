@@ -58,12 +58,10 @@ struct CBCameraData
 
 struct CBUseTextureMap
 {
-	int UseDiffuseMap;
 	int UseNormalMap;
 	int UseSpecularMap;
 	int UseEmissiveMap;
 	int UseGammaCorrection;
-	Vector3 dummy;
 };
 
 struct CBMaterial

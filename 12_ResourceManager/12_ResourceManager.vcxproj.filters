@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header">
+      <UniqueIdentifier>{ecc04ba7-eb5a-4084-a37e-eb32cf92491e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{5664c783-0714-483a-8372-63c67dc55434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{a95019d4-e2de-4d74-99ad-5062de3ee29b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{6bdf98f5-a542-47b4-8d05-9d957bbd6f45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{384bc364-32b7-45b9-8b9a-de252ab2ddf1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DemoApp.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferStruct.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="enum.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiMenu.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoadManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DemoApp.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiMenu.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoadManager.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Default.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

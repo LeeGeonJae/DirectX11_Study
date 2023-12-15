@@ -49,7 +49,6 @@ cbuffer Camera : register(b2)
 // ImGui로 텍스쳐 체크해주는 Constant Buffer
 cbuffer NormalMap : register(b3)
 {
-    int UseDiffuseMap;
     int UseNormalMap;
     int UseSpecularMap;
     int UseEmissiveMap;
@@ -161,7 +160,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float4 TextureColor = baseColor;
     
     // 텍스처
-    if (bIsValidDiffuseMap && UseDiffuseMap)
+    if (bIsValidDiffuseMap)
     {
         TextureColor = texture0.Sample(sampler0, input.mUV);
     }
@@ -195,7 +194,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     }
     
     float4 diffuse = input.mDiffuse * LightColor;
-        
+    
     // 반사광의 노멀라이즈(정규화), 오브젝트에서 카메라까지의 거리 노멀라이즈(정규화)
     float3 viewDir = normalize(input.mViewDir);
     float4 specular = 0;

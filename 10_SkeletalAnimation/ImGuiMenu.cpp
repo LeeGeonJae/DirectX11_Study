@@ -9,24 +9,22 @@ Vector4 ImGuiMenu::CameraPos = { 0.f, 70.f, -400.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
 float ImGuiMenu::CameraNearFar[2] = { 1.f , 30000.0f };
 
-Vector3 ImGuiMenu::CubePosition = {};
-Vector2 ImGuiMenu::CubeRotation = {};
-Vector3 ImGuiMenu::CubeScale = { 1.f, 1.f, 1.f };
+Vector3 ImGuiMenu::ModelPosition = {};
+Vector2 ImGuiMenu::ModelRotation = {};
+Vector3 ImGuiMenu::ModelScale = { 1.f, 1.f, 1.f };
+float ImGuiMenu::ModelAnimationSpeed = 1.f;
 
 Vector4 ImGuiMenu::DirectionLightDir = { 0.f, 0.f, 1.f, 0.0f };
 Vector4 ImGuiMenu::DirectionLightColor = { 1.f, 1.f, 1.f, 1.f };
 Vector3 ImGuiMenu::AmbientColor = { 0.1f, 0.1f, 0.1f };
 float ImGuiMenu::SpecularPower = 50.f;
 
-bool ImGuiMenu::bIsDiffuseMap = true;
 bool ImGuiMenu::bIsNormalMap = true;
 bool ImGuiMenu::bIsSpecularMap = true;
 bool ImGuiMenu::bIsEmissiveMap = true;
 bool ImGuiMenu::bIsGammaCorrection = true;
 float ImGuiMenu::EmissivePower = 1.f;
 float ImGuiMenu::OpacityValue = 0.5f;
-
-float ImGuiMenu::AnimationSpeed = 1.f;
 
 ImGuiMenu::ImGuiMenu(DemoApp* owner)
 	:m_Owner(owner)
@@ -94,12 +92,11 @@ void ImGuiMenu::Render()
 		}
 
 		// Cube
-		if (ImGui::CollapsingHeader("Model Setting"))
+		if (ImGui::CollapsingHeader("Model Position Setting"))
 		{
-			ImGui::SliderFloat3("Model Position", (float*)&CubePosition, -20.f, 20.f);
-			ImGui::SliderFloat3("Model Scale", (float*)&CubeScale, 0.f, 20.f);
-			ImGui::SliderFloat2("Model Rotation", (float*)&CubeRotation, -1.f, 1.f);
-			ImGui::SliderFloat("Model AnimationSpeed", &AnimationSpeed, 0.f, 5.f);
+			ImGui::SliderFloat3("Model Position", (float*)&ModelPosition, -20.f, 20.f);
+			ImGui::SliderFloat3("Model Scale", (float*)&ModelScale, 0.f, 20.f);
+			ImGui::SliderFloat2("Model Rotation", (float*)&ModelRotation, -1.f, 1.f);
 		}
 
 		if (durationTime >= 1.f)
@@ -124,7 +121,6 @@ void ImGuiMenu::Render()
 		ImGui::Begin("Material Menu");
 
 		// ¸Ê Ã¼Å©
-		ImGui::Checkbox("DiffuseMap Check", &bIsDiffuseMap);
 		ImGui::Checkbox("NormalMap Check", &bIsNormalMap);
 		ImGui::Checkbox("SpecularMap Check", &bIsSpecularMap);
 		ImGui::Checkbox("EmissiveMap Check", &bIsEmissiveMap);
@@ -132,6 +128,7 @@ void ImGuiMenu::Render()
 
 		ImGui::SliderFloat("OpacityValue", &OpacityValue, 0.f, 1.f);
 		ImGui::SliderFloat("EmissivePower", &EmissivePower, 0.f, 5.f);
+		ImGui::SliderFloat("Model Animation Speed", &ModelAnimationSpeed, 0.f, 5.f);
 
 		ImGui::End();
 	}
