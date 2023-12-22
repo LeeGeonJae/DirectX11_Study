@@ -30,6 +30,15 @@ struct BoneWeightVertex
 	}
 };
 
+struct Vertex
+{
+	Vector3 m_Position;
+	Vector2 m_Texcoord;
+	Vector3 m_Normal;
+	Vector3 m_Tangent;
+	Vector3 m_BiTangetns;
+};
+
 struct CBCoordinateData
 {
 	DirectX::SimpleMath::Matrix View;

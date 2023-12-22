@@ -3,6 +3,8 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 
+struct Vertex;
+
 class DemoApp
 	: public GameApp
 {

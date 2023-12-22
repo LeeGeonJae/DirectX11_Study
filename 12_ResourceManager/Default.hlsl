@@ -210,11 +210,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float metalness = 1.f;
     
     //텍스처
-    if (bIsValidDiffuseMap)
+    //if (bIsValidDiffuseMap)
         albedo = texture0.Sample(sampler0, input.mUV).rgb;
     // 러프니스
     //if (bIsValidRoughnessMap)
-        roughness = roughness0.Sample(sampler0, input.mUV).r;
+    roughness = roughness0.Sample(sampler0, input.mUV).r;
     // 메탈릭
     //if (bIsValidMetalnessMap)
         metalness = metalness0.Sample(sampler0, input.mUV).r;
@@ -266,8 +266,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             float3 Lh = normalize(-lightDir + Lo);
 
-            float cosLi = dot(Normal, -lightDir);
-            float cosLh = dot(Normal, Lh);
+            float cosLi = max(0.0, dot(Normal, -lightDir));
+            float cosLh = max(0.0, dot(Normal, Lh));
         
             float3 F = FresnelReflection(max(0.0, dot(Lh, Lo)), F0);
             float D = ndfGGX(cosLh, roughness);
@@ -299,7 +299,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     //float4 TotalAmbient = float4(AmbientColor, 1) * float4(albedo, alpha) * 0.1f;
     float4 TotalAmbient = float4(AmbientColor, 1) * float4(albedo, alpha) * 0.1f;
-    float4 finalColor = float4(directLighting + TotalAmbient.rgb + emissive.rgb, 1.f);
+    float4 finalColor = float4(directLighting + emissive.rgb, 1.f);
     
     // 감마 콜렉션
     if (UseGammaCorrection)

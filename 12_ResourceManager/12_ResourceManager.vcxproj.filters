@@ -16,6 +16,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{384bc364-32b7-45b9-8b9a-de252ab2ddf1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{ecf85e18-3621-40cd-9b90-d50c340a8a76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DemoApp.h">
@@ -48,6 +51,18 @@
     <ClInclude Include="Model.h">
       <Filter>Model</Filter>
     </ClInclude>
+    <ClInclude Include="StaticMesh.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletalMesh.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DemoApp.cpp">
@@ -73,6 +88,18 @@
     </ClCompile>
     <ClCompile Include="Node.cpp">
       <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletalMesh.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticMesh.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

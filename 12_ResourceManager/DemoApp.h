@@ -93,7 +93,7 @@ private:
 	// [ CPU <-> RAM ] [ GPU <-> VRAM ]
 
 private:
-	ImGuiMenu* m_imgui;
+	shared_ptr<ImGuiMenu> m_imgui;
 
 	CBCoordinateData		m_CBCoordinateData;
 	CBLightData				m_CBLightData;
@@ -113,6 +113,5 @@ private:
 	XMFLOAT4 m_LightColor;
 
 private:
-	ModelLoadManager* m_ModelLoader = nullptr;
-	Model* myModel;
+	vector<shared_ptr<Model>> myModels;
 };

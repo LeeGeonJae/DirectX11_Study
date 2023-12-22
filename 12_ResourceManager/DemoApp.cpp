@@ -8,6 +8,7 @@
 
 #include "ImGuiMenu.h"
 #include "ModelLoadManager.h"
+#include "ResourceManager.h"
 #include "Model.h"
 //#include "Node.h"
 
@@ -20,20 +21,18 @@ DemoApp::DemoApp(HINSTANCE hInstance)
 
 DemoApp::~DemoApp()
 {
-	delete m_ModelLoader;
-	delete myModel;
+	//delete m_ModelLoader;
+	//delete myModel;
 }
 
 void DemoApp::Initialize(UINT Width, UINT Height)
 {
 	__super::Initialize(Width, Height);
 
-	m_ModelLoader = new ModelLoadManager();
-
 	initD3D();
 	initScene();
 
-	m_imgui = new ImGuiMenu(this);
+	m_imgui = make_shared<ImGuiMenu>(this);
 	m_imgui->Init(m_hWnd, m_Device.Get(), m_DeviceContext.Get());
 }
 
@@ -47,8 +46,10 @@ void DemoApp::initD3D()
 
 void DemoApp::initScene()
 {
-	myModel = new Model;
-	ModelLoadManager::GetInstance()->Load(m_hWnd, m_Device.Get(), m_DeviceContext.Get(), "../Resource/Texture/PBR_Test.fbx", myModel);
+	ResourceManager::GetInstance()->Init(m_Device, m_DeviceContext);
+	ModelLoadManager::GetInstance()->Init(m_Device, m_DeviceContext);
+
+	shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/Dying.fbx");
 
 	createVS();
 	createInputLayout();
@@ -62,12 +63,20 @@ void DemoApp::initScene()
 	createConstantBuffer();
 
 	setTransform();
-	myModel->Init(m_Device.Get(), m_ModelCBBuffer);
+	model->Init(m_Device.Get(), m_ModelCBBuffer);
+	myModels.push_back(model);
 }
 
 void DemoApp::Update()
 {
 	__super::Update();
+
+	if (GetAsyncKeyState('S') & 0x8000)
+	{
+		shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/Dying.fbx");
+		model->Init(m_Device.Get(), m_ModelCBBuffer);
+		myModels.push_back(model);
+	}
 
 	// Camera
 	{
@@ -144,13 +153,10 @@ void DemoApp::Render()
 		m_DeviceContext->PSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(3, 1, m_pCBUseTextureMap.GetAddressOf());
-		// OM
-
-		//
-
 
 		// 모델 업데이트
-		myModel->Update(m_DeviceContext.Get());
+		for (auto model : myModels)
+			model->Update(m_DeviceContext.Get());
 	}
 
 	// ImGUI
@@ -466,12 +472,6 @@ void DemoApp::setTransform()
 
 void DemoApp::Release()
 {
-	if (m_imgui)
-	{
-		delete m_imgui;
-		m_imgui = nullptr;
-	}
-
 	m_RenderTargetView.ReleaseAndGetAddressOf();
 	m_SwapChain.ReleaseAndGetAddressOf();
 	m_DeviceContext.ReleaseAndGetAddressOf();

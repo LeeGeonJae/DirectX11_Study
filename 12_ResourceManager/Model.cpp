@@ -3,9 +3,9 @@
 
 Model::Model()
 	: m_Nodes()
-	, m_HeadNode(nullptr)
-	, m_Animation(nullptr)
-	, m_Material(nullptr)
+	, m_HeadNode()
+	, m_Animation()
+	, m_Material()
 {
 }
 
@@ -13,14 +13,14 @@ Model::~Model()
 {
 }
 
-void Model::Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> ModelBuffer)
+void Model::Init(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> ModelBuffer)
 {
 	m_BoneTransformBuffer = ModelBuffer->m_pCBBoneTransformData;
 
 	m_HeadNode->Init(device, ModelBuffer);
 }
 
-void Model::Update(ID3D11DeviceContext* deviceContext)
+void Model::Update(ComPtr<ID3D11DeviceContext> deviceContext)
 {
 	m_HeadNode->Update(deviceContext);
 
@@ -30,7 +30,7 @@ void Model::Update(ID3D11DeviceContext* deviceContext)
 	m_HeadNode->Draw(deviceContext);
 }
 
-void Model::updateMatrixPallete(ID3D11DeviceContext* deviceContext)
+void Model::updateMatrixPallete(ComPtr<ID3D11DeviceContext> deviceContext)
 {
 	// 본 트랜스폼 계산
 	assert(m_Bones.size() < 128);

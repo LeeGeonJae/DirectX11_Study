@@ -3,41 +3,33 @@
 #include "../Engine/Header.h"
 
 #include "Struct.h"
+#include "Material.h"
 
-// 진짜 억지 코드.. 수정해야함.. node class 만들어서 수정 예정
 class Mesh
 {
 public:
 	Mesh();
-	~Mesh();
+	virtual ~Mesh();
 
 public:
-	void Draw(ID3D11DeviceContext* deviceContext);
-	void Close();
-
+	virtual void Draw(ComPtr<ID3D11DeviceContext> deviceContext) abstract;
+	virtual void Close() abstract;
 
 public:
-	void SetupMesh(ID3D11Device* device, shared_ptr<ModelCBBuffer> NodeBuffer);
+	virtual void SetupMesh(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffer) abstract;
 
 	inline string GetName();
 	inline void SetName(string name);
-	inline string GetParentName();
-	inline void SetParentName(string name);
-	inline Material* GetMaterial();
-	inline void SetMaterial(Material* material);
+	inline shared_ptr<Material> GetMaterial();
+	inline void SetMaterial(shared_ptr<Material> material);
 	inline CBIsValidTextureMap* GetIsValidTextureMap();
 
-public:
-	vector<BoneWeightVertex>	m_BoneWeightVertices;
-	vector<UINT>				m_Indices;
-
-private:
+protected:
 	string m_Name;
-	string m_ParnetName;
 
-	ID3D11Buffer* m_VertexBuffer;
-	ID3D11Buffer* m_IndexBuffer;
-	Material* m_Material;
+	ComPtr<ID3D11Buffer> m_VertexBuffer;
+	ComPtr<ID3D11Buffer> m_IndexBuffer;
+	shared_ptr<Material> m_Material;
 
 	CBMaterial					m_CBMaterial;
 	CBIsValidTextureMap			m_CBIsValidTextureMap;
@@ -55,22 +47,12 @@ void Mesh::SetName(string name)
 	m_Name = name;
 }
 
-string Mesh::GetParentName()
-{
-	return m_ParnetName;
-}
-
-void Mesh::SetParentName(string name)
-{
-	m_ParnetName = name;
-}
-
-Material* Mesh::GetMaterial()
+shared_ptr<Material> Mesh::GetMaterial()
 {
 	return m_Material;
 }
 
-void Mesh::SetMaterial(Material* material)
+void Mesh::SetMaterial(shared_ptr<Material> material)
 {
 	m_Material = material;
 }

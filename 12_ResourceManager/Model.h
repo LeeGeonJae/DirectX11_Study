@@ -1,7 +1,9 @@
 #pragma once
 #include "../Engine/Header.h"
 #include "Struct.h"
+#include "Animation.h"
 
+class Material;
 class Node;
 
 class Model
@@ -11,43 +13,43 @@ public:
 	~Model();
 
 public:
-	void Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> ModelBuffer);
-	void Update(ID3D11DeviceContext* deviceContext);
+	void Init(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> ModelBuffer);
+	void Update(ComPtr<ID3D11DeviceContext> deviceContext);
 
 private:
-	void updateMatrixPallete(ID3D11DeviceContext* deviceContext);
+	void updateMatrixPallete(ComPtr<ID3D11DeviceContext> deviceContext);
 
 public:
-	inline void SetHeadNode(Node* node);
-	inline Node* GetHeadNode();
-	inline void SetNode(Node* node);
-	inline vector<Node*>& GetNode();
+	inline void SetHeadNode(shared_ptr<Node> node);
+	inline shared_ptr<Node> GetHeadNode();
+	inline void SetNode(shared_ptr<Node> node);
+	inline vector<shared_ptr<Node>>& GetNode();
 	inline bool HasNode();
-	inline void SetAnimation(asAnimation* animation);
-	inline asAnimation* GetAnimation();
-	inline void SetMaterial(Material* material);
-	inline Material* GetMaterial();
-	inline void SetBone(Bone* bone);
-	inline vector<Bone*> GetBones();
+	inline void SetAnimation(shared_ptr<Animation> animation);
+	inline shared_ptr<Animation> GetAnimation();
+	inline void SetMaterial(shared_ptr<Material> material);
+	inline shared_ptr<Material> GetMaterial();
+	inline void SetBone(shared_ptr<Bone> bone);
+	inline vector<shared_ptr<Bone>> GetBones();
 
 private:
-	vector<Node*>			m_Nodes;
-	vector<Bone*>			m_Bones;
-	Node* m_HeadNode;
-	asAnimation* m_Animation;
-	Material* m_Material;
+	vector<shared_ptr<Node>>	m_Nodes;
+	vector<shared_ptr<Bone>>	m_Bones;
+	shared_ptr<Node> m_HeadNode;
+	shared_ptr<Animation> m_Animation;
+	shared_ptr<Material> m_Material;
 
 private:
 	CBMatrixPallete			m_CBMatrixPallete;
 	ComPtr<ID3D11Buffer>	m_BoneTransformBuffer;
 };
 
-void Model::SetHeadNode(Node* node)
+void Model::SetHeadNode(shared_ptr<Node> node)
 {
 	m_HeadNode = node;
 }
 
-Node* Model::GetHeadNode()
+shared_ptr<Node> Model::GetHeadNode()
 {
 	if (m_HeadNode != nullptr)
 		return m_HeadNode;
@@ -55,12 +57,12 @@ Node* Model::GetHeadNode()
 	return nullptr;
 }
 
-void Model::SetNode(Node* node)
+void Model::SetNode(shared_ptr<Node> node)
 {
 	m_Nodes.push_back(node);
 }
 
-vector<Node*>& Model::GetNode()
+vector<shared_ptr<Node>>& Model::GetNode()
 {
 	return m_Nodes;
 }
@@ -70,12 +72,12 @@ bool Model::HasNode()
 	return m_Nodes.empty();
 }
 
-void Model::SetAnimation(asAnimation* animation)
+void Model::SetAnimation(shared_ptr<Animation> animation)
 {
 	m_Animation = animation;
 }
 
-asAnimation* Model::GetAnimation()
+shared_ptr<Animation> Model::GetAnimation()
 {
 	if (m_Animation != nullptr)
 		return m_Animation;
@@ -83,12 +85,12 @@ asAnimation* Model::GetAnimation()
 	return nullptr;
 }
 
-void Model::SetMaterial(Material* material)
+void Model::SetMaterial(shared_ptr<Material> material)
 {
 	m_Material = material;
 }
 
-Material* Model::GetMaterial()
+shared_ptr<Material> Model::GetMaterial()
 {
 	if (m_Material != nullptr)
 		return m_Material;
@@ -96,12 +98,12 @@ Material* Model::GetMaterial()
 	return nullptr;
 }
 
-void Model::SetBone(Bone* bone)
+void Model::SetBone(shared_ptr<Bone> bone)
 {
 	m_Bones.push_back(bone);
 }
 
-vector<Bone*> Model::GetBones()
+vector<shared_ptr<Bone>> Model::GetBones()
 {
 	return m_Bones;
 }

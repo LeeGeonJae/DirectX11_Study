@@ -10,71 +10,7 @@ struct Texture
 {
 	string m_Type;
 	string m_Path;
-	ID3D11ShaderResourceView* m_Texture;
-
-	void Release()
-	{
-		if (m_Texture != nullptr)
-		{
-			delete m_Texture;
-			m_Texture = nullptr;
-		}
-	}
-};
-
-struct Material
-{
-	string m_Name;
-	Vector3 m_BaseColor;
-	Vector3 m_EmissiveColor;
-	map<int, Texture*> m_Textures;
-
-	// 텍스처가 있는지
-	bool HasTexture(TextureType type)
-	{
-		return m_Textures.find(static_cast<int>(type)) != m_Textures.end();
-	}
-
-	// 텍스처 타입의 텍스처 찾기
-	Texture* GetTexture(TextureType type)
-	{
-		if (m_Textures.find(static_cast<int>(type)) != m_Textures.end())
-			return m_Textures.find(static_cast<int>(type))->second;
-
-		return nullptr;
-	}
-};
-
-struct asKeyFrameData
-{
-	float m_Time;
-	Vector3 m_Scale;
-	Quaternion m_Rotation;
-	Vector3 m_Transtation;
-};
-
-struct asKeyFrame
-{
-	string m_boneName;
-	vector<asKeyFrameData> m_Transform;
-};
-
-struct asAnimationNode
-{
-	string m_Name;
-	unsigned int m_FrameCount;
-	float m_FrameRate;
-	float m_Duration;
-	vector<asKeyFrameData> m_KeyFrame;
-};
-
-struct asAnimation
-{
-	string m_Name;
-	unsigned int m_FrameCount;
-	float m_FrameRate;
-	float m_Duration;
-	vector<asAnimationNode*> m_Nodes;
+	ComPtr<ID3D11ShaderResourceView> m_Texture;
 };
 
 struct Bone
@@ -83,5 +19,44 @@ struct Bone
 	DirectX::SimpleMath::Matrix m_OffsetMatrix;
 	unsigned int m_NumWeights;
 
-	Node* m_Owner;
+	shared_ptr<Node> m_Owner;
+};
+
+struct NodeData
+{
+	string m_ModelName;
+	string m_Name;
+	string m_Parent;
+	string m_MeshName;
+	string m_MaterialName;
+	string m_BoneName;
+
+	bool GetRootNode()
+	{
+		if (m_Parent.empty())
+			return true;
+
+		return false;
+	}
+	string* GetMeshName()
+	{
+		if (m_MeshName.empty())
+			return nullptr;
+
+		return &m_MeshName;
+	}
+	string* GetMaterialName()
+	{
+		if (m_MaterialName.empty())
+			return nullptr;
+
+		return &m_MaterialName;
+	}
+	string* GetBoneName()
+	{
+		if (m_BoneName.empty())
+			return nullptr;
+
+		return &m_BoneName;
+	}
 };

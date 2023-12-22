@@ -6,6 +6,8 @@
 
 #include <imgui.h>
 
+struct Vertex;
+
 class DemoApp
 	: public GameApp
 {

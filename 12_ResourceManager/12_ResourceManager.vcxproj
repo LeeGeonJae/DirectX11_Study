@@ -109,6 +109,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libaries\Lib\;$(SolutionDir)\Libaries\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,15 +134,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="BufferStruct.h" />
     <ClInclude Include="DemoApp.h" />
     <ClInclude Include="enum.h" />
     <ClInclude Include="ImGuiMenu.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoadManager.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="SkeletalMesh.h" />
+    <ClInclude Include="StaticMesh.h" />
     <ClInclude Include="Struct.h" />
   </ItemGroup>
   <ItemGroup>
@@ -152,14 +157,18 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="DemoApp.cpp" />
     <ClCompile Include="ImGuiMenu.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLoadManager.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="SkeletalMesh.cpp" />
+    <ClCompile Include="StaticMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.vcxproj">

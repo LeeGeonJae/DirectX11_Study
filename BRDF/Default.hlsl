@@ -86,25 +86,25 @@ cbuffer MeshData : register(b7)
     matrix MatrixPalleteArray[128];
 }
 
+//// Normal Distribution Function : 거칠기에 따라 반사율을 작게한다.
+//float ndfGGX(float cosLh, float roughness)
+//{
+//    float alpha = roughness * roughness;
+//    float alphasq = alpha * alpha;
+    
+//    float denominator = 3.141592f * pow((cosLh * cosLh) * (alpha - 1.f) + 1.f, 2);
+//    return alpha / denominator;
+//}
+
 // Normal Distribution Function : 거칠기에 따라 반사율을 작게한다.
 float ndfGGX(float cosLh, float roughness)
 {
     float alpha = roughness * roughness;
-    float alphasq = alpha * alpha;
-    
-    float denominator = 3.141592f * pow((cosLh * cosLh) * (alpha - 1.f) + 1.f, 2);
-    return alpha / denominator;
+    float alphaSq = alpha * alpha;
+
+    float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
+    return alphaSq / (3.141592 * denom * denom);
 }
-
-// Normal Distribution Function : 거칠기에 따라 반사율을 작게한다.
-//float ndfGGX(float cosLh, float roughness)
-//{
-//    float alpha = roughness * roughness;
-//    float alphaSq = alpha * alpha;
-
-//    float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
-//    return alphaSq / (3.141592 * denom * denom);
-//}
 
 // Fresnel Reflection : 
 float3 FresnelReflection(float costheta, float3 F0)
@@ -125,7 +125,11 @@ float gaSchlickGGX(float cosLi, float cosLo, float roughness)
 {
     float r = roughness + 1.0;
     float k = (r * r) / 8.0; // Epic suggests using this roughness remapping for analytic lights.
-    return gaSchlickG1(cosLi, k) * gaSchlickG1(cosLo, k);
+    
+    float a = gaSchlickG1(cosLi, k);
+    float b = gaSchlickG1(cosLo, k);
+    float final = mul(a, b);
+    return final;
 }
 
 // IA - VS - RS - PS - OM
@@ -206,7 +210,7 @@ SamplerState BRDFsampler0 : register(s1);
 float4 PS(VS_OUTPUT input) : SV_Target
 {
     float3 albedo = baseColor.rgb;
-    float roughness = 1.f;
+    float roughness = 0.f;
     float metalness = 1.f;
     
     // 텍스처
@@ -263,8 +267,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             float3 Lh = normalize(-lightDir + Lo);
 
-            float cosLi = dot(Normal, -lightDir);
-            float cosLh = dot(Normal, Lh);
+            float cosLi = max(0.0, dot(Normal, -lightDir));
+            float cosLh = max(0.0, dot(Normal, Lh));
         
             float3 F = FresnelReflection(max(0.0, dot(Lh, Lo)), F0);
             float D = ndfGGX(cosLh, roughness);
@@ -296,7 +300,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     
     float4 TotalAmbient = float4(AmbientColor, 1) * float4(albedo, alpha) * 0.1f;
     float4 TotalDiffuse = diffuse * float4(albedo, alpha);
-    float4 finalColor = float4(directLighting + TotalAmbient.rgb + emissive.rgb, alpha);
+    float4 finalColor = float4(directLighting, alpha);
     
     // 감마 콜렉션
     if (UseGammaCorrection)

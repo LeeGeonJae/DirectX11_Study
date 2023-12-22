@@ -1,32 +1,22 @@
 #include "ResourceManager.h"
-#include "Mesh.h"
 
-ResourceManager* ResourceManager::pInstance = nullptr;
+#include "ModelLoadManager.h"
+#include "Model.h"
 
-ResourceManager::ResourceManager()
+void ResourceManager::Init(ComPtr<ID3D11Device> device, ComPtr<ID3D11DeviceContext> deviceContext)
 {
+	m_Device = device;
+	m_DeviceContext = deviceContext;
 }
 
-ResourceManager::~ResourceManager()
+shared_ptr<Model> ResourceManager::CreateModel(string path)
 {
-}
+	shared_ptr<Model> model = FindModel(path);
 
-std::shared_ptr<Material> ResourceManager::CreateMaterial(std::string key, aiMaterial* pAiMaterial)
-{
-	auto material = m_MaterialMap.find(key);
+	if (model == nullptr)
+	{
+		model = ModelLoadManager::GetInstance()->Load(path);
+	}
 
-	if (material != m_MaterialMap.end())
-		return material->second.lock();
-
-
-}
-
-void ResourceManager::Initialize()
-{
-
-}
-
-void ResourceManager::Uninitialize()
-{
-
+	return model;
 }

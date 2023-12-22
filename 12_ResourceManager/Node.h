@@ -1,22 +1,24 @@
 #pragma once
 #include "Struct.h"
+#include "Animation.h"
 
 #include "../Engine/Header.h"
 
 class Mesh;
+class Material;
 
 namespace Math = DirectX::SimpleMath;
 
-class Node
+class Node : public enable_shared_from_this<Node>
 {
 public:
 	Node();
 	~Node();
 
 public:
-	void Init(ID3D11Device* device, shared_ptr<ModelCBBuffer> NodeBuffer);
-	void Update(ID3D11DeviceContext* deviceContext);
-	void Draw(ID3D11DeviceContext* deviceContext);
+	void Init(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffer);
+	void Update(ComPtr<ID3D11DeviceContext> deviceContext);
+	void Draw(ComPtr<ID3D11DeviceContext> deviceContext);
 
 private:
 	void interpolateAnimationData(float currentTime, Vector3& outPosition, Vector3& outScaling, Math::Quaternion& outRotation);
@@ -24,23 +26,21 @@ private:
 public:
 	inline void SetName(string name);
 	inline string GetName();
-	inline void SetParentNode(Node* parent);
-	inline Node* GetParentNode();
-	inline void SetChildNode(Node* child);
-	inline vector<Node*> GetChildNode();
+	inline void SetParentNode(shared_ptr<Node> parent);
+	inline shared_ptr<Node> GetParentNode();
+	inline void SetChildNode(shared_ptr<Node> child);
+	inline vector<shared_ptr<Node>> GetChildNode();
 	inline void SetTransform(aiMatrix4x4 transform);
 	inline aiMatrix4x4 GetTransform();
-	inline void SetMesh(Mesh* mesh);
-	inline vector<Mesh*> GetMesh();
-	inline void SetMaterial(Material* material);
-	inline Material* GetMaterial();
-	inline void SetAnimation(asAnimationNode* animation);
-	inline asAnimationNode* GetAnimation();
-	inline void SetBone(Bone* bone);
-	inline Bone* GetBone();
+	inline void SetMesh(shared_ptr<Mesh> mesh);
+	inline vector<shared_ptr<Mesh>> GetMesh();
+	inline shared_ptr<Material> GetMaterial();
+	inline void SetAnimation(shared_ptr<AnimationNode> animation);
+	inline shared_ptr<AnimationNode> GetAnimation();
+	inline void SetBone(shared_ptr<Bone> bone);
+	inline shared_ptr<Bone> GetBone();
 
 	inline DirectX::SimpleMath::Matrix GetNodeTransform();
-	inline CBIsValidTextureMap* GetIsValidTextureMap();
 
 	inline Math::Matrix GetNodeWorldTransform();
 
@@ -48,14 +48,16 @@ private:
 	string				m_Name;
 	string				m_ParentName;
 
-	Node* m_Parent;
-	vector<Node*>		m_Children;
+	shared_ptr<Node> m_Parent;
+	vector<shared_ptr<Node>>		m_Children;
 
-	vector<Mesh*>		m_Mesh;
-	Bone* m_Bone;
-	asAnimationNode* m_Animation;
+	vector<shared_ptr<Mesh>>		m_Mesh;
+	shared_ptr<Bone> m_Bone;
+	shared_ptr<AnimationNode> m_AnimationNode;
 
 private:
+	float m_CurrentTime = 0.0f;
+
 	Math::Matrix m_Local;
 	Math::Matrix m_World;
 	aiMatrix4x4					m_Transform;
@@ -74,24 +76,24 @@ string Node::GetName()
 	return m_Name;
 }
 
-void Node::SetParentNode(Node* parent)
+void Node::SetParentNode(shared_ptr<Node> parent)
 {
 	m_Parent = parent;
 
-	parent->SetChildNode(this);
+	parent->SetChildNode(shared_from_this());
 }
 
-Node* Node::GetParentNode()
+shared_ptr<Node> Node::GetParentNode()
 {
 	return m_Parent;
 }
 
-void Node::SetChildNode(Node* child)
+void Node::SetChildNode(shared_ptr<Node> child)
 {
 	m_Children.push_back(child);
 }
 
-vector<Node*> Node::GetChildNode()
+vector<shared_ptr<Node>> Node::GetChildNode()
 {
 	return m_Children;
 }
@@ -106,35 +108,35 @@ aiMatrix4x4 Node::GetTransform()
 	return m_Transform;
 }
 
-void Node::SetMesh(Mesh* mesh)
+void Node::SetMesh(shared_ptr<Mesh> mesh)
 {
 	m_Mesh.push_back(mesh);
 }
 
-vector<Mesh*> Node::GetMesh()
+vector<shared_ptr<Mesh>> Node::GetMesh()
 {
 	return m_Mesh;
 }
 
-void Node::SetAnimation(asAnimationNode* animation)
+void Node::SetAnimation(shared_ptr<AnimationNode> animation)
 {
-	m_Animation = animation;
+	m_AnimationNode = animation;
 }
 
-void Node::SetBone(Bone* bone)
+void Node::SetBone(shared_ptr<Bone> bone)
 {
 	m_Bone = bone;
 }
 
-Bone* Node::GetBone()
+shared_ptr<Bone> Node::GetBone()
 {
 	return m_Bone;
 }
 
-asAnimationNode* Node::GetAnimation()
+shared_ptr<AnimationNode> Node::GetAnimation()
 {
-	if (m_Animation != nullptr)
-		return m_Animation;
+	if (m_AnimationNode != nullptr)
+		return m_AnimationNode;
 
 	return nullptr;
 }
