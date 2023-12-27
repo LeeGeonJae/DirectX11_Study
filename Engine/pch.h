@@ -12,6 +12,8 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <random>
+#include<time.h>
 using namespace std;
 
 // WIN

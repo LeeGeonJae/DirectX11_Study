@@ -1,11 +1,12 @@
 #include "Model.h"
 #include "Node.h"
+#include "../Engine/TimeManager.h"
+#include "ImGuiMenu.h"
 
 Model::Model()
 	: m_Nodes()
 	, m_HeadNode()
 	, m_Animation()
-	, m_Material()
 {
 }
 
@@ -16,13 +17,14 @@ Model::~Model()
 void Model::Init(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> ModelBuffer)
 {
 	m_BoneTransformBuffer = ModelBuffer->m_pCBBoneTransformData;
+	m_Position = Vector3(rand() % 400 - 200, 0.f, 0.f);
 
 	m_HeadNode->Init(device, ModelBuffer);
 }
 
 void Model::Update(ComPtr<ID3D11DeviceContext> deviceContext)
 {
-	m_HeadNode->Update(deviceContext);
+	m_HeadNode->Update(deviceContext, m_Position);
 
 	// 본 오프셋 트랜스폼 x 월드 트랜스폼 상수 버퍼로 등록
 	updateMatrixPallete(deviceContext);

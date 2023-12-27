@@ -1,11 +1,23 @@
 #include "ImGuiMenu.h"
 #include "../Engine/TimeManager.h"
+#include "Model.h";
+#include "Node.h"
+#include "Struct.h"
+#include "ResourceManager.h"
+#include "Material.h"
+#include "SkeletalMesh.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-Vector4 ImGuiMenu::CameraPos = { 0.f, 70.f, -400.f, 0.f };
+#include <dxgidebug.h>
+#include <Psapi.h>
+#include <directxtk/GeometricPrimitive.h>
+
+#pragma comment(lib,"dxgi.lib")
+
+Vector4 ImGuiMenu::CameraPos = { 0.f, 70.f, -800.f, 0.f };
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
 float ImGuiMenu::CameraNearFar[2] = { 1.f , 30000.0f };
 
@@ -26,6 +38,12 @@ bool ImGuiMenu::bIsGammaCorrection = true;
 float ImGuiMenu::EmissivePower = 1.f;
 float ImGuiMenu::OpacityValue = 0.5f;
 
+bool ImGuiMenu::DyingAnimationFBX = false;
+bool ImGuiMenu::SkinningTestFBX = false;
+bool ImGuiMenu::ZeldaFBX = false;
+bool ImGuiMenu::VampireFBX = false;
+bool ImGuiMenu::cerberusFBX = false;
+
 ImGuiMenu::ImGuiMenu(DemoApp* owner)
 	:m_Owner(owner)
 {
@@ -36,10 +54,24 @@ ImGuiMenu::~ImGuiMenu()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	if (!m_DXGIFactory)
+	{
+		m_DXGIFactory->Release();
+		m_DXGIFactory = nullptr;
+	}
+	if (!m_DXGIAdapter)
+	{
+		m_DXGIAdapter->Release();
+		m_DXGIAdapter = nullptr;
+	}
 }
 
 void ImGuiMenu::Init(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* devicecontext)
 {
+	HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory4), (void**)&m_DXGIFactory);
+	hr = m_DXGIFactory->EnumAdapters(0, reinterpret_cast<IDXGIAdapter**>(&m_DXGIAdapter));
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -79,7 +111,7 @@ void ImGuiMenu::Render()
 		{
 			static float camerafov = 50.f;
 
-			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -600.f, 500.f);
+			ImGui::SliderFloat4("Camera Position", (float*)&CameraPos, -800.f, 500.f);
 			ImGui::SliderFloat("Camera Fov", &camerafov, 0.01f, 180.f);
 			ImGui::SliderFloat2("Camera Near&Far", CameraNearFar, 1.f, 30000.f);
 
@@ -106,17 +138,15 @@ void ImGuiMenu::Render()
 			fps += to_string(fpsCount);
 			pfs += to_string(durationTime / fpsCount);
 
+			durationTime += -1.f;
 			fpsCount = 0;
-			durationTime = -1.f;
-		}
 
-		ImGui::Text(fps.c_str());
-		ImGui::Text(pfs.c_str());
+		}
 
 		ImGui::End();
 	}
 
-	// Light
+	// Material
 	{
 		ImGui::Begin("Material Menu");
 
@@ -148,8 +178,52 @@ void ImGuiMenu::Render()
 		ImGui::End();
 	}
 
+	// Resource
+	{
+		ImGui::Begin("Resource Menu");
+
+		if (ImGui::CollapsingHeader("Resource"))
+		{
+			DyingAnimationFBX = ImGui::Button("Dying Animation FBX Create");
+			SkinningTestFBX = ImGui::Button("Skinning Test Animation FBX Create");
+			ZeldaFBX =ImGui::Button("Zelda FBX Create");
+			VampireFBX = ImGui::Button("Vampire FBX Create");
+			cerberusFBX = ImGui::Button("cerberus Create");
+		}
+
+		ImGui::Text(fps.c_str());
+		ImGui::Text(pfs.c_str());
+
+		string str;
+		str = to_string(durationTime);
+		ImGui::Text("Time : %s", str.c_str());
+		getVideoMemoryInfo(str);
+		ImGui::Text("VideoMemory: %s", str.c_str());
+		getSystemMemoryInfo(str);
+		ImGui::Text("SystemMemory: %s", str.c_str());
+
+		ImGui::End();
+	}
+
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ImGuiMenu::getVideoMemoryInfo(std::string& out)
+{
+	DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo;
+	m_DXGIAdapter->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &videoMemoryInfo);
+
+	out = std::to_string(videoMemoryInfo.CurrentUsage / 1024 / 1024) + " MB" + "/" + std::to_string(videoMemoryInfo.Budget / 1024 / 1024) + " MB";
+}
+
+void ImGuiMenu::getSystemMemoryInfo(std::string& out)
+{
+	HANDLE hProcess = GetCurrentProcess();
+	PROCESS_MEMORY_COUNTERS_EX pmc;
+	pmc.cb = sizeof(PROCESS_MEMORY_COUNTERS_EX);
+	GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+	out = std::to_string((pmc.PagefileUsage) / 1024 / 1024) + " MB";
 }
 
 void ImGuiMenu::Release()

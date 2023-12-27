@@ -20,6 +20,8 @@ private:
 	void updateMatrixPallete(ComPtr<ID3D11DeviceContext> deviceContext);
 
 public:
+	inline string GetName();
+	inline void SetName(string name);
 	inline void SetHeadNode(shared_ptr<Node> node);
 	inline shared_ptr<Node> GetHeadNode();
 	inline void SetNode(shared_ptr<Node> node);
@@ -27,22 +29,31 @@ public:
 	inline bool HasNode();
 	inline void SetAnimation(shared_ptr<Animation> animation);
 	inline shared_ptr<Animation> GetAnimation();
-	inline void SetMaterial(shared_ptr<Material> material);
-	inline shared_ptr<Material> GetMaterial();
 	inline void SetBone(shared_ptr<Bone> bone);
 	inline vector<shared_ptr<Bone>> GetBones();
 
 private:
+	string m_Name;
+
 	vector<shared_ptr<Node>>	m_Nodes;
 	vector<shared_ptr<Bone>>	m_Bones;
 	shared_ptr<Node> m_HeadNode;
 	shared_ptr<Animation> m_Animation;
-	shared_ptr<Material> m_Material;
+	Vector3 m_Position;
 
 private:
 	CBMatrixPallete			m_CBMatrixPallete;
 	ComPtr<ID3D11Buffer>	m_BoneTransformBuffer;
 };
+
+string Model::GetName()
+{
+	return m_Name;
+}
+void Model::SetName(string name)
+{
+	m_Name = name;
+}
 
 void Model::SetHeadNode(shared_ptr<Node> node)
 {
@@ -81,19 +92,6 @@ shared_ptr<Animation> Model::GetAnimation()
 {
 	if (m_Animation != nullptr)
 		return m_Animation;
-
-	return nullptr;
-}
-
-void Model::SetMaterial(shared_ptr<Material> material)
-{
-	m_Material = material;
-}
-
-shared_ptr<Material> Model::GetMaterial()
-{
-	if (m_Material != nullptr)
-		return m_Material;
 
 	return nullptr;
 }

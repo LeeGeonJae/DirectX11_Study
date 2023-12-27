@@ -8,6 +8,11 @@ class Node;
 
 struct Texture
 {
+	Texture()
+	{
+		int a = 0;
+	}
+
 	string m_Type;
 	string m_Path;
 	ComPtr<ID3D11ShaderResourceView> m_Texture;
@@ -22,14 +27,18 @@ struct Bone
 	shared_ptr<Node> m_Owner;
 };
 
+struct Skeletal
+{
+	string m_Name;
+	vector<shared_ptr<Bone>> m_Bones;
+};
+
 struct NodeData
 {
-	string m_ModelName;
 	string m_Name;
 	string m_Parent;
 	string m_MeshName;
 	string m_MaterialName;
-	string m_BoneName;
 
 	bool GetRootNode()
 	{
@@ -38,25 +47,10 @@ struct NodeData
 
 		return false;
 	}
-	string* GetMeshName()
-	{
-		if (m_MeshName.empty())
-			return nullptr;
+};
 
-		return &m_MeshName;
-	}
-	string* GetMaterialName()
-	{
-		if (m_MaterialName.empty())
-			return nullptr;
-
-		return &m_MaterialName;
-	}
-	string* GetBoneName()
-	{
-		if (m_BoneName.empty())
-			return nullptr;
-
-		return &m_BoneName;
-	}
+struct ModelData
+{
+	string m_Name;
+	vector<shared_ptr<NodeData>> m_Nodes;
 };

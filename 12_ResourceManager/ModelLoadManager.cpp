@@ -9,6 +9,7 @@
 #include "SkeletalMesh.h"
 #include "Node.h"
 #include "Material.h"
+#include "Animation.h"
 
 #include <Directxtk/WICTextureLoader.h>
 
@@ -22,6 +23,7 @@ shared_ptr<Model> ModelLoadManager::Load(string fileName)
 {
 	m_Directory = fileName.substr(0, fileName.find_last_of("/\\"));
 	m_pLoadModel = make_shared<Model>();
+	m_pLoadModel->SetName(fileName);
 
 	// 임포터
 	{
@@ -57,23 +59,38 @@ shared_ptr<Model> ModelLoadManager::Load(string fileName)
 void ModelLoadManager::processNode(const aiNode* aiNode, const aiScene* scene, shared_ptr<Node> headnode)
 {
 	shared_ptr<Node> tempNode = make_shared<Node>();
+	shared_ptr<NodeData> nodeData = make_shared<NodeData>();
 	tempNode->SetName(aiNode->mName.C_Str());
+	nodeData->m_Name = tempNode->GetName();
 	tempNode->SetTransform(aiNode->mTransformation);
 
 	// 노드가 nullptr이 아니면 부모 노드로 저장
 	// 노드가 nullptr이면 루트 노드로 저장
 	if (headnode != nullptr)
+	{
 		tempNode->SetParentNode(headnode);
+		nodeData->m_Parent = headnode->GetName();
+	}
 	else
+	{
 		m_pLoadModel->SetHeadNode(tempNode);
+	}
 
 	// 메시 로드
 	for (int i = 0; i < aiNode->mNumMeshes; i++)
 	{
+		auto aimesh = scene->mMeshes[aiNode->mMeshes[i]];
+
 		if (scene->mMeshes[0]->HasBones())
-			tempNode->SetMesh(processSkeletalMesh(scene->mMeshes[aiNode->mMeshes[i]], scene));
+		{
+			tempNode->SetMesh(processSkeletalMesh(aimesh, scene, nodeData));
+		}
 		else
-			tempNode->SetMesh(processStaticMesh(scene->mMeshes[aiNode->mMeshes[i]], scene));
+		{
+			tempNode->SetMesh(processStaticMesh(aimesh, scene, nodeData));
+		}
+
+		nodeData->m_MeshName = aimesh->mName.C_Str();
 	}
 
 	// 자식 노드 실행
@@ -82,10 +99,11 @@ void ModelLoadManager::processNode(const aiNode* aiNode, const aiScene* scene, s
 		processNode(aiNode->mChildren[i], scene, tempNode);
 	}
 
+	ResourceManager::GetInstance()->SetNodeData(m_pLoadModel->GetName(), nodeData);
 	m_pLoadModel->SetNode(tempNode);
 }
 
-shared_ptr<StaticMesh> ModelLoadManager::processStaticMesh(const aiMesh* aimesh, const aiScene* scene)
+shared_ptr<StaticMesh> ModelLoadManager::processStaticMesh(const aiMesh* aimesh, const aiScene* scene, shared_ptr<NodeData> nodeData)
 {
 	shared_ptr<StaticMesh> myMesh;
 
@@ -154,78 +172,26 @@ shared_ptr<StaticMesh> ModelLoadManager::processStaticMesh(const aiMesh* aimesh,
 	{
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
+		// 리소스 매니저에서 찾아보기
 		shared_ptr<Material> material = ResourceManager::GetInstance()->FindMaterial(aimaterial->GetName().C_Str());
 
+		// 리소스 매니저에 없으면 머터리얼 로드
 		if (material == nullptr)
 		{
-			material = make_shared<Material>();
-			material->m_Name = aimaterial->GetName().C_Str();
-
-			aiColor3D color(0.f, 0.f, 0.f);
-			aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-			material->m_BaseColor = Vector3(color.r, color.g, color.b);
-			aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, color);
-			material->m_EmissiveColor = Vector3(color.r, color.g, color.b);
-
-			vector<shared_ptr<Texture>> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
-			if (diffuseMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidDiffuseMap = true;
-			}
-
-			vector<shared_ptr<Texture>> NormalMaps = loadMaterialTextures(aimaterial, aiTextureType_NORMALS, "texture_normals", scene);
-			if (NormalMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidNormalMap = true;
-			}
-
-			vector<shared_ptr<Texture>> SpecularMaps = loadMaterialTextures(aimaterial, aiTextureType_SPECULAR, "texture_specular", scene);
-			if (SpecularMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidSpecularMap = true;
-			}
-
-			vector<shared_ptr<Texture>> OpacityMaps = loadMaterialTextures(aimaterial, aiTextureType_OPACITY, "texture_opacity", scene);
-			if (OpacityMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidOpcityMap = true;
-			}
-
-			vector<shared_ptr<Texture>> EmissiveMaps = loadMaterialTextures(aimaterial, aiTextureType_EMISSIVE, "texture_emissive", scene);
-			if (EmissiveMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::EMISSIVE), EmissiveMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidEmissiveMap = true;
-			}
-
-			vector<shared_ptr<Texture>> MetalnessMap = loadMaterialTextures(aimaterial, aiTextureType_METALNESS, "texture_metalness", scene);
-			if (MetalnessMap.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::METALNESS), MetalnessMap[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidMetalnessMap = true;
-			}
-
-			vector<shared_ptr<Texture>> RoughnessMaps = loadMaterialTextures(aimaterial, aiTextureType_SHININESS, "texture_roughness", scene);
-			if (RoughnessMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::ROUGHNESS), RoughnessMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidRoughnessMap = true;
-			}
+			material = processMaterialsData(aimesh, scene, myMesh);
 
 			ResourceManager::GetInstance()->SetMaterial(material->m_Name, material);
-			myMesh->SetMaterial(material);
+			nodeData->m_MaterialName = material->m_Name;
 		}
+
+		myMesh->SetMaterial(material);
 	}
 
 	ResourceManager::GetInstance()->SetStaticMesh(myMesh->GetName(), myMesh);
 	return myMesh;
 }
 
-shared_ptr<SkeletalMesh> ModelLoadManager::processSkeletalMesh(const aiMesh* aimesh, const aiScene* scene)
+shared_ptr<SkeletalMesh> ModelLoadManager::processSkeletalMesh(const aiMesh* aimesh, const aiScene* scene, shared_ptr<NodeData> nodeData)
 {
 	shared_ptr<SkeletalMesh> myMesh;
 
@@ -337,6 +303,7 @@ shared_ptr<SkeletalMesh> ModelLoadManager::processSkeletalMesh(const aiMesh* aim
 				}
 
 				m_pLoadModel->SetBone(bone);
+				ResourceManager::GetInstance()->SetSkeletal(m_pLoadModel->GetName(), bone);
 			}
 			else
 			{
@@ -358,115 +325,122 @@ shared_ptr<SkeletalMesh> ModelLoadManager::processSkeletalMesh(const aiMesh* aim
 	{
 		aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
+		// 리소스 매니저에서 찾아보기
 		shared_ptr<Material> material = ResourceManager::GetInstance()->FindMaterial(aimaterial->GetName().C_Str());
 
+		// 리소스 매니저에 없으면 머터리얼 로드
 		if (material == nullptr)
 		{
-			material = make_shared<Material>();
-			material->m_Name = aimaterial->GetName().C_Str();
-
-			aiColor3D color(0.f, 0.f, 0.f);
-			aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-			material->m_BaseColor = Vector3(color.r, color.g, color.b);
-			aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, color);
-			material->m_EmissiveColor = Vector3(color.r, color.g, color.b);
-
-			vector<shared_ptr<Texture>> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
-			if (diffuseMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidDiffuseMap = true;
-			}
-
-			vector<shared_ptr<Texture>> NormalMaps = loadMaterialTextures(aimaterial, aiTextureType_NORMALS, "texture_normals", scene);
-			if (NormalMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidNormalMap = true;
-			}
-
-			vector<shared_ptr<Texture>> SpecularMaps = loadMaterialTextures(aimaterial, aiTextureType_SPECULAR, "texture_specular", scene);
-			if (SpecularMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidSpecularMap = true;
-			}
-
-			vector<shared_ptr<Texture>> OpacityMaps = loadMaterialTextures(aimaterial, aiTextureType_OPACITY, "texture_opacity", scene);
-			if (OpacityMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidOpcityMap = true;
-			}
-
-			vector<shared_ptr<Texture>> EmissiveMaps = loadMaterialTextures(aimaterial, aiTextureType_EMISSIVE, "texture_emissive", scene);
-			if (EmissiveMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::EMISSIVE), EmissiveMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidEmissiveMap = true;
-			}
-
-			vector<shared_ptr<Texture>> MetalnessMap = loadMaterialTextures(aimaterial, aiTextureType_METALNESS, "texture_metalness", scene);
-			if (MetalnessMap.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::METALNESS), MetalnessMap[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidMetalnessMap = true;
-			}
-
-			vector<shared_ptr<Texture>> RoughnessMaps = loadMaterialTextures(aimaterial, aiTextureType_SHININESS, "texture_roughness", scene);
-			if (RoughnessMaps.size() > 0)
-			{
-				material->m_Textures.insert(make_pair(static_cast<int>(TextureType::ROUGHNESS), RoughnessMaps[0]));
-				myMesh->GetIsValidTextureMap()->bIsValidRoughnessMap = true;
-			}
+			material = processMaterialsData(aimesh, scene, myMesh);
 
 			ResourceManager::GetInstance()->SetMaterial(material->m_Name, material);
-			myMesh->SetMaterial(material);
+			nodeData->m_MaterialName = material->m_Name;
 		}
+
+		myMesh->SetMaterial(material);
 	}
 
 	ResourceManager::GetInstance()->SetSkeletalMesh(myMesh->GetName(), myMesh);
 	return myMesh;
 }
 
+shared_ptr<Material> ModelLoadManager::processMaterialsData(const aiMesh* aimesh, const aiScene* scene, shared_ptr<Mesh> mesh)
+{
+	aiMaterial* aimaterial = scene->mMaterials[aimesh->mMaterialIndex];
+
+	shared_ptr<Material> material = make_shared<Material>();
+	material->m_Name = aimaterial->GetName().C_Str();
+
+	aiColor3D color(0.f, 0.f, 0.f);
+	aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+	material->m_BaseColor = Vector3(color.r, color.g, color.b);
+	aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, color);
+	material->m_EmissiveColor = Vector3(color.r, color.g, color.b);
+
+	vector<shared_ptr<Texture>> diffuseMaps = loadMaterialTextures(aimaterial, aiTextureType_DIFFUSE, "texture_diffuse", scene);
+	if (diffuseMaps.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::DIFFUSE), diffuseMaps[0]));
+	}
+
+	vector<shared_ptr<Texture>> NormalMaps = loadMaterialTextures(aimaterial, aiTextureType_NORMALS, "texture_normals", scene);
+	if (NormalMaps.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::NORMAL), NormalMaps[0]));
+	}
+
+	vector<shared_ptr<Texture>> SpecularMaps = loadMaterialTextures(aimaterial, aiTextureType_SPECULAR, "texture_specular", scene);
+	if (SpecularMaps.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::SPECULAR), SpecularMaps[0]));
+	}
+
+	vector<shared_ptr<Texture>> OpacityMaps = loadMaterialTextures(aimaterial, aiTextureType_OPACITY, "texture_opacity", scene);
+	if (OpacityMaps.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::OPACITY), OpacityMaps[0]));
+	}
+
+	vector<shared_ptr<Texture>> EmissiveMaps = loadMaterialTextures(aimaterial, aiTextureType_EMISSIVE, "texture_emissive", scene);
+	if (EmissiveMaps.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::EMISSIVE), EmissiveMaps[0]));
+	}
+
+	vector<shared_ptr<Texture>> MetalnessMap = loadMaterialTextures(aimaterial, aiTextureType_METALNESS, "texture_metalness", scene);
+	if (MetalnessMap.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::METALNESS), MetalnessMap[0]));
+	}
+
+	vector<shared_ptr<Texture>> RoughnessMaps = loadMaterialTextures(aimaterial, aiTextureType_SHININESS, "texture_roughness", scene);
+	if (RoughnessMaps.size() > 0)
+	{
+		material->m_Textures.insert(make_pair(static_cast<int>(TextureType::ROUGHNESS), RoughnessMaps[0]));
+	}
+
+	return material;
+}
+
 void ModelLoadManager::processAnimation(aiAnimation* srcAnimation)
 {
 	// 애니메이션 세팅하기
-	shared_ptr<Animation> animation = make_shared<Animation>();
+	shared_ptr<Animation> animation = ResourceManager::GetInstance()->FindAnimation(srcAnimation->mName.C_Str());
 
-	animation->m_Name = srcAnimation->mName.C_Str();
-	animation->m_FrameRate = static_cast<float>(srcAnimation->mTicksPerSecond);
-	animation->m_FrameCount = static_cast<unsigned int>(srcAnimation->mDuration + 1);
-
-	// 노드 개수만큼 애니메이션 가져오기
-	for (int i = 0; i < srcAnimation->mNumChannels; i++)
+	if (animation == nullptr)
 	{
-		aiNodeAnim* node = srcAnimation->mChannels[i];
+		animation = make_shared<Animation>();
 
-		// 애니메이션 노드 데이터 파싱
-		shared_ptr<AnimationNode> nodeanimation = ParseAnimationNode(animation, node);
-		animation->m_Nodes.push_back(nodeanimation);
+		animation->m_Name = srcAnimation->mName.C_Str();
+		animation->m_FrameRate = static_cast<float>(srcAnimation->mTicksPerSecond);
+		animation->m_FrameCount = static_cast<unsigned int>(srcAnimation->mDuration + 1);
 
-		// 이름이 맞는 노드를 찾아서 해당 노드에 애니메이션 등록
-		for (int i = 0; i < m_pLoadModel->GetNode().size(); i++)
+		// 노드 개수만큼 애니메이션 가져오기
+		for (int i = 0; i < srcAnimation->mNumChannels; i++)
 		{
-			if (m_pLoadModel->GetNode()[i]->GetName() == nodeanimation->m_Name)
-				m_pLoadModel->GetNode()[i]->SetAnimation(nodeanimation);
+			aiNodeAnim* node = srcAnimation->mChannels[i];
+
+			// 애니메이션 노드 데이터 파싱
+			shared_ptr<AnimationNode> nodeanimation = ParseAnimationNode(animation, node);
+			animation->m_Nodes.push_back(nodeanimation);
+
+			// 이름이 맞는 노드를 찾아서 해당 노드에 애니메이션 등록
+			for (int i = 0; i < m_pLoadModel->GetNode().size(); i++)
+			{
+				if (m_pLoadModel->GetNode()[i]->GetName() == nodeanimation->m_Name)
+					m_pLoadModel->GetNode()[i]->SetAnimation(nodeanimation);
+			}
 		}
 	}
 
+	ResourceManager::GetInstance()->SetAnimation(m_pLoadModel->GetName(), animation);
 	m_pLoadModel->SetAnimation(animation);
 }
 
 shared_ptr<AnimationNode> ModelLoadManager::ParseAnimationNode(shared_ptr<Animation> animation, aiNodeAnim* srcNode)
 {
 	// 애니메이션 노드 세팅하기
-	shared_ptr<AnimationNode> node = ResourceManager::GetInstance()->FindAnimation(srcNode->mNodeName.C_Str());
-
-	if (node != nullptr)
-		return node;
-	else
-		node = make_shared<AnimationNode>();
+	shared_ptr<AnimationNode> node = make_shared<AnimationNode>();
 
 	node->m_Animation = animation;
 	node->m_Name = srcNode->mNodeName.C_Str();
@@ -534,7 +508,6 @@ shared_ptr<AnimationNode> ModelLoadManager::ParseAnimationNode(shared_ptr<Animat
 		}
 	}
 
-	ResourceManager::GetInstance()->SetAnimation(node->m_Name, node);
 	return node;
 }
 

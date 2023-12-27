@@ -19,6 +19,11 @@ public:
 public:
 	void SetupMesh(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffer);
 
+private:
+	virtual void createVS() override;
+	virtual void createPS() override;
+	virtual void createInputLayout() override;
+
 public:
 	vector<Vertex> m_Vertices;
 	vector<UINT> m_Indices;

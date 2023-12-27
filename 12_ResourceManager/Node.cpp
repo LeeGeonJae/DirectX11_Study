@@ -15,6 +15,7 @@ Node::Node()
 	, m_AnimationNode(nullptr)
 	, m_Bone(nullptr)
 	, m_NodeBuffer(nullptr)
+	, m_CurrentTime(0.f)
 {
 	m_CBNodeTransform.World = DirectX::SimpleMath::Matrix::Identity;
 }
@@ -39,7 +40,7 @@ void Node::Init(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffe
 	}
 }
 
-void Node::Update(ComPtr<ID3D11DeviceContext> deviceContext)
+void Node::Update(ComPtr<ID3D11DeviceContext> deviceContext, Vector3 modelPosition)
 {
 	Math::Vector3 position, scaling;
 	Math::Quaternion rotation;
@@ -48,7 +49,7 @@ void Node::Update(ComPtr<ID3D11DeviceContext> deviceContext)
 	{
 		if (m_AnimationNode != nullptr)
 		{
-			m_CurrentTime += TimeManager::GetInstance()->GetfDT() * ImGuiMenu::ModelAnimationSpeed;
+			m_CurrentTime += TimeManager::GetInstance()->GetfDT() * ImGuiMenu::ModelAnimationSpeed * 30.f;
 
 			if (m_CurrentTime > m_AnimationNode->m_Animation->m_FrameCount)
 			{
@@ -77,9 +78,10 @@ void Node::Update(ComPtr<ID3D11DeviceContext> deviceContext)
 			XMMATRIX mSpin2 = XMMatrixRotationY(ImGuiMenu::ModelRotation.y * 3.14f);
 			XMMATRIX mScale = XMMatrixScaling(ImGuiMenu::ModelScale.x, ImGuiMenu::ModelScale.y, ImGuiMenu::ModelScale.z);
 			XMMATRIX mTranslate1 = XMMatrixTranslation(ImGuiMenu::ModelPosition.x, ImGuiMenu::ModelPosition.y, ImGuiMenu::ModelPosition.z);
+			XMMATRIX mTranslate2 = XMMatrixTranslation(modelPosition.x, modelPosition.y, modelPosition.z);
 
 			// Cube World Setting
-			XMMATRIX world = mScale * mSpin1 * mSpin2 * mTranslate1;
+			XMMATRIX world = mScale * mSpin1 * mSpin2 * mTranslate1 * mTranslate2;
 
 			m_World = m_Local * world;
 			m_CBNodeTransform.World = m_World;
@@ -91,13 +93,18 @@ void Node::Update(ComPtr<ID3D11DeviceContext> deviceContext)
 	{
 		if (child != nullptr)
 		{
-			child->Update(deviceContext);
+			child->Update(deviceContext, modelPosition);
 		}
 	}
 }
 
 void Node::Draw(ComPtr<ID3D11DeviceContext> deviceContext)
 {
+	if (m_Name == "mixamorig:Hips")
+	{
+		int a = 0;
+	}
+
 	for (auto mesh : m_Mesh)
 	{
 		Math::Matrix matrix = m_CBNodeTransform.World.Transpose();

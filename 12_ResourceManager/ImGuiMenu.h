@@ -1,7 +1,12 @@
 #pragma once
 
-#include "../Engine/pch.h"
-#include <Windows.h>
+#include "string"
+#include "../Engine/Header.h"
+#include "../Engine/Types.h"
+
+#include <vector>
+#include <directxtk/SimpleMath.h>
+#include <dxgi1_4.h>
 
 class DemoApp;
 
@@ -15,6 +20,10 @@ public:
 	void Init(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* devicecontext);
 	void Render();
 	void Release();
+
+private:
+	void getVideoMemoryInfo(std::string& out);
+	void getSystemMemoryInfo(std::string& out);
 
 public:
 	static Vector4 CameraPos;
@@ -38,6 +47,15 @@ public:
 	static float EmissivePower;
 	static float OpacityValue;
 
+	static bool DyingAnimationFBX;
+	static bool SkinningTestFBX;
+	static bool ZeldaFBX;
+	static bool VampireFBX;
+	static bool cerberusFBX;
+
 private:
 	DemoApp* m_Owner;
+
+	IDXGIFactory4* m_DXGIFactory;		// DXGI팩토리
+	IDXGIAdapter3* m_DXGIAdapter;		// 비디오카드 정보에 접근 가능한 인터페이스
 };

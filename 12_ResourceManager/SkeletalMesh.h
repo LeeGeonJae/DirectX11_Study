@@ -17,7 +17,12 @@ public:
 	void Close();
 
 public:
-	void SetupMesh(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffer);
+	virtual void SetupMesh(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffer) override;
+
+private:
+	virtual void createVS() override;
+	virtual void createPS() override;
+	virtual void createInputLayout() override;
 
 public:
 	vector<BoneWeightVertex>	m_BoneWeightVertices;

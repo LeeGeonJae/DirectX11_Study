@@ -9,6 +9,7 @@ class Node;
 class Mesh;
 class StaticMesh;
 class SkeletalMesh;
+class Material;
 
 class ModelLoadManager
 {
@@ -28,13 +29,16 @@ public:
 
 private:
 	void processNode(const aiNode* headNode, const aiScene* scene, shared_ptr<Node> headnode);			// 노드
-	shared_ptr<StaticMesh> processStaticMesh(const aiMesh* aimesh, const aiScene* scene);				// 메시
-	shared_ptr<SkeletalMesh> processSkeletalMesh(const aiMesh* aimesh, const aiScene* scene);				// 메시
+	shared_ptr<StaticMesh> processStaticMesh(const aiMesh* aimesh, const aiScene* scene, shared_ptr<NodeData> nodeData);		// 메시
+	shared_ptr<SkeletalMesh> processSkeletalMesh(const aiMesh* aimesh, const aiScene* scene, shared_ptr<NodeData> nodeData);	// 메시
+
 
 	// 애니메이션
 	void processAnimation(aiAnimation* srcAnimation);
 	shared_ptr<AnimationNode> ParseAnimationNode(shared_ptr<Animation> animation, aiNodeAnim* srcNode);
 
+	// 머터리얼
+	shared_ptr<Material> processMaterialsData(const aiMesh* aimesh, const aiScene* scene, shared_ptr<Mesh> mesh);
 	// 텍스쳐 파일 가져오기
 	vector<shared_ptr<Texture>> loadMaterialTextures(aiMaterial* material, aiTextureType type, string typeName, const aiScene* scene);
 	ComPtr<ID3D11ShaderResourceView> loadEmbeddedTexture(const aiTexture* embeddedTexture); // 내장된 텍스쳐 파일 가져오기

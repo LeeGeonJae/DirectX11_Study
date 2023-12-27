@@ -3,6 +3,7 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 #include "BufferStruct.h"
+#include "Model.h"
 
 #include <imgui.h>
 
@@ -40,16 +41,11 @@ private:
 	void createDeathStencilView();
 
 private:
-	void createInputLayout();
 	void createConstantBuffer();
-	void createVS();
-	void createPS();
 
 	void createRasterizeState();
 	void createSamplerState();
 	void createBlendState();
-
-	void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
 
 public:
 	virtual LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -70,22 +66,12 @@ private:
 	D3D11_VIEWPORT m_Viewport = { 0 };
 
 private:
-	// Geometry
-	ComPtr<ID3D11InputLayout> m_inputLayout = nullptr;
-
-	// VS
-	ComPtr<ID3D11VertexShader> m_vertexShader = nullptr;
-	ComPtr<ID3DBlob> m_vsBlob = nullptr;
 
 	// RAS
 	ComPtr<ID3D11RasterizerState> m_rasterizerState = nullptr;
 
 	// RS
 	ComPtr<ID3D11DepthStencilView> m_depthStancilView = nullptr;
-
-	// PS
-	ComPtr<ID3D11PixelShader> m_pixelShader = nullptr;
-	ComPtr<ID3DBlob> m_psBlob = nullptr;
 
 	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 	ComPtr<ID3D11SamplerState> m_BRDF_Sampler = nullptr;
@@ -111,6 +97,19 @@ private:
 	DirectX::SimpleMath::Matrix m_Projection;
 	XMFLOAT4 m_DirectionLight;
 	XMFLOAT4 m_LightColor;
+
+	struct ModelInstance
+	{
+		Model* Model;
+		DirectX::SimpleMath::Matrix World;
+		float TimePos = 0;
+
+		void Update(ComPtr<ID3D11DeviceContext> deviceContext)
+		{
+			TimePos += TimeManager::GetInstance()->GetfDT();
+			Model->Update(deviceContext);
+		}
+	};
 
 private:
 	vector<shared_ptr<Model>> myModels;

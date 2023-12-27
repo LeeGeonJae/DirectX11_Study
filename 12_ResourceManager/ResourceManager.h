@@ -1,14 +1,19 @@
 #pragma once
 #include "../Engine/Header.h"
+#include "Struct.h"
+#include "Animation.h"
 
 class ModelLoadManager;
 class Material;
 class AnimationNode;
+class Animation;
 class Texture;
 class SkeletalMesh;
 class StaticMesh;
 class NodeData;
+class ModelData;
 class Bone;
+class Skeletal;
 class Model;
 
 struct ResourceManager
@@ -28,90 +33,97 @@ public:
 	shared_ptr<Model> CreateModel(string path);
 
 public:
-	inline void SetStaticMesh(string key, weak_ptr<StaticMesh> staticMesh);
-	inline void SetSkeletalMesh(string key, weak_ptr<SkeletalMesh> skeletalMesh);
-	inline void SetBone(string key, weak_ptr<Bone> bone);
-	inline void SetAnimation(string key, weak_ptr<AnimationNode> animation);
-	inline void SetMaterial(string key, weak_ptr<Material> material);
-	inline void SetNodeData(string key, weak_ptr<NodeData> nodeData);
-	inline void SetModel(string key, weak_ptr<Model> model);
+	inline void SetStaticMesh(string key, shared_ptr<StaticMesh> staticMesh);
+	inline void SetSkeletalMesh(string key, shared_ptr<SkeletalMesh> skeletalMesh);
+	inline void SetSkeletal(string key, shared_ptr<Bone> bone);
+	inline void SetAnimation(string key, shared_ptr<Animation> animation);
+	inline void SetMaterial(string key, shared_ptr<Material> material);
+	inline void SetNodeData(string key, shared_ptr<NodeData> nodeData);
 	inline shared_ptr<StaticMesh> FindStaticMesh(string key);
 	inline shared_ptr<SkeletalMesh> FindSkeletalMesh(string key);
-	inline shared_ptr<Bone> FindBone(string key);
-	inline shared_ptr<AnimationNode> FindAnimation(string key);
+	inline shared_ptr<Skeletal> FindSkeletal(string key);
+	inline shared_ptr<Animation> FindAnimation(string key);
 	inline shared_ptr<Material> FindMaterial(string key);
-	inline shared_ptr<NodeData> FindNodeData(string key);
-	inline shared_ptr<Model> FindModel(string key);
+	inline shared_ptr<ModelData> FindModelData(string key);
 
 private:
-	// Model
-	map<string, weak_ptr<Model>> m_ModelMap;
 	// StaticMesh
-	map<string, weak_ptr<StaticMesh>> m_StaticMeshMap;
+	map<string, shared_ptr<StaticMesh>> m_StaticMeshMap;
 	// SkeletalMesh
-	map<string, weak_ptr<SkeletalMesh>> m_SkeletalMeshMap;
+	map<string, shared_ptr<SkeletalMesh>> m_SkeletalMeshMap;
 	// Skeleton
-	map<string, weak_ptr<Bone>> m_BoneMap;
+	map<string, shared_ptr<Skeletal>> m_SkeletalMap;
 	// Animation
-	map<string, weak_ptr<AnimationNode>> m_AnimationMap;
+	map<string, shared_ptr<Animation>> m_AnimationMap;
 	// Material
-	map<string, weak_ptr<Material>> m_MaterialMap;
-	// NodeData
-	map<string, weak_ptr<NodeData>> m_NodeDataMap;
+	map<string, shared_ptr<Material>> m_MaterialMap;
+	// ModelData
+	map<string, shared_ptr<ModelData>> m_ModelDataMap;
 
 private:
 	ComPtr<ID3D11Device> m_Device;
 	ComPtr<ID3D11DeviceContext> m_DeviceContext;
 };
 
-void ResourceManager::SetStaticMesh(string key, weak_ptr<StaticMesh> staticMesh)
+void ResourceManager::SetStaticMesh(string key, shared_ptr<StaticMesh> staticMesh)
 {
 	auto staticmesh = FindStaticMesh(key);
 
 	if (staticmesh == nullptr)
 		m_StaticMeshMap.insert(make_pair(key, staticMesh));
 }
-void ResourceManager::SetSkeletalMesh(string key, weak_ptr<SkeletalMesh> skeletalMesh)
+void ResourceManager::SetSkeletalMesh(string key, shared_ptr<SkeletalMesh> skeletalMesh)
 {
-	auto staticmesh = FindSkeletalMesh(key);
+	auto skeletalmesh = FindSkeletalMesh(key);
 
-	if (staticmesh == nullptr)
+	if (skeletalmesh == nullptr)
 		m_SkeletalMeshMap.insert(make_pair(key, skeletalMesh));
 }
-void ResourceManager::SetBone(string key, weak_ptr<Bone> bone)
+void ResourceManager::SetSkeletal(string key, shared_ptr<Bone> bone)
 {
-	auto staticmesh = FindBone(key);
+	auto findSkeletal = FindSkeletal(key);
 
-	if (staticmesh == nullptr)
-		m_BoneMap.insert(make_pair(key, bone));
+	if (findSkeletal == nullptr)
+	{
+		findSkeletal = make_shared<Skeletal>();
+		findSkeletal->m_Bones.push_back(bone);
+
+		m_SkeletalMap.insert(make_pair(key, findSkeletal));
+	}
+	else
+	{
+		findSkeletal->m_Bones.push_back(bone);
+	}
 }
-void ResourceManager::SetAnimation(string key, weak_ptr<AnimationNode> animation)
+void ResourceManager::SetAnimation(string key, shared_ptr<Animation> animation)
 {
-	auto staticmesh = FindAnimation(key);
+	auto findAnimation = FindAnimation(key);
 
-	if (staticmesh == nullptr)
+	if (findAnimation == nullptr)
 		m_AnimationMap.insert(make_pair(key, animation));
 }
-void ResourceManager::SetMaterial(string key, weak_ptr<Material> material)
+void ResourceManager::SetMaterial(string key, shared_ptr<Material> material)
 {
-	auto staticmesh = FindMaterial(key);
+	auto findMaterial = FindMaterial(key);
 
-	if (staticmesh == nullptr)
+	if (findMaterial == nullptr)
 		m_MaterialMap.insert(make_pair(key, material));
 }
-void ResourceManager::SetNodeData(string key, weak_ptr<NodeData> nodeData)
+void ResourceManager::SetNodeData(string key, shared_ptr<NodeData> nodeData)
 {
-	auto staticmesh = FindNodeData(key);
+	auto findModelData = FindModelData(key);
 
-	if (staticmesh == nullptr)
-		m_NodeDataMap.insert(make_pair(key, nodeData));
-}
-void ResourceManager::SetModel(string key, weak_ptr<Model> model)
-{
-	auto staticmesh = FindModel(key);
+	if (findModelData == nullptr)
+	{
+		findModelData = make_shared<ModelData>();
+		findModelData->m_Nodes.push_back(nodeData);
 
-	if (staticmesh == nullptr)
-		m_ModelMap.insert(make_pair(key, model));
+		m_ModelDataMap.insert(make_pair(key, findModelData));
+	}
+	else
+	{
+		findModelData->m_Nodes.push_back(nodeData);
+	}
 }
 
 shared_ptr<StaticMesh> ResourceManager::FindStaticMesh(string key)
@@ -119,7 +131,7 @@ shared_ptr<StaticMesh> ResourceManager::FindStaticMesh(string key)
 	auto staticMesh = m_StaticMeshMap.find(key);
 
 	if (staticMesh != m_StaticMeshMap.end())
-		return staticMesh->second.lock();
+		return staticMesh->second;
 
 	return nullptr;
 }
@@ -128,25 +140,25 @@ shared_ptr<SkeletalMesh> ResourceManager::FindSkeletalMesh(string key)
 	auto skeletalMesh = m_SkeletalMeshMap.find(key);
 
 	if (skeletalMesh != m_SkeletalMeshMap.end())
-		return skeletalMesh->second.lock();
+		return skeletalMesh->second;
 
 	return nullptr;
 }
-shared_ptr<Bone> ResourceManager::FindBone(string key)
+shared_ptr<Skeletal> ResourceManager::FindSkeletal(string key)
 {
-	auto bone = m_BoneMap.find(key);
+	auto bone = m_SkeletalMap.find(key);
 
-	if (bone != m_BoneMap.end())
-		return bone->second.lock();
+	if (bone != m_SkeletalMap.end())
+		return bone->second;
 
 	return nullptr;
 }
-shared_ptr<AnimationNode> ResourceManager::FindAnimation(string key)
+shared_ptr<Animation> ResourceManager::FindAnimation(string key)
 {
 	auto animation = m_AnimationMap.find(key);
 
 	if (animation != m_AnimationMap.end())
-		return animation->second.lock();
+		return animation->second;
 
 	return nullptr;
 }
@@ -155,25 +167,16 @@ shared_ptr<Material> ResourceManager::FindMaterial(string key)
 	auto material = m_MaterialMap.find(key);
 
 	if (material != m_MaterialMap.end())
-		return material->second.lock();
+		return material->second;
 
 	return nullptr;
 }
-shared_ptr<NodeData> ResourceManager::FindNodeData(string key)
+shared_ptr<ModelData> ResourceManager::FindModelData(string key)
 {
-	auto nodeData = m_NodeDataMap.find(key);
+	auto modelData = m_ModelDataMap.find(key);
 
-	if (nodeData != m_NodeDataMap.end())
-		return nodeData->second.lock();
-
-	return nullptr;
-}
-shared_ptr<Model> ResourceManager::FindModel(string key)
-{
-	auto model = m_ModelMap.find(key);
-
-	if (model != m_ModelMap.end())
-		return model->second.lock();
+	if (modelData != m_ModelDataMap.end())
+		return modelData->second;
 
 	return nullptr;
 }

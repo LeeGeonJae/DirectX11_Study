@@ -83,14 +83,9 @@ struct CBMaterial
 
 struct CBIsValidTextureMap
 {
-	int bIsValidDiffuseMap;
-	int bIsValidNormalMap;
-	int bIsValidMetalnessMap;
-	int bIsValidRoughnessMap;
-	int bIsValidSpecularMap;
-	int bIsValidOpcityMap;
-	int bIsValidEmissiveMap;
+	int bIsValidTextureMap[8];
 	int bIsValidBone;
+	int dummy[3];
 };
 
 struct CBMatrixPallete

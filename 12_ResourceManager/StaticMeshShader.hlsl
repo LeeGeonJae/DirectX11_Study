@@ -7,8 +7,6 @@ struct VS_INPUT
     float3 mNormal : NORMAL0;
     float3 mTangent : NORMAL1;
     float3 mBiTangent : NORMAL2;
-    int4 mBlendIndices : BLENDINDICES;
-    float4 mBlendWeights : BLENDWEIGHTS;
 };
 
 // Vertex Shader(VS) 출력
@@ -96,17 +94,6 @@ float ndfGGX(float cosLh, float roughness)
     return alpha / denominator;
 }
 
-//// Normal Distribution Function : 거칠기에 따라 반사율을 작게한다.
-//float ndfGGX(float cosLh, float roughness)
-//{
-//    float alpha = roughness * roughness;
-//    float alphaSq = alpha * alpha;
-
-//    float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
-//    return alphaSq / (3.141592 * denom * denom);
-//}
-
-// Fresnel Reflection : 
 float3 FresnelReflection(float costheta, float3 F0)
 {
     return F0 + (1.f - F0) * pow((1.f - costheta), 5);
@@ -138,14 +125,7 @@ VS_OUTPUT VS(VS_INPUT input)
     float4 pos = input.mPosition;
     float4x4 matWorldBlended = MatrixPalleteArray[0];
     
-    // 본이 있으면 본의 월드 트랜스폼 위치에 맞춰서 위치 아니면 기존 월드 트랜스폼 위치에 위치
-
-    // 월드 내의 위치
-    matWorldBlended = mul(input.mBlendWeights.x, MatrixPalleteArray[input.mBlendIndices.x]);
-    matWorldBlended += mul(input.mBlendWeights.y, MatrixPalleteArray[input.mBlendIndices.y]);
-    matWorldBlended += mul(input.mBlendWeights.z, MatrixPalleteArray[input.mBlendIndices.z]);
-    matWorldBlended += mul(input.mBlendWeights.w, MatrixPalleteArray[input.mBlendIndices.w]);
-    pos = mul(pos, matWorldBlended);
+    pos = mul(pos, meshWorld);
     output.mPositionWorld = pos;
     
     // ndc 공간 내의 위치
@@ -159,9 +139,9 @@ VS_OUTPUT VS(VS_INPUT input)
     output.mViewDir = viewDir;
     
     // 오브젝트 월드에서 노말 벡터 계산 (오브젝트의 정면에 90도를 이루는 벡터)
-    output.mNormal = normalize(mul(input.mNormal, (float3x3) matWorldBlended));
-    output.mTangent = normalize(mul(input.mTangent, (float3x3) matWorldBlended));
-    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) matWorldBlended));
+    output.mNormal = normalize(mul(input.mNormal, (float3x3) meshWorld));
+    output.mTangent = normalize(mul(input.mTangent, (float3x3) meshWorld));
+    output.mBiTangent = normalize(mul(input.mBiTangent, (float3x3) meshWorld));
     
     // 난반사(Diffuse) 내적으로 구하기
     output.mDiffuse = saturate(dot(-lightDir, output.mNormal));
@@ -189,8 +169,8 @@ SamplerState BRDFsampler0 : register(s1);
 float4 PS(VS_OUTPUT input) : SV_Target
 {
     float3 albedo = baseColor.rgb;
-    float roughness = 0.f;
-    float metalness = 0.f;
+    float roughness = 0.5f;
+    float metalness = 0.5f;
     
     //텍스처
     if (bIsValidDiffuseMap)

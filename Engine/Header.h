@@ -7,6 +7,8 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <random>
+#include<time.h>
 using namespace std;
 
 // WIN

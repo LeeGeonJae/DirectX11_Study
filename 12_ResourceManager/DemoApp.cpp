@@ -10,7 +10,7 @@
 #include "ModelLoadManager.h"
 #include "ResourceManager.h"
 #include "Model.h"
-//#include "Node.h"
+
 
 #define USE_FLIPMODE 0
 
@@ -21,8 +21,6 @@ DemoApp::DemoApp(HINSTANCE hInstance)
 
 DemoApp::~DemoApp()
 {
-	//delete m_ModelLoader;
-	//delete myModel;
 }
 
 void DemoApp::Initialize(UINT Width, UINT Height)
@@ -49,31 +47,46 @@ void DemoApp::initScene()
 	ResourceManager::GetInstance()->Init(m_Device, m_DeviceContext);
 	ModelLoadManager::GetInstance()->Init(m_Device, m_DeviceContext);
 
-	shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/Dying.fbx");
-
-	createVS();
-	createInputLayout();
-
 	createRasterizeState();
 	createSamplerState();
 	createBlendState();
 
-	createPS();
-
 	createConstantBuffer();
 
 	setTransform();
-	model->Init(m_Device.Get(), m_ModelCBBuffer);
-	myModels.push_back(model);
 }
 
 void DemoApp::Update()
 {
 	__super::Update();
 
-	if (GetAsyncKeyState('S') & 0x8000)
+	if (ImGuiMenu::SkinningTestFBX)
+	{
+		shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/SkinningTest.fbx");
+		model->Init(m_Device.Get(), m_ModelCBBuffer);
+		myModels.push_back(model);
+	}
+	else if (ImGuiMenu::DyingAnimationFBX)
 	{
 		shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/Dying.fbx");
+		model->Init(m_Device.Get(), m_ModelCBBuffer);
+		myModels.push_back(model);
+	}
+	else if (ImGuiMenu::ZeldaFBX)
+	{
+		shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/zeldaPosed001.fbx");
+		model->Init(m_Device.Get(), m_ModelCBBuffer);
+		myModels.push_back(model);
+	}
+	else if (ImGuiMenu::VampireFBX)
+	{
+		shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/Vampire.fbx");
+		model->Init(m_Device.Get(), m_ModelCBBuffer);
+		myModels.push_back(model);
+	}
+	else if (ImGuiMenu::cerberusFBX)
+	{
+		shared_ptr<Model> model = ResourceManager::GetInstance()->CreateModel("../Resource/Texture/cerberus_test.fbx");
 		model->Init(m_Device.Get(), m_ModelCBBuffer);
 		myModels.push_back(model);
 	}
@@ -118,7 +131,6 @@ void DemoApp::Render()
 	renderBegin();
 
 	{
-		m_DeviceContext->IASetInputLayout(m_inputLayout.Get());
 		m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		static bool tem = false;
 
@@ -131,7 +143,7 @@ void DemoApp::Render()
 			m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 		}
 		// VS
-		m_DeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+
 		m_DeviceContext->VSSetConstantBuffers(0, 1, m_pCBCoordinateData.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
 		m_DeviceContext->VSSetConstantBuffers(2, 1, m_pCBCamera.GetAddressOf());
@@ -146,7 +158,6 @@ void DemoApp::Render()
 		m_DeviceContext->UpdateSubresource(m_pCBUseTextureMap.Get(), 0, nullptr, &m_CBNormalMap, 0, 0);
 
 		// PS
-		m_DeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 		m_DeviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 		m_DeviceContext->PSSetSamplers(1, 1, m_BRDF_Sampler.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(0, 1, m_pCBCoordinateData.GetAddressOf());
@@ -283,23 +294,6 @@ void DemoApp::createDeathStencilView()
 	textureDepthStancil->Release();
 }
 
-void DemoApp::createInputLayout()
-{
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"BLENDWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 72, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
-
-	const int count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
-	m_Device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
-}
-
 void DemoApp::createConstantBuffer()
 {
 	HRESULT hr;
@@ -371,20 +365,6 @@ void DemoApp::createConstantBuffer()
 	assert(SUCCEEDED(hr));
 }
 
-void DemoApp::createVS()
-{
-	LoadShaderFromFile(L"Default.hlsl", "VS", "vs_5_0", m_vsBlob);
-	HRESULT hr = m_Device->CreateVertexShader(m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), nullptr, m_vertexShader.GetAddressOf());
-	assert(SUCCEEDED(hr));
-}
-
-void DemoApp::createPS()
-{
-	LoadShaderFromFile(L"Default.hlsl", "PS", "ps_5_0", m_psBlob);
-	HRESULT hr = m_Device->CreatePixelShader(m_psBlob->GetBufferPointer(), m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
-	assert(SUCCEEDED(hr));
-}
-
 void DemoApp::createRasterizeState()
 {
 	D3D11_RASTERIZER_DESC desc;
@@ -443,24 +423,6 @@ void DemoApp::createBlendState()
 	desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
 	HRESULT hr = m_Device->CreateBlendState(&desc, m_blendState.GetAddressOf());
-	assert(SUCCEEDED(hr));
-}
-
-void DemoApp::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)
-{
-	const uint32 compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-
-	HRESULT hr = ::D3DCompileFromFile(
-		path.c_str(),
-		nullptr,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		name.c_str(),
-		version.c_str(),
-		compileFlag,
-		0,
-		blob.GetAddressOf(),
-		nullptr);
-
 	assert(SUCCEEDED(hr));
 }
 

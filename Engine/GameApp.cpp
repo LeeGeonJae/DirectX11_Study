@@ -63,6 +63,8 @@ void GameApp::Initialize(UINT Width, UINT Height)
     UpdateWindow(m_hWnd);
 
     TimeManager::GetInstance()->Initialize();
+
+    srand(static_cast<unsigned int>(time(NULL)));
 }
 
 bool GameApp::Run()

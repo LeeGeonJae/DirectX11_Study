@@ -106,5 +106,8 @@
     <FxCompile Include="Default.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="StaticMeshShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

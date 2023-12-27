@@ -17,7 +17,7 @@ public:
 
 public:
 	void Init(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer> NodeBuffer);
-	void Update(ComPtr<ID3D11DeviceContext> deviceContext);
+	void Update(ComPtr<ID3D11DeviceContext> deviceContext, Vector3 modelPosition);
 	void Draw(ComPtr<ID3D11DeviceContext> deviceContext);
 
 private:
@@ -54,10 +54,9 @@ private:
 	vector<shared_ptr<Mesh>>		m_Mesh;
 	shared_ptr<Bone> m_Bone;
 	shared_ptr<AnimationNode> m_AnimationNode;
+	float m_CurrentTime;
 
 private:
-	float m_CurrentTime = 0.0f;
-
 	Math::Matrix m_Local;
 	Math::Matrix m_World;
 	aiMatrix4x4					m_Transform;
