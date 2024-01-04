@@ -4,8 +4,12 @@
 #include <imgui.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
+#include <directxtk/Keyboard.h>
+#include <directxtk/Mouse.h>
 
 #include "GameApp.h"
+#include "TimeManager.h"
+#include "InputManager.h"
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -63,6 +67,7 @@ void GameApp::Initialize(UINT Width, UINT Height)
     UpdateWindow(m_hWnd);
 
     TimeManager::GetInstance()->Initialize();
+    InputManager::GetInstance()->Initalize(m_hWnd);
 
     srand(static_cast<unsigned int>(time(NULL)));
 }
@@ -93,6 +98,7 @@ bool GameApp::Run()
 void GameApp::Update()
 {
     TimeManager::GetInstance()->Update();
+    InputManager::GetInstance()->Update();
 }
 
 void GameApp::Render()
@@ -110,6 +116,29 @@ LRESULT GameApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_DESTROY:
         PostQuitMessage(0);
+        break;
+    case WM_ACTIVATEAPP:
+        DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+        DirectX::Mouse::ProcessMessage(message, wParam, lParam);
+        break;
+    case WM_INPUT:
+    case WM_MOUSEMOVE:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+    case WM_MOUSEWHEEL:
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
+    case WM_MOUSEHOVER:
+        Mouse::ProcessMessage(message, wParam, lParam);
+        break;
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+        Keyboard::ProcessMessage(message, wParam, lParam);
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

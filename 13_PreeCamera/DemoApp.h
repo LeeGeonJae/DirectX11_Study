@@ -3,12 +3,16 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 #include "BufferStruct.h"
-#include "Model.h"
 
 #include <imgui.h>
 
 class ImGuiMenu;
 class ModelLoadManager;
+class Model;
+class RenderComponent;
+class Component;
+class CameraComponent;
+class Object;
 class Model;
 
 class DemoApp
@@ -41,7 +45,9 @@ private:
 	void createDeathStencilView();
 
 private:
-	void createConstantBuffer();
+	template <typename T>
+	ComPtr<ID3D11Buffer> createConstantBuffer();
+	void constantBufferSetting();
 
 	void createRasterizeState();
 	void createSamplerState();
@@ -86,11 +92,11 @@ private:
 	CBCameraData			m_CBCamera;
 	CBUseTextureMap			m_CBNormalMap;
 
-	ComPtr<ID3D11Buffer> m_pCBCoordinateData = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBLight = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBCamera = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBUseTextureMap = nullptr;
-	shared_ptr<ModelCBBuffer> m_ModelCBBuffer = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBCoordinateData = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBLight = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBCamera = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBUseTextureMap = nullptr;
+	shared_ptr<ModelCBBuffer>	m_ModelCBBuffer = nullptr;
 
 	DirectX::SimpleMath::Matrix m_World;
 	DirectX::SimpleMath::Matrix m_View;
@@ -99,5 +105,22 @@ private:
 	XMFLOAT4 m_LightColor;
 
 private:
-	vector<shared_ptr<Model>> myModels;
+	vector<shared_ptr<Object>> m_Objects;
 };
+
+template <typename T>
+ComPtr<ID3D11Buffer> DemoApp::createConstantBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC desc;
+	ComPtr<ID3D11Buffer> buffer;
+
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(T);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, buffer.GetAddressOf());
+	assert(SUCCEEDED(hr));
+	
+	return buffer;
+}

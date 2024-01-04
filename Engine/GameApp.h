@@ -1,6 +1,5 @@
 #pragma once
 
-#include "TimeManager.h"
 
 #include <wrl.h>
 
@@ -29,11 +28,6 @@ protected:
 	WCHAR m_szWindowClass[MAX_LOADSTRING];
 	UINT m_ClientWidth;
 	UINT m_ClientHeight;
-
-private:
-	Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deivceContext = nullptr;
-	Microsoft::WRL::ComPtr<IDXGISwapChain> m_SwapChain = nullptr;
 
 public:
 	static GameApp* m_pInstance;

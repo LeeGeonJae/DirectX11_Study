@@ -3,12 +3,16 @@
 #include "../Engine/GameApp.h"
 #include "../Engine/pch.h"
 #include "BufferStruct.h"
-#include "Model.h"
 
 #include <imgui.h>
 
 class ImGuiMenu;
 class ModelLoadManager;
+class Model;
+class RenderComponent;
+class Component;
+class CameraComponent;
+class Object;
 class Model;
 
 class DemoApp
@@ -35,13 +39,12 @@ private:
 	void initScene();
 
 private:
-	void createDeviceAndSwapChain();
-	void createRenderTargetView();
-	void setViewport();
 	void createDeathStencilView();
 
 private:
-	void createConstantBuffer();
+	template <typename T>
+	ComPtr<ID3D11Buffer> createConstantBuffer();
+	void constantBufferSetting();
 
 	void createRasterizeState();
 	void createSamplerState();
@@ -50,28 +53,11 @@ private:
 public:
 	virtual LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-private:
-	void setTransform();
 
-private:
-	// 렌더링 파이프라인을 구성하는 필수 객체의 인터페이스 ( 뎊스 스텐실 뷰도 있지만 아직 사용하지 않는다.)
-	ComPtr<ID3D11Device> m_Device = nullptr;						// 디바이스	
-	ComPtr<ID3D11DeviceContext> m_DeviceContext = nullptr;			// 즉시 디바이스 컨텍스트
-	ComPtr<IDXGISwapChain> m_SwapChain = nullptr;					// 스왑체인
-
-	// RTV
-	ComPtr<ID3D11RenderTargetView> m_RenderTargetView = nullptr;	// 렌더링 타겟뷰
-
-	// Misc
-	D3D11_VIEWPORT m_Viewport = { 0 };
 
 private:
 
-	// RAS
-	ComPtr<ID3D11RasterizerState> m_rasterizerState = nullptr;
 
-	// RS
-	ComPtr<ID3D11DepthStencilView> m_depthStancilView = nullptr;
 
 	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 	ComPtr<ID3D11SamplerState> m_BRDF_Sampler = nullptr;
@@ -86,18 +72,32 @@ private:
 	CBCameraData			m_CBCamera;
 	CBUseTextureMap			m_CBNormalMap;
 
-	ComPtr<ID3D11Buffer> m_pCBCoordinateData = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBLight = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBCamera = nullptr;
-	ComPtr<ID3D11Buffer> m_pCBUseTextureMap = nullptr;
-	shared_ptr<ModelCBBuffer> m_ModelCBBuffer = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBCoordinateData = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBLight = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBCamera = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBUseTextureMap = nullptr;
+	shared_ptr<ModelCBBuffer>	m_ModelCBBuffer = nullptr;
 
-	DirectX::SimpleMath::Matrix m_World;
-	DirectX::SimpleMath::Matrix m_View;
-	DirectX::SimpleMath::Matrix m_Projection;
 	XMFLOAT4 m_DirectionLight;
 	XMFLOAT4 m_LightColor;
 
 private:
-	vector<shared_ptr<Model>> myModels;
+	vector<shared_ptr<Object>> m_Objects;
 };
+
+template <typename T>
+ComPtr<ID3D11Buffer> DemoApp::createConstantBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC desc;
+	ComPtr<ID3D11Buffer> buffer;
+
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(T);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, buffer.GetAddressOf());
+	assert(SUCCEEDED(hr));
+	
+	return buffer;
+}
