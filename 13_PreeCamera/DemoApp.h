@@ -72,7 +72,6 @@ private:
 	D3D11_VIEWPORT m_Viewport = { 0 };
 
 private:
-
 	// RAS
 	ComPtr<ID3D11RasterizerState> m_rasterizerState = nullptr;
 

@@ -2,15 +2,24 @@
 
 #include <d3d11.h>
 #include "../Engine/GameApp.h"
-#include "../Engine/pch.h"
+#include "../Engine/Header.h"
 #include "BufferStruct.h"
 
-#include <imgui.h>
+class ImGuiMenu;
+class RenderComponent;
+class CameraComponent;
+
+enum class CB_DATA_TYPE
+{
+	COORDINATE,
+	LIGHT,
+	USE_TEXTURE_MAP,
+};
 
 class RenderManager
 {
 private:
-	RenderManager();
+	RenderManager() {}
 public:
 	static RenderManager* GetInstance()
 	{
@@ -20,12 +29,28 @@ public:
 
 public:
 	void Init(HWND _hwnd, UINT _clientHeight, UINT _clientWidth);
+	void Update();
+	void Render();
+	void Release();
+
+public:
+	inline void SetCamera(weak_ptr<CameraComponent> _cameraComponent);
+	inline void SetRender(shared_ptr<RenderComponent> _renderComponent);
 
 public:
 	inline ComPtr<ID3D11Device> GetDevice();
 	inline ComPtr<ID3D11DeviceContext> GetDeviceContext();
+	inline ComPtr<ID3D11Buffer> GetCB(CB_DATA_TYPE _type);
+	inline shared_ptr<ModelCBBuffer> GetModelCB();
 
+private:
+	void renderDebugDraw();
+	void renderMesh();
 
+private:
+	void renderBegin();
+	void renderEnd();
+	void constantBufferSetting();
 
 private:
 	void createDeviceAndSwapChain();
@@ -33,8 +58,20 @@ private:
 	void setViewport();
 	void createDeathStencilView();
 
-private:
 	void createRasterizeState();
+	void createBlendState();
+	void createSamplerState();
+
+	template <typename T>
+	ComPtr<ID3D11Buffer> createConstantBuffer();
+
+private:
+	vector<shared_ptr<RenderComponent>> m_RenderVec;
+
+	weak_ptr<CameraComponent> m_pCamera;
+	DirectX::BoundingFrustum	m_Frustum;
+	DirectX::SimpleMath::Matrix m_View;
+	DirectX::SimpleMath::Matrix m_Projection;
 
 
 private:
@@ -54,11 +91,32 @@ private:
 	// RS
 	ComPtr<ID3D11DepthStencilView> m_depthStancilView = nullptr;
 
+private:
+	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
+	ComPtr<ID3D11SamplerState> m_BRDF_Sampler = nullptr;
+	ComPtr<ID3D11BlendState> m_blendState = nullptr;
+	// [ CPU <-> RAM ] [ GPU <-> VRAM ]
+
+private:
+	CBLightData m_CBLightData;
+	CBUseTextureMap m_CBUseTextureMap;
+	CBCoordinateData			m_CBCoordinateData;
+
+	ComPtr<ID3D11Buffer>		m_pCBCoordinate;
+	ComPtr<ID3D11Buffer>		m_pCBLight = nullptr;
+	ComPtr<ID3D11Buffer>		m_pCBUseTextureMap = nullptr;
+	shared_ptr<ModelCBBuffer>	m_pCBModel = nullptr;
+
+	XMFLOAT4 m_DirectionLight;
+	XMFLOAT4 m_LightColor;
 
 private:
 	HWND m_hWnd;
 	UINT m_ClientHeight;
 	UINT m_ClientWidth;
+
+private:
+	shared_ptr<ImGuiMenu> m_imgui;
 };
 
 ComPtr<ID3D11Device> RenderManager::GetDevice()
@@ -68,6 +126,57 @@ ComPtr<ID3D11Device> RenderManager::GetDevice()
 ComPtr<ID3D11DeviceContext> RenderManager::GetDeviceContext()
 {
 	return m_DeviceContext;
+}
+
+void RenderManager::SetCamera(weak_ptr<CameraComponent> _cameraComponent)
+{
+	m_pCamera = _cameraComponent;
+}
+
+void RenderManager::SetRender(shared_ptr<RenderComponent> _renderComponent)
+{
+	m_RenderVec.push_back(_renderComponent);
+}
+
+ComPtr<ID3D11Buffer> RenderManager::GetCB(CB_DATA_TYPE _type)
+{
+	switch (_type)
+	{
+	case CB_DATA_TYPE::COORDINATE:
+	{
+		return m_pCBCoordinate;
+	}
+	case CB_DATA_TYPE::LIGHT:
+	{
+		return m_pCBLight;
+	}
+	case CB_DATA_TYPE::USE_TEXTURE_MAP:
+	{
+		return m_pCBUseTextureMap;
+	}
+	}
+}
+
+shared_ptr<ModelCBBuffer> RenderManager::GetModelCB()
+{
+	return m_pCBModel;
+}
+
+template <typename T>
+ComPtr<ID3D11Buffer> RenderManager::createConstantBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC desc;
+	ComPtr<ID3D11Buffer> buffer;
+
+	desc = {};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.ByteWidth = sizeof(T);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	hr = m_Device->CreateBuffer(&desc, nullptr, buffer.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	return buffer;
 }
 
 #define DEVICE			RenderManager::GetInstance()->GetDevice()

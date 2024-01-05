@@ -52,10 +52,13 @@ shared_ptr<Model> ResourceManager::CreateModel(string path)
 		// 2. 메시가 있는가?
 		if (!nodeData->m_MeshName.empty())
 		{
+
 			// 2-1. 본이 있는가? 
 			if (findSkeletal != nullptr)			// Skeltal Mesh
 			{
 				auto findSkeletalMesh = FindSkeletalMesh(nodeData->m_MeshName);
+
+				model->SetBoundingBox(findSkeletalMesh->GetAABBmin(), findSkeletalMesh->GetAABBmax());
 
 				// 2-2. 머터리얼이 있는가?
 				if (!nodeData->m_MaterialName.empty())
@@ -74,6 +77,8 @@ shared_ptr<Model> ResourceManager::CreateModel(string path)
 			{
 				// 스태틱 메쉬 맞는 노드에 등록
 				auto findStaticMesh = FindStaticMesh(nodeData->m_MeshName);
+
+				model->SetBoundingBox(findStaticMesh->GetAABBmin(), findStaticMesh->GetAABBmax());
 
 				// 2-2. 머터리얼이 있는가?
 				if (!nodeData->m_MaterialName.empty())

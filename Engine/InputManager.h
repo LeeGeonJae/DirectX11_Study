@@ -19,8 +19,8 @@ public:
 	void Update();
 
 public:
-	inline std::unique_ptr<DirectX::Keyboard> GetKeyboard();
-	inline std::unique_ptr<DirectX::Mouse> GetMouse();
+	inline DirectX::Keyboard* GetKeyboard();
+	inline DirectX::Mouse* GetMouse();
 	inline DirectX::Keyboard::State GetKeyboardState();
 	inline DirectX::Mouse::State GetMouseState();
 	inline DirectX::Keyboard::KeyboardStateTracker GetKeyboardStateTracker();
@@ -55,4 +55,13 @@ DirectX::Keyboard::KeyboardStateTracker InputManager::GetKeyboardStateTracker()
 DirectX::Mouse::ButtonStateTracker InputManager::GetMouseStateTracker()
 {
 	return m_MouseStateTracker;
+}
+
+DirectX::Keyboard* InputManager::GetKeyboard()
+{
+	return m_Keyboard.get();
+}
+DirectX::Mouse* InputManager::GetMouse()
+{
+	return m_Mouse.get();
 }

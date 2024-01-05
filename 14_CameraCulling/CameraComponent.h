@@ -5,12 +5,6 @@
 struct CameraComponentDesc
 {
 	ComponentDesc m_ComponentDesc;
-
-	ComPtr<ID3D11DeviceContext> m_DeviceContext;
-	CBCoordinateData m_CBCoordinateData;
-	CBCameraData m_CBCamera;
-	ComPtr<ID3D11Buffer> m_pCBCoordinateData;
-	ComPtr<ID3D11Buffer> m_pCBCamera;
 };
 
 class CameraComponent : public Component
@@ -30,13 +24,21 @@ public:
 	virtual void Render() ;
 
 public:
-	void GetViewMatrix(SimpleMath::Matrix& ViewMatrix);
+	inline const SimpleMath::Matrix& GetViewMatrix();
+	inline const SimpleMath::Matrix& GetProjectionMatrix();
 
 private:
-	ComPtr<ID3D11DeviceContext> m_DeviceContext;
-	CBCoordinateData			m_CBCoordinateData;
-	CBCameraData				m_CBCamera;
-	ComPtr<ID3D11Buffer>		m_CBCoordinateBuffer;
-	ComPtr<ID3D11Buffer>		m_CBCameraBuffer;
+	SimpleMath::Matrix m_View;
+	SimpleMath::Matrix m_Projection;
+
+
 };
 
+const SimpleMath::Matrix& CameraComponent::GetViewMatrix()
+{
+	return m_View;
+}
+const SimpleMath::Matrix& CameraComponent::GetProjectionMatrix()
+{
+	return m_Projection;
+}

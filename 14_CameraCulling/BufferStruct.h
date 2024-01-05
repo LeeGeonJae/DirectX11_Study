@@ -43,7 +43,8 @@ struct CBCoordinateData
 {
 	DirectX::SimpleMath::Matrix View;
 	DirectX::SimpleMath::Matrix Projection;
-	Vector4 MeshColor;
+	Vector3 CameraPosition;
+	int dummy;
 };
 
 struct CBNodeTransform
@@ -57,11 +58,6 @@ struct CBLightData
 	Vector4 LightColor;
 	float SpecularPower;
 	Vector3 AmbientColor;
-};
-
-struct CBCameraData
-{
-	Vector4 CameraPosition;
 };
 
 struct CBUseTextureMap

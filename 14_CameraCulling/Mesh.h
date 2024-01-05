@@ -30,9 +30,14 @@ public:
 	inline shared_ptr<Material> GetMaterial();
 	inline void SetMaterial(shared_ptr<Material> material);
 	inline CBIsValidTextureMap* GetIsValidTextureMap();
+	inline void SetAABB(Vector3 AABBmin, Vector3 AABBmax);
+	inline Vector3 GetAABBmin();
+	inline Vector3 GetAABBmax();
 
 protected:
 	string m_Name;
+	Vector3 m_AABBmin;
+	Vector3 m_AABBmax;
 
 	ComPtr<ID3D11Buffer> m_VertexBuffer;
 	ComPtr<ID3D11Buffer> m_IndexBuffer;
@@ -42,8 +47,6 @@ protected:
 	CBIsValidTextureMap			m_CBIsValidTextureMap;
 	ComPtr<ID3D11Buffer>		m_MaterialBuffer;
 	ComPtr<ID3D11Buffer>		m_bisTextureMapBuffer;
-
-	ComPtr<ID3D11Device> m_Device;
 
 	// Geometry
 	ComPtr<ID3D11InputLayout> m_inputLayout = nullptr;
@@ -78,4 +81,18 @@ void Mesh::SetMaterial(shared_ptr<Material> material)
 CBIsValidTextureMap* Mesh::GetIsValidTextureMap()
 {
 	return &m_CBIsValidTextureMap;
+}
+
+void Mesh::SetAABB(Vector3 AABBmin, Vector3 AABBmax)
+{
+	m_AABBmin = AABBmin;
+	m_AABBmax = AABBmax;
+}
+Vector3 Mesh::GetAABBmin()
+{
+	return m_AABBmin;
+}
+Vector3 Mesh::GetAABBmax()
+{
+	return m_AABBmax;
 }

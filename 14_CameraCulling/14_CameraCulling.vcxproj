@@ -136,6 +136,7 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="DemoApp.cpp" />
     <ClCompile Include="ImGuiMenu.cpp" />
     <ClCompile Include="main.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="BufferStruct.h" />
     <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="DebugDraw.h" />
     <ClInclude Include="DemoApp.h" />
     <ClInclude Include="enum.h" />
     <ClInclude Include="ImGuiMenu.h" />

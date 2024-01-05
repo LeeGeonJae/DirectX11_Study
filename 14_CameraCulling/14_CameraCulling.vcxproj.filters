@@ -58,6 +58,7 @@
     <ClCompile Include="RenderManager.cpp">
       <Filter>01.Manager</Filter>
     </ClCompile>
+    <ClCompile Include="DebugDraw.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGuiMenu.h">
@@ -123,6 +124,7 @@
     <ClInclude Include="RenderManager.h">
       <Filter>01.Manager</Filter>
     </ClInclude>
+    <ClInclude Include="DebugDraw.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="SkeletalMeshShader.hlsl">

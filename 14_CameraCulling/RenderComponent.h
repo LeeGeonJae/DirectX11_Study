@@ -7,8 +7,6 @@ class Model;
 struct RenderComponentDesc
 {
 	ComponentDesc m_ComponentDesc;
-	ComPtr<ID3D11Device> m_Device;
-	ComPtr<ID3D11DeviceContext> m_DeviceContext;
 	shared_ptr<ModelCBBuffer> m_ModelBuffer;
 
 	string m_Path;
@@ -30,12 +28,32 @@ public:
 	virtual void FixedUpdate();
 	virtual void Render();
 
+public:
+	inline shared_ptr<Model> GetModel();
+	inline bool GetIsCulled();
+	inline void SetIsCulled(bool isTrue);
+
+	DirectX::BoundingBox GetBoundingBox();
+
 private:
+	bool m_bIsCulled;
+
 	shared_ptr<Model> m_pModel;
 
-	ComPtr<ID3D11Device>		m_Device;
-	ComPtr<ID3D11DeviceContext> m_DeviceContext;
 	shared_ptr<ModelCBBuffer>	m_ModelBuffer;
 	string m_Path;
 };
 
+shared_ptr<Model> RenderComponent::GetModel()
+{
+	return m_pModel;
+}
+
+bool RenderComponent::GetIsCulled()
+{
+	return m_bIsCulled;
+}
+void RenderComponent::SetIsCulled(bool isTrue)
+{
+	m_bIsCulled = isTrue;
+}

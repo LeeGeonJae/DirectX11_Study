@@ -46,6 +46,8 @@ public:
 	inline shared_ptr<Material> FindMaterial(string key);
 	inline shared_ptr<ModelData> FindModelData(string key);
 
+	inline map<string, shared_ptr<Material>>* GetMaterialMap();
+
 private:
 	// StaticMesh
 	map<string, shared_ptr<StaticMesh>> m_StaticMeshMap;
@@ -179,4 +181,9 @@ shared_ptr<ModelData> ResourceManager::FindModelData(string key)
 		return modelData->second;
 
 	return nullptr;
+}
+
+map<string, shared_ptr<Material>>* ResourceManager::GetMaterialMap()
+{
+	return &m_MaterialMap;
 }

@@ -50,3 +50,22 @@ void Model::updateMatrixPallete(ComPtr<ID3D11DeviceContext> deviceContext)
 	deviceContext->VSSetConstantBuffers(7, 1, m_BoneTransformBuffer.GetAddressOf());
 	deviceContext->PSSetConstantBuffers(7, 1, m_BoneTransformBuffer.GetAddressOf());
 }
+
+void Model::SetBoundingBox(Vector3 _min, Vector3 _max)
+{
+	m_AABBmin = Math::Vector3::Min(m_AABBmin, _min);
+	m_AABBmax = Math::Vector3::Max(m_AABBmax, _max);
+
+	// Extents = Center에서 각 면이 떨어져 있는 좌표(x, y, z) 값
+	m_BoundingBox.Center = Math::Vector3(m_AABBmin + m_AABBmax) * 0.5;
+	m_BoundingBox.Extents = Math::Vector3(m_AABBmax - m_AABBmin) * 0.5;
+
+	// 팔 벌릴 때를 대비해서 z축과 x축 중 큰값으로 AABB를 만든다.
+	float max = fmax(m_BoundingBox.Extents.z, fmax(m_BoundingBox.Extents.x, m_BoundingBox.Extents.y));
+	m_BoundingBox.Extents.x = max;
+	m_BoundingBox.Extents.y = max;
+	m_BoundingBox.Extents.z = max;
+
+	// 바운딩박스의 센터를 가운데로 생성
+	//m_BoundingBox.Center.y += max;
+}

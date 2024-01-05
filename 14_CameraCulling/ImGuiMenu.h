@@ -13,7 +13,7 @@ class DemoApp;
 class ImGuiMenu
 {
 public:
-	ImGuiMenu(DemoApp* owner);
+	ImGuiMenu();
 	~ImGuiMenu();
 
 public:
@@ -52,9 +52,11 @@ public:
 	static bool VampireFBX;
 	static bool cerberusFBX;
 
-private:
-	DemoApp* m_Owner;
+	static int ObjectCount;
+	static int DrawComponentCount;
+	static bool bIsFreezeCulling;
 
+private:
 	IDXGIFactory4* m_DXGIFactory;		// DXGI팩토리
 	IDXGIAdapter3* m_DXGIAdapter;		// 비디오카드 정보에 접근 가능한 인터페이스
 };

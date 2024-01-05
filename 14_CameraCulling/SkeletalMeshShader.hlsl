@@ -31,7 +31,7 @@ cbuffer BufferData : register(b0)
 {
     matrix View;
     matrix Projection;
-    float4 Color;
+    float3 CameraPos;
 }
 // Direction Light Constant Buffer
 cbuffer LightData : register(b1)
@@ -40,11 +40,6 @@ cbuffer LightData : register(b1)
     float4 LightColor;
     float SpecularPower;
     float3 AmbientColor;
-}
-// Camera Constant Buffer
-cbuffer Camera : register(b2)
-{
-    float4 CameraPos;
 }
 // ImGui로 텍스쳐 체크해주는 Constant Buffer
 cbuffer NormalMap : register(b3)

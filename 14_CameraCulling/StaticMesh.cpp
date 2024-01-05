@@ -1,5 +1,6 @@
 #include "StaticMesh.h"
 #include "ImGuiMenu.h"
+#include "RenderManager.h"
 
 namespace Math = DirectX::SimpleMath;
 
@@ -68,7 +69,6 @@ void StaticMesh::SetupMesh(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer
 {
 	m_MaterialBuffer = NodeBuffer->m_pCBMaterialData;
 	m_bisTextureMapBuffer = NodeBuffer->m_pCBbisTextureMap;
-	m_Device = device;
 
 	HRESULT hr;
 
@@ -111,14 +111,14 @@ void StaticMesh::SetupMesh(ComPtr<ID3D11Device> device, shared_ptr<ModelCBBuffer
 void StaticMesh::createVS()
 {
 	LoadShaderFromFile(L"StaticMeshShader.hlsl", "VS", "vs_5_0", m_vsBlob);
-	HRESULT hr = m_Device->CreateVertexShader(m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), nullptr, m_vertexShader.GetAddressOf());
+	HRESULT hr = DEVICE->CreateVertexShader(m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), nullptr, m_vertexShader.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 
 void StaticMesh::createPS()
 {
 	LoadShaderFromFile(L"StaticMeshShader.hlsl", "PS", "ps_5_0", m_psBlob);
-	HRESULT hr = m_Device->CreatePixelShader(m_psBlob->GetBufferPointer(), m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
+	HRESULT hr = DEVICE->CreatePixelShader(m_psBlob->GetBufferPointer(), m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 
@@ -134,5 +134,5 @@ void StaticMesh::createInputLayout()
 	};
 
 	const int count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
-	m_Device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
+	DEVICE->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
 }

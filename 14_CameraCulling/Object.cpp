@@ -1,6 +1,9 @@
 #include "Object.h"
 #include "Component.h"
 
+#include "RenderComponent.h"
+#include "RenderManager.h"
+
 Object::Object()
 {
 
@@ -59,6 +62,11 @@ void Object::Render()
 {
 	for (auto component : m_pMyComponents)
 	{
-		component->Render();
+		shared_ptr<RenderComponent> renderComponent = dynamic_pointer_cast<RenderComponent>(component);
+
+		if (renderComponent)
+		{
+			RenderManager::GetInstance()->SetRender(renderComponent);
+		}
 	}
 }

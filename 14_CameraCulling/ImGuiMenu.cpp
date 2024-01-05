@@ -18,7 +18,7 @@
 #pragma comment(lib,"dxgi.lib")
 
 float ImGuiMenu::CameraFov = 50.f * 3.14f / 180.f;
-float ImGuiMenu::CameraNearFar[2] = { 1.f , 30000.0f };
+float ImGuiMenu::CameraNearFar[2] = { 1.f , 300000.0f };
 
 Vector3 ImGuiMenu::ModelPosition = {};
 Vector2 ImGuiMenu::ModelRotation = {};
@@ -43,8 +43,11 @@ bool ImGuiMenu::ZeldaFBX = false;
 bool ImGuiMenu::VampireFBX = false;
 bool ImGuiMenu::cerberusFBX = false;
 
-ImGuiMenu::ImGuiMenu(DemoApp* owner)
-	:m_Owner(owner)
+int ImGuiMenu::DrawComponentCount = 0;
+bool ImGuiMenu::bIsFreezeCulling = false;
+int ImGuiMenu::ObjectCount = 0;
+
+ImGuiMenu::ImGuiMenu()
 {
 }
 
@@ -168,15 +171,19 @@ void ImGuiMenu::Render()
 
 	// Resource
 	{
-		ImGui::Begin("Resource Menu");
+		ImGui::Begin("Render Menu");
 
 		if (ImGui::CollapsingHeader("Resource"))
 		{
 			DyingAnimationFBX = ImGui::Button("Dying Animation FBX Create");
 			SkinningTestFBX = ImGui::Button("Skinning Test Animation FBX Create");
-			ZeldaFBX =ImGui::Button("Zelda FBX Create");
+			ZeldaFBX = ImGui::Button("Zelda FBX Create");
 			VampireFBX = ImGui::Button("Vampire FBX Create");
 			cerberusFBX = ImGui::Button("cerberus Create");
+		}
+		if (ImGui::CollapsingHeader("Culling"))
+		{
+			ImGui::Checkbox("FreezeCulling", &bIsFreezeCulling);
 		}
 
 		if (durationTime >= 1.f)
@@ -188,8 +195,6 @@ void ImGuiMenu::Render()
 
 			durationTime += -1.f;
 			fpsCount = 0;
-
-
 		}
 
 		string str;
@@ -203,6 +208,13 @@ void ImGuiMenu::Render()
 		ImGui::Text("VideoMemory: %s", str.c_str());
 		getSystemMemoryInfo(str);
 		ImGui::Text("SystemMemory: %s", str.c_str());
+		ImGui::Text("");
+		str = to_string(ObjectCount);
+		ImGui::Text("DrawObjectCount : %s", str.c_str());
+		str = to_string(DrawComponentCount);
+		ImGui::Text("DrawObjectCount : %s", str.c_str());
+
+		DrawComponentCount = 0;
 
 		ImGui::End();
 	}

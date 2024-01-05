@@ -64,6 +64,7 @@ void ModelLoadManager::processNode(const aiNode* aiNode, const aiScene* scene, s
 	nodeData->m_Name = tempNode->GetName();
 	tempNode->SetTransform(aiNode->mTransformation);
 
+
 	// 노드가 nullptr이 아니면 부모 노드로 저장
 	// 노드가 nullptr이면 루트 노드로 저장
 	if (headnode != nullptr)
@@ -185,6 +186,20 @@ shared_ptr<StaticMesh> ModelLoadManager::processStaticMesh(const aiMesh* aimesh,
 		}
 
 		myMesh->SetMaterial(material);
+	}
+
+	// AABB 바운드 볼륨 가져오기
+	{
+		DirectX::BoundingBox boundingBox;
+
+		Vector3 min;
+		Vector3 max;
+
+		memcpy(&min, &aimesh->mAABB.mMin, sizeof(min));
+		memcpy(&max, &aimesh->mAABB.mMax, sizeof(max));
+
+		myMesh->SetAABB(min, max);
+		m_pLoadModel->SetBoundingBox(min, max);
 	}
 
 	ResourceManager::GetInstance()->SetStaticMesh(myMesh->GetName(), myMesh);
@@ -338,6 +353,20 @@ shared_ptr<SkeletalMesh> ModelLoadManager::processSkeletalMesh(const aiMesh* aim
 		}
 
 		myMesh->SetMaterial(material);
+	}
+
+	// AABB 바운드 볼륨 가져오기
+	{
+		DirectX::BoundingBox boundingBox;
+
+		Vector3 min;
+		Vector3 max;
+
+		memcpy(&min, &aimesh->mAABB.mMin, sizeof(min));
+		memcpy(&max, &aimesh->mAABB.mMax, sizeof(max));
+
+		myMesh->SetAABB(min, max);
+		m_pLoadModel->SetBoundingBox(min, max);
 	}
 
 	ResourceManager::GetInstance()->SetSkeletalMesh(myMesh->GetName(), myMesh);

@@ -24,21 +24,20 @@ private:
 	void interpolateAnimationData(float currentTime, Vector3& outPosition, Vector3& outScaling, Math::Quaternion& outRotation);
 
 public:
-	inline void SetName(string name);
-	inline string GetName();
-	inline void SetParentNode(shared_ptr<Node> parent);
-	inline shared_ptr<Node> GetParentNode();
-	inline void SetChildNode(shared_ptr<Node> child);
-	inline vector<shared_ptr<Node>> GetChildNode();
-	inline void SetTransform(aiMatrix4x4 transform);
-	inline aiMatrix4x4 GetTransform();
-	inline void SetMesh(shared_ptr<Mesh> mesh);
-	inline vector<shared_ptr<Mesh>> GetMesh();
-	inline shared_ptr<Material> GetMaterial();
-	inline void SetAnimation(shared_ptr<AnimationNode> animation);
-	inline shared_ptr<AnimationNode> GetAnimation();
-	inline void SetBone(shared_ptr<Bone> bone);
-	inline shared_ptr<Bone> GetBone();
+	inline void							SetName(string name);
+	inline string						GetName();
+	inline void							SetParentNode(shared_ptr<Node> parent);
+	inline shared_ptr<Node>				GetParentNode();
+	inline void							SetChildNode(shared_ptr<Node> child);
+	inline vector<shared_ptr<Node>>		GetChildNode();
+	inline void							SetTransform(aiMatrix4x4 transform);
+	inline aiMatrix4x4					GetTransform();
+	inline void							SetMesh(shared_ptr<Mesh> mesh);
+	inline vector<shared_ptr<Mesh>>		GetMesh();
+	inline void							SetAnimation(shared_ptr<AnimationNode> animation);
+	inline shared_ptr<AnimationNode>	GetAnimation();
+	inline void							SetBone(shared_ptr<Bone> bone);
+	inline shared_ptr<Bone>				GetBone();
 
 	inline DirectX::SimpleMath::Matrix GetNodeTransform();
 

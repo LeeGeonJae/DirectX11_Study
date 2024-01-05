@@ -32,9 +32,14 @@ public:
 	inline shared_ptr<Animation> GetAnimation();
 	inline void SetBone(shared_ptr<Bone> bone);
 	inline vector<shared_ptr<Bone>> GetBones();
+	void SetBoundingBox(Vector3 _min, Vector3 _max);
+	inline DirectX::BoundingBox GetBoundingBox();
 
 private:
 	string m_Name;
+	DirectX::BoundingBox m_BoundingBox;
+	Vector3 m_AABBmin;
+	Vector3 m_AABBmax;
 
 	vector<shared_ptr<Node>>	m_Nodes;
 	vector<shared_ptr<Bone>>	m_Bones;
@@ -104,4 +109,11 @@ void Model::SetBone(shared_ptr<Bone> bone)
 vector<shared_ptr<Bone>> Model::GetBones()
 {
 	return m_Bones;
+}
+
+
+
+DirectX::BoundingBox Model::GetBoundingBox()
+{
+	return m_BoundingBox;
 }
