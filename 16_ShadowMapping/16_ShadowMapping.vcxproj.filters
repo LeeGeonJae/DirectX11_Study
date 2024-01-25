@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="BoxComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>97.Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>01.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDraw.cpp">
+      <Filter>96.Render</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoApp.cpp">
+      <Filter>00.Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>97.Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>97.Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>04.Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiMenu.cpp">
+      <Filter>00.Main</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>00.Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoadManager.cpp">
+      <Filter>01.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="MovementComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>04.Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>02.Object</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>01.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="OrientedBoxComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Pawn.cpp">
+      <Filter>02.Object</Filter>
+    </ClCompile>
+    <ClCompile Include="PawnController.cpp">
+      <Filter>05.Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderManager.cpp">
+      <Filter>01.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>01.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletalMesh.cpp">
+      <Filter>97.Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereComponent.cpp">
+      <Filter>03.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticMesh.cpp">
+      <Filter>97.Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="TestBoxObject.cpp">
+      <Filter>02.Object</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BoxComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>97.Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferStruct.h">
+      <Filter>99.Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>01.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugDraw.h">
+      <Filter>96.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoApp.h">
+      <Filter>00.Main</Filter>
+    </ClInclude>
+    <ClInclude Include="enum.h">
+      <Filter>99.Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>97.Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>97.Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>04.Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiMenu.h">
+      <Filter>00.Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoadManager.h">
+      <Filter>01.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>04.Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>02.Object</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectManager.h">
+      <Filter>01.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="OrientedBoxComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Pawn.h">
+      <Filter>02.Object</Filter>
+    </ClInclude>
+    <ClInclude Include="PawnController.h">
+      <Filter>05.Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderManager.h">
+      <Filter>01.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>01.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletalMesh.h">
+      <Filter>97.Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereComponent.h">
+      <Filter>03.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticMesh.h">
+      <Filter>97.Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>99.Header</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBoxObject.h">
+      <Filter>02.Object</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="SkeletalMeshShader.hlsl">
+      <Filter>98.Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="StaticMeshShader.hlsl">
+      <Filter>98.Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="StaticShadowShader.hlsl">
+      <Filter>98.Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="SkeletalShadowShader.hlsl">
+      <Filter>98.Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="00.Main">
+      <UniqueIdentifier>{3b586931-cf5d-45aa-93dd-ea95a95d7ce2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Manager">
+      <UniqueIdentifier>{61a2e7c1-77bf-4ef7-9ce5-d30f5e96006b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Object">
+      <UniqueIdentifier>{791bbe98-dbfc-472a-be30-8d83e2339698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03.Component">
+      <UniqueIdentifier>{19777920-870f-47da-aef4-7cfca7f9bf5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04.Model">
+      <UniqueIdentifier>{fbda0022-6f89-4901-bfe7-f6e564a57673}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05.Controller">
+      <UniqueIdentifier>{43c6fc10-e648-4527-a894-f04d13d4f2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="96.Render">
+      <UniqueIdentifier>{d04c5e9f-2bf7-43af-8b61-13a4207169e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="97.Resource">
+      <UniqueIdentifier>{07e66fe5-16a6-4626-9082-7c69f0274721}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="98.Shader">
+      <UniqueIdentifier>{727ea1c7-5b7f-43bf-b3ad-db03047d3195}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="99.Header">
+      <UniqueIdentifier>{bbf5cac4-039b-4646-b58f-693420cb50ba}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
