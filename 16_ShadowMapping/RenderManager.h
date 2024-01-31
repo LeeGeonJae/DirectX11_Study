@@ -105,6 +105,7 @@ private:
 private:
 	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 	ComPtr<ID3D11SamplerState> m_BRDF_Sampler = nullptr;
+	ComPtr<ID3D11SamplerState> m_ShadowSampler = nullptr;
 	ComPtr<ID3D11BlendState> m_blendState = nullptr;
 	// [ CPU <-> RAM ] [ GPU <-> VRAM ]
 
@@ -125,7 +126,7 @@ private:
 	Vector3 m_ShadowLookAt;
 	Vector3 m_ShadowPos;
 	SimpleMath::Matrix m_ShadowView;
-	float m_ShadowForwardistFromCamera = 1000;
+	float m_ShadowForwardistFromCamera = 2000;
 	float m_ShadowUpDistFromLookAt = 5000;
 
 private:

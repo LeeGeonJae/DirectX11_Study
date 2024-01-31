@@ -82,7 +82,7 @@ void RenderManager::Update()
 		m_CBCoordinateData.CameraPosition = camera->GetWorldTransform().Translation();
 	}
 
-	// Shadow
+	// Shadow ( 원근 투영 )
 	{
 		m_ShadowProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, SHADOWMAP_SIZE / SHADOWMAP_SIZE, 2000.f, 400000.f);
 		m_ShadowLookAt = m_pCamera.lock()->GetWorldTransform().Translation() + m_pCamera.lock()->GetForward() * m_ShadowForwardistFromCamera;
@@ -94,6 +94,34 @@ void RenderManager::Update()
 
 		m_CBCoordinateData.ShadowView = m_ShadowView.Transpose();
 		m_CBCoordinateData.ShadowProjection = m_ShadowProjection.Transpose();
+	}
+
+	// Shadow ( 직교 투영 )
+	{
+		//enum { SCENE_RADIUS = 1024 };
+		//// 경계 구의 가운데를 가리키도록 한 후 뷰 행렬을 정의한다
+
+		//auto camera = m_pCamera.lock();
+
+		//Vector4 lightDir = ImGuiMenu::DirectionLightDir;
+		//Vector4 lightPos = -2.f * SCENE_RADIUS * lightDir;
+		//Vector3 targetPos = { 0, 0, 0 };
+		//Vector4 up = { 0.f, 1.f, 0.f, 0.f };
+
+		//Matrix V = DirectX::XMMatrixLookAtLH(lightPos, targetPos, up);
+		//Vector3 sphereCenterLS = Vector3::Transform(targetPos, V);
+
+		//// 시야 입체를 통해 투영 행렬 구성
+		//float l = sphereCenterLS.x - SCENE_RADIUS;
+		//float b = sphereCenterLS.y - SCENE_RADIUS;
+		//float n = sphereCenterLS.z - SCENE_RADIUS;
+		//float r = sphereCenterLS.x + SCENE_RADIUS;
+		//float t = sphereCenterLS.y + SCENE_RADIUS;
+		//float f = sphereCenterLS.z + SCENE_RADIUS;
+		//Matrix P = DirectX::XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+		//m_CBCoordinateData.ShadowView = V.Transpose();
+		//m_CBCoordinateData.ShadowProjection = P.Transpose();
 	}
 }
 
@@ -152,6 +180,7 @@ void RenderManager::Render()
 		// PS
 		m_DeviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 		m_DeviceContext->PSSetSamplers(1, 1, m_BRDF_Sampler.GetAddressOf());
+		m_DeviceContext->PSSetSamplers(2, 1, m_ShadowSampler.GetAddressOf());
 
 		m_DeviceContext->PSSetConstantBuffers(0, 1, m_pCBCoordinate.GetAddressOf());
 		m_DeviceContext->PSSetConstantBuffers(1, 1, m_pCBLight.GetAddressOf());
@@ -393,7 +422,6 @@ void RenderManager::createDeathStencilView()
 		srvDesc.Texture2D.MipLevels = 1;
 		hr = m_Device->CreateShaderResourceView(pShadowMap, &srvDesc, m_pShadowMapSRV.GetAddressOf());
 		assert(SUCCEEDED(hr));
-
 	}
 }
 
@@ -401,7 +429,7 @@ void RenderManager::createRasterizeState()
 {
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.DepthBias = 1000;
+	desc.DepthBias = 300;
 	desc.DepthBiasClamp = 0.f;
 	desc.SlopeScaledDepthBias = 1.f;
 	desc.FillMode = D3D11_FILL_SOLID;
@@ -457,6 +485,18 @@ void RenderManager::createSamplerState()
 	desc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	hr = m_Device->CreateSamplerState(&desc, m_BRDF_Sampler.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	ZeroMemory(&desc, sizeof(desc));
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
+	desc.ComparisonFunc = D3D11_COMPARISON_LESS;
+	desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	desc.MaxLOD = 0;
+	desc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	hr = m_Device->CreateSamplerState(&desc, m_ShadowSampler.GetAddressOf());
 	assert(SUCCEEDED(hr));
 }
 

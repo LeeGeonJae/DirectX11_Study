@@ -187,6 +187,7 @@ Texture2D ShadowTex : register(t8);
 
 SamplerState sampler0 : register(s0);
 SamplerState BRDFsampler0 : register(s1);
+SamplerComparisonState Shadowsampler : register(s2);
 
 // Pixel Shader(PS) 프로그래밍
 float4 PS(VS_OUTPUT input) : SV_Target
@@ -266,6 +267,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
             float3 specularBRDF = (F * D * G) / (4.0 * cosLi * cosLo);
         
             directLighting += (diffuseBRDF + specularBRDF) * LightColor.rgb * cosLi;
+            directLighting = float3(max(directLighting.x, 0.f), max(directLighting.y, 0.f), max(directLighting.z, 0.f));
         }
     }
     
@@ -292,41 +294,43 @@ float4 PS(VS_OUTPUT input) : SV_Target
     uv.y = -uv.y; // y는 반대
     uv = uv * 0.5 + 0.5; // -1에서 1을 0~1로 변환
     
-    // ShadowMap에 기록된 Depth가져오기
-    // 커버할 수 있는 영역이 아니면 처리하지 않음
     if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0)
     {
-        const float SMAP_SIZE = 2048.f;
-        const float SMAP_DX = 1.f / SMAP_SIZE;
+        float sampleDepth = ShadowTex.Sample(sampler0, uv).r;
         
-        // 그림자 맵을 추출해서 광원에 가장 가까운 깊이를 얻는다.
-        float sampleShadowDepth = ShadowTex.Sample(sampler0, uv).r;
-        float s1 = ShadowTex.Sample(sampler0, uv + float2(SMAP_DX, 0)).r;
-        float s2 = ShadowTex.Sample(sampler0, uv + float2(0, SMAP_DX)).r;
-        float s3 = ShadowTex.Sample(sampler0, uv + float2(SMAP_DX, SMAP_DX)).r;
-        
-        // 픽셀 깊이가 그림자 맵의 값 이하인가?
-        float result0 = currentShadowDepth <= sampleShadowDepth;
-        float result1 = currentShadowDepth <= s1;
-        float result2 = currentShadowDepth <= s2;
-        float result3 = currentShadowDepth <= s3;
-        
-        // 텍스처 공간으로 변환한다.
-        float2 texelPos = SMAP_SIZE * uv;
-        
-        // 보간의 양을 결정한다.
-        float2 t = frac(texelPos);
-        
-        float depth = lerp(lerp(result0, result1, t.x), lerp(result2, result3, t.x), t.y);
-        
-        //float percentLit = ShadowTex.SampleCmpLevelZero(sampler0, t, depth).r;
-        
-        // currentShadowDepth가 크면 더 뒤쪽에 있으므로 직접광이 차단된다.
-        if (currentShadowDepth > sampleShadowDepth + 0.0001)
+        if (currentShadowDepth > sampleDepth + 0.001)
         {
-            directLighting = 0.0f;
+            directLighting = 0.f;
         }
     }
+    
+    // PCF
+	// ShadowMap에 기록된 Depth가져오기
+	// 커버할수 있는 영역이 아니면 처리하지않음
+    //if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0)
+    //{
+    //    const float SMAP_SIZE = 4096.f;
+    //    const float SMAP_DX = 1.f / SMAP_SIZE;
+        
+    //    // 텍셀 크기
+    //    float percentiLit = 0.0f;
+    //    const float2 offsets[9] =
+    //    {
+    //        float2(-SMAP_DX, -SMAP_DX), float2(0.f, -SMAP_DX), float2(SMAP_DX, -SMAP_DX),
+    //        float2(-SMAP_DX, 0.f), float2(0.f, 0.f), float2(SMAP_DX, 0.f),
+    //        float2(-SMAP_DX, SMAP_DX), float2(0.f, SMAP_DX), float2(SMAP_DX, SMAP_DX)
+    //    };
+
+    //    // 3x3 상자 필터 패턴, 각 표본마다 4표본 PCF를 수행한다.
+    //    for (int i = 0; i < 9; i++)
+    //    {
+    //        percentiLit += ShadowTex.SampleCmpLevelZero(Shadowsampler, uv, currentShadowDepth).r;
+    //    }
+        
+    //    percentiLit /= 9;
+        
+    //    directLighting = directLighting * percentiLit;
+    //}
     
     //float4 TotalAmbient = float4(AmbientColor, 1) * float4(albedo, alpha) * 0.1f;
     float4 TotalAmbient = float4(AmbientColor, 1) * float4(albedo, alpha) * 0.1f;

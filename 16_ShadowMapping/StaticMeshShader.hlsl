@@ -167,6 +167,7 @@ Texture2D ShadowTex : register(t8);
 
 SamplerState sampler0 : register(s0);
 SamplerState BRDFsampler : register(s1);
+SamplerComparisonState Shadowsampler : register(s2);
 
 // Pixel Shader(PS) 프로그래밍
 float4 PS(VS_OUTPUT input) : SV_Target
@@ -271,17 +272,46 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	// NDC좌표계 좌표로 샘플링하기위해 Texture 좌표계로 변환한다.
     uv.y = -uv.y; // y는 반대
     uv = uv * 0.5 + 0.5; // -1 에서 1을 0~1로 변환
-	
+    
+    // 스태틱 메시 hlsl은 그림자 보정 처리 하고 스켈레탈 메시 hlsl은 그림자 보정 처리 안했읍니다
+	// ShadowMap에 기록된 Depth가져오기
+	// 커버할수 있는 영역이 아니면 처리하지않음
+  //  if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0)
+  //  {
+  //      float sampleShadowDepth = ShadowTex.Sample(sampler0, uv).r;
+		//// currentShadowDepth가 크면 더 뒤쪽에 있으므로 직접광이 차단된다.
+  //      if (currentShadowDepth > sampleShadowDepth + 0.001)
+  //      {
+  //          directLighting = 0.0f;
+  //      }
+  //  }
+    
+    // PCF
 	// ShadowMap에 기록된 Depth가져오기
 	// 커버할수 있는 영역이 아니면 처리하지않음
     if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0)
     {
-        float sampleShadowDepth = ShadowTex.Sample(sampler0, uv).r;
-		// currentShadowDepth가 크면 더 뒤쪽에 있으므로 직접광이 차단된다.
-        if (currentShadowDepth > sampleShadowDepth + 0.0001)
+        const float SMAP_SIZE = 4096.f;
+        const float SMAP_DX = 1.f / SMAP_SIZE;
+        
+        // 텍셀 크기
+        float percentiLit = 0.0f;
+        const float2 offsets[9] =
         {
-            directLighting = 0.0f;
+            float2(-SMAP_DX, -SMAP_DX), float2(0.f, -SMAP_DX), float2(SMAP_DX, -SMAP_DX),
+            float2(-SMAP_DX, 0.f), float2(0.f, 0.f), float2(SMAP_DX, 0.f),
+            float2(-SMAP_DX, SMAP_DX), float2(0.f, SMAP_DX), float2(SMAP_DX, SMAP_DX)
+        };
+
+        // 3x3 상자 필터 패턴, 각 표본마다 4표본 PCF를 수행한다.
+        for (int i = 0; i < 9; i++)
+        {
+            percentiLit += ShadowTex.SampleCmpLevelZero(Shadowsampler, uv, currentShadowDepth).r;
         }
+        
+        percentiLit /= 9;
+        
+        directLighting = directLighting * percentiLit;
     }
     
     //float4 TotalAmbient = float4(AmbientColor, 1) * float4(albedo, alpha) * 0.1f;
